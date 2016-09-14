@@ -76,7 +76,7 @@ func (s *Storage) Save() {
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
-	err = ioutil.WriteFile("/tmp/dat1", []byte(encodedContent), 0644)
+	err = ioutil.WriteFile(s.File, []byte(encodedContent), 0644)
 	check(err)
 }
 
@@ -123,24 +123,16 @@ func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 	return
 }
 
-type Namespace struct {
-	Name     string
-	Accounts []*Account
-}
-
-func (n *Namespace) FindAccount(name string) (account *Account, err error) {
-	for _, account = range n.Accounts {
-		if account.Name == name {
-			return
+func (s *Storage) DeleteNamespace(namespace *Namespace) {
+	var position int = -1
+	for i, item := range s.Namespaces {
+		if item == namespace {
+			position = i
+			break
 		}
 	}
-	account = nil
-	err = errors.New("Account not found.")
 
-	return
-}
-
-type Account struct {
-	Name  string
-	Token string
+	copy(s.Namespaces[position:], s.Namespaces[position+1:])
+	s.Namespaces[len(s.Namespaces)-1] = nil
+	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
 }

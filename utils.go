@@ -57,3 +57,12 @@ func Ask(prompt string) (text string) {
 
 	return
 }
+
+func Confirm(prompt string) bool {
+	fmt.Printf("%s ", prompt)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	text = strings.ToLower(strings.TrimSpace(text))
+
+	return (text == "y" || text == "yes" || text == "sure")
+}
