@@ -117,7 +117,7 @@ func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 			return
 		}
 	}
-	namespace = nil
+	namespace = &Namespace{}
 	err = errors.New("Namespace not found.")
 
 	return
@@ -130,6 +130,10 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 			position = i
 			break
 		}
+	}
+
+	if position < 0 {
+		return
 	}
 
 	copy(s.Namespaces[position:], s.Namespaces[position+1:])

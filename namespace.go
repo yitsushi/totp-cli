@@ -13,7 +13,7 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 			return
 		}
 	}
-	account = nil
+	account = &Account{}
 	err = errors.New("Account not found.")
 
 	return
@@ -26,6 +26,10 @@ func (n *Namespace) DeleteAccount(account *Account) {
 			position = i
 			break
 		}
+	}
+
+	if position < 0 {
+		return
 	}
 
 	copy(n.Accounts[position:], n.Accounts[position+1:])
