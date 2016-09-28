@@ -8,8 +8,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 )
 
 type Storage struct {
@@ -94,7 +96,10 @@ func (s *Storage) parse(decodedData []byte) {
 	}
 
 	err := json.Unmarshal(decodedData, &parsedData)
-	check(err)
+	if err != nil {
+		fmt.Println("Something went wrong. Maybe this PIN is not a valid one.")
+		os.Exit(1)
+	}
 
 	var namespaces []*Namespace
 

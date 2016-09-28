@@ -12,18 +12,24 @@ import (
 
 func check(err error) {
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 }
 
-func AskPIN(length int) []byte {
+func AskPIN(length int, prompt string) []byte {
 	var pin []byte = make([]byte, length, length)
 	var text string
+
+	if prompt == "" {
+		prompt = "PIN"
+	}
 
 	text = os.Getenv("PIN")
 
 	if len(text) < 1 {
-		os.Stderr.Write([]byte("PIN: "))
+		prompt = fmt.Sprintf("%s: ", prompt)
+		os.Stderr.Write([]byte(prompt))
 		stdin := int(os.Stdin.Fd())
 		if terminal.IsTerminal(stdin) {
 			var lineBytes []byte
@@ -65,4 +71,26 @@ func Confirm(prompt string) bool {
 	text = strings.ToLower(strings.TrimSpace(text))
 
 	return (text == "y" || text == "yes" || text == "sure")
+}
+
+func CheckPINConfirm(pin, confirm []byte) bool {
+	if pin == nil && confirm == nil {
+		return true
+	}
+
+	if pin == nil || confirm == nil {
+		return false
+	}
+
+	if len(pin) != len(confirm) {
+		return false
+	}
+
+	for i := range pin {
+		if pin[i] != confirm[i] {
+			return false
+		}
+	}
+
+	return true
 }
