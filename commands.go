@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -20,6 +21,8 @@ var commandHandlers map[string]CommandFunction = map[string]CommandFunction{
 	"list":       Command_List,
 	"delete":     Command_Delete,
 	"change-pin": Command_ChangePIN,
+	"update":     Command_Update,
+	"version":    Command_Version,
 }
 
 var commandDescriptions map[string]string = map[string]string{
@@ -29,6 +32,8 @@ var commandDescriptions map[string]string = map[string]string{
 	"list":       "List all available namespaces or accounts under a namespace%NLWI%`totp-cli list`      => list all namespaces%NLWI%`totp-cli list myns` => list all accounts under 'myns' namespace",
 	"delete":     "Delete an account or a whole namespace%NLWI%`totp-cli delete nsname`%NLWI%`totp-cli delete nsname.accname`",
 	"change-pin": "Change PIN code",
+	"update":     "Update totp-cli itself",
+	"version":    "Current version number of this application",
 }
 
 func prepareStorage() {
@@ -197,6 +202,19 @@ func Command_ChangePIN() {
 
 	storage.PIN = newPIN
 	storage.Save()
+}
+
+func Command_Update() {
+	updater := &Updater{}
+	if updater.CheckAndDownloadVersion() {
+		fmt.Printf("Now you have a fresh new %s \\o/\n", AppName)
+	} else {
+		fmt.Printf("Your %s is up-to-date. \\o/\n", AppName)
+	}
+}
+
+func Command_Version() {
+	fmt.Printf("%s %s (%s/%s)\n", AppName, AppVersion, runtime.GOOS, runtime.GOARCH)
 }
 
 func Command_NotImplementedYet() {
