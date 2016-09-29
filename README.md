@@ -3,6 +3,8 @@ accounts with namespaces and protect your data with a PIN _(aka password)_.
 
 ```
 ❯ totp-cli
+              update     Update totp-cli itself
+             version     Current version number of this application
               delete     Delete an account or a whole namespace
                          `totp-cli delete nsname`
                          `totp-cli delete nsname.accname`
