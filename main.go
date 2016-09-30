@@ -3,7 +3,7 @@ package main
 import "flag"
 
 const AppName string = "totp-cli"
-const AppVersion string = "1.0.1"
+const AppVersion string = "1.0.2"
 
 func main() {
 	flag.Parse()

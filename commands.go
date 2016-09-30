@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -37,6 +38,12 @@ var commandDescriptions map[string]string = map[string]string{
 }
 
 func prepareStorage() {
+	initStorage()
+
+	if storage != nil {
+		return
+	}
+
 	pin := AskPIN(32, "")
 
 	currentUser, err := user.Current()
@@ -235,4 +242,32 @@ func askForAddTokenDetails() (namespace, account, token string) {
 	}
 
 	return
+}
+
+func initStorage() {
+	currentUser, err := user.Current()
+	check(err)
+	homePath := currentUser.HomeDir
+	documentDirectory := filepath.Join(homePath, ".config/totp-cli")
+
+	if _, err := os.Stat(documentDirectory); err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(documentDirectory, 0700)
+			check(err)
+		} else {
+			check(err)
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(documentDirectory, "credentials")); err == nil {
+		return
+	}
+
+	pin := AskPIN(32, "You PIN/Password (do not forget it)")
+	storage = &Storage{
+		File: filepath.Join(documentDirectory, "credentials"),
+		PIN:  pin,
+	}
+
+	storage.Save()
 }
