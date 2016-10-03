@@ -136,7 +136,7 @@ func Command_AddToken() {
 
 	account, err = namespace.FindAccount(accName)
 	if err == nil {
-		fmt.Println("%s.%s exists!", namespace.Name, account.Name)
+		fmt.Printf("%s.%s exists!\n", namespace.Name, account.Name)
 	}
 
 	account = &Account{Name: accName, Token: token}
