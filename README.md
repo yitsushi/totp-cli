@@ -1,5 +1,5 @@
 This is a simple TOTP _(Time-based One-time Password)_ CLI tool. You can manage your
-accounts with namespaces and protect your data with a PIN _(aka password)_.
+accounts with namespaces and protect your data with a password.
 
 ```
 ❯ totp-cli
@@ -8,7 +8,7 @@ accounts with namespaces and protect your data with a PIN _(aka password)_.
               delete     Delete an account or a whole namespace
                          `totp-cli delete nsname`
                          `totp-cli delete nsname.accname`
-          change-pin     Change PIN code
+     change-password     Change password
             generate     Generate a specific OTP
                          `totp-cli generate namespace.account`
                 help     This help message :)

@@ -16,25 +16,25 @@ type CommandFunction func()
 var storage *Storage
 
 var commandHandlers map[string]CommandFunction = map[string]CommandFunction{
-	"generate":   Command_Generate,
-	"help":       Command_Help,
-	"add-token":  Command_AddToken,
-	"list":       Command_List,
-	"delete":     Command_Delete,
-	"change-pin": Command_ChangePIN,
-	"update":     Command_Update,
-	"version":    Command_Version,
+	"generate":        Command_Generate,
+	"help":            Command_Help,
+	"add-token":       Command_AddToken,
+	"list":            Command_List,
+	"delete":          Command_Delete,
+	"change-password": Command_ChangePassword,
+	"update":          Command_Update,
+	"version":         Command_Version,
 }
 
 var commandDescriptions map[string]string = map[string]string{
-	"generate":   "Generate a specific OTP%NLWI%`totp-cli generate namespace.account`",
-	"help":       "This help message :)",
-	"add-token":  "Add new token%NLWI%`totp-cli add-token`%NLWI%This command will ask for the namespace, the account and the token",
-	"list":       "List all available namespaces or accounts under a namespace%NLWI%`totp-cli list`      => list all namespaces%NLWI%`totp-cli list myns` => list all accounts under 'myns' namespace",
-	"delete":     "Delete an account or a whole namespace%NLWI%`totp-cli delete nsname`%NLWI%`totp-cli delete nsname.accname`",
-	"change-pin": "Change PIN code",
-	"update":     "Update totp-cli itself",
-	"version":    "Current version number of this application",
+	"generate":        "Generate a specific OTP%NLWI%`totp-cli generate namespace.account`",
+	"help":            "This help message :)",
+	"add-token":       "Add new token%NLWI%`totp-cli add-token`%NLWI%This command will ask for the namespace, the account and the token",
+	"list":            "List all available namespaces or accounts under a namespace%NLWI%`totp-cli list`      => list all namespaces%NLWI%`totp-cli list myns` => list all accounts under 'myns' namespace",
+	"delete":          "Delete an account or a whole namespace%NLWI%`totp-cli delete nsname`%NLWI%`totp-cli delete nsname.accname`",
+	"change-password": "Change password",
+	"update":          "Update totp-cli itself",
+	"version":         "Current version number of this application",
 }
 
 func prepareStorage() {
@@ -44,15 +44,15 @@ func prepareStorage() {
 		return
 	}
 
-	pin := AskPIN(32, "")
+	password := AskPassword(32, "")
 
 	currentUser, err := user.Current()
 	check(err)
 	homePath := currentUser.HomeDir
 
 	storage = &Storage{
-		File: filepath.Join(homePath, ".config/totp-cli/credentials"),
-		PIN:  pin,
+		File:     filepath.Join(homePath, ".config/totp-cli/credentials"),
+		Password: password,
 	}
 
 	storage.Decrypt()
@@ -197,17 +197,17 @@ func Command_Delete() {
 	}
 }
 
-func Command_ChangePIN() {
+func Command_ChangePassword() {
 	prepareStorage()
-	newPIN := AskPIN(32, "New PIN")
-	newPINConfirm := AskPIN(32, "Again")
+	newPassword := AskPassword(32, "New Password")
+	newPasswordConfirm := AskPassword(32, "Again")
 
-	if !CheckPINConfirm(newPIN, newPINConfirm) {
-		fmt.Println("New PIN and the confirm mismatch!")
+	if !CheckPasswordConfirm(newPassword, newPasswordConfirm) {
+		fmt.Println("New Password and the confirm mismatch!")
 		return
 	}
 
-	storage.PIN = newPIN
+	storage.Password = newPassword
 	storage.Save()
 }
 
@@ -263,10 +263,10 @@ func initStorage() {
 		return
 	}
 
-	pin := AskPIN(32, "You PIN/Password (do not forget it)")
+	password := AskPassword(32, "Your Password (do not forget it)")
 	storage = &Storage{
-		File: filepath.Join(documentDirectory, "credentials"),
-		PIN:  pin,
+		File:     filepath.Join(documentDirectory, "credentials"),
+		Password: password,
 	}
 
 	storage.Save()

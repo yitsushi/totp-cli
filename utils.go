@@ -17,15 +17,15 @@ func check(err error) {
 	}
 }
 
-func AskPIN(length int, prompt string) []byte {
-	var pin []byte = make([]byte, length, length)
+func AskPassword(length int, prompt string) []byte {
+	var password []byte = make([]byte, length, length)
 	var text string
 
 	if prompt == "" {
-		prompt = "PIN"
+		prompt = "Password"
 	}
 
-	text = os.Getenv("PIN")
+	text = os.Getenv("Password")
 
 	if len(text) < 1 {
 		prompt = fmt.Sprintf("%s: ", prompt)
@@ -50,9 +50,9 @@ func AskPIN(length int, prompt string) []byte {
 	h := hash.Sum(nil)
 	text = fmt.Sprintf("%x", h)
 
-	copy(pin[:], text[0:length])
+	copy(password[:], text[0:length])
 
-	return pin
+	return password
 }
 
 func Ask(prompt string) (text string) {
@@ -73,21 +73,21 @@ func Confirm(prompt string) bool {
 	return (text == "y" || text == "yes" || text == "sure")
 }
 
-func CheckPINConfirm(pin, confirm []byte) bool {
-	if pin == nil && confirm == nil {
+func CheckPasswordConfirm(password, confirm []byte) bool {
+	if password == nil && confirm == nil {
 		return true
 	}
 
-	if pin == nil || confirm == nil {
+	if password == nil || confirm == nil {
 		return false
 	}
 
-	if len(pin) != len(confirm) {
+	if len(password) != len(confirm) {
 		return false
 	}
 
-	for i := range pin {
-		if pin[i] != confirm[i] {
+	for i := range password {
+		if password[i] != confirm[i] {
 			return false
 		}
 	}

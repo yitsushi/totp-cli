@@ -15,8 +15,8 @@ import (
 )
 
 type Storage struct {
-	File string
-	PIN  []byte
+	File     string
+	Password []byte
 
 	Namespaces []*Namespace
 }
@@ -29,7 +29,7 @@ func (s *Storage) Decrypt() {
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
-	block, err := aes.NewCipher(s.PIN)
+	block, err := aes.NewCipher(s.Password)
 	check(err)
 
 	if len(decodedData)%aes.BlockSize != 0 {
@@ -64,7 +64,7 @@ func (s *Storage) Save() {
 		panic("plaintext is not a multiple of the block size")
 	}
 
-	block, err := aes.NewCipher(s.PIN)
+	block, err := aes.NewCipher(s.Password)
 	check(err)
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
@@ -97,7 +97,7 @@ func (s *Storage) parse(decodedData []byte) {
 
 	err := json.Unmarshal(decodedData, &parsedData)
 	if err != nil {
-		fmt.Println("Something went wrong. Maybe this PIN is not a valid one.")
+		fmt.Println("Something went wrong. Maybe this Password is not a valid one.")
 		os.Exit(1)
 	}
 
