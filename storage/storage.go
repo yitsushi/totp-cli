@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"bytes"
@@ -12,6 +12,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path/filepath"
+
+	"github.com/Yitsushi/totp-cli/util"
 )
 
 type Storage struct {
@@ -23,14 +27,14 @@ type Storage struct {
 
 func (s *Storage) Decrypt() {
 	encryptedData, err := ioutil.ReadFile(s.File)
-	check(err)
+	util.Check(err)
 	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
 	block, err := aes.NewCipher(s.Password)
-	check(err)
+	util.Check(err)
 
 	if len(decodedData)%aes.BlockSize != 0 {
 		panic("ciphertext is not a multiple of the block size")
@@ -53,7 +57,7 @@ func (s *Storage) Save() {
 	}
 
 	plaintext, err := json.Marshal(jsonStruct)
-	check(err)
+	util.Check(err)
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
 	padded := make([]byte, len(plaintext)+missing, len(plaintext)+missing)
@@ -65,7 +69,7 @@ func (s *Storage) Save() {
 	}
 
 	block, err := aes.NewCipher(s.Password)
-	check(err)
+	util.Check(err)
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 	iv := ciphertext[:aes.BlockSize]
@@ -79,7 +83,7 @@ func (s *Storage) Save() {
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
 	err = ioutil.WriteFile(s.File, []byte(encodedContent), 0644)
-	check(err)
+	util.Check(err)
 }
 
 func (s *Storage) parse(decodedData []byte) {
@@ -144,4 +148,57 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	copy(s.Namespaces[position:], s.Namespaces[position+1:])
 	s.Namespaces[len(s.Namespaces)-1] = nil
 	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
+}
+
+var storage *Storage
+
+func PrepareStorage() *Storage {
+	initStorage()
+
+	if storage != nil {
+		return storage
+	}
+
+	password := util.AskPassword(32, "")
+
+	currentUser, err := user.Current()
+	util.Check(err)
+	homePath := currentUser.HomeDir
+
+	storage = &Storage{
+		File:     filepath.Join(homePath, ".config/totp-cli/credentials"),
+		Password: password,
+	}
+
+	storage.Decrypt()
+
+	return storage
+}
+
+func initStorage() {
+	currentUser, err := user.Current()
+	util.Check(err)
+	homePath := currentUser.HomeDir
+	documentDirectory := filepath.Join(homePath, ".config/totp-cli")
+
+	if _, err := os.Stat(documentDirectory); err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(documentDirectory, 0700)
+			util.Check(err)
+		} else {
+			util.Check(err)
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(documentDirectory, "credentials")); err == nil {
+		return
+	}
+
+	password := util.AskPassword(32, "Your Password (do not forget it)")
+	storage = &Storage{
+		File:     filepath.Join(documentDirectory, "credentials"),
+		Password: password,
+	}
+
+	storage.Save()
 }

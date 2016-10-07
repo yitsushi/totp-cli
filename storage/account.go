@@ -1,4 +1,4 @@
-package main
+package storage
 
 type Account struct {
 	Name  string

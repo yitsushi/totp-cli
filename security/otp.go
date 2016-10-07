@@ -1,4 +1,4 @@
-package main
+package security
 
 import (
 	"crypto/hmac"
@@ -9,12 +9,14 @@ import (
 	"math"
 	"strings"
 	"time"
+
+	"github.com/Yitsushi/totp-cli/util"
 )
 
 func GenerateOTPCode(token string, when time.Time) string {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(30)))
 	secretBytes, err := base32.StdEncoding.DecodeString(strings.ToUpper(token))
-	check(err)
+	util.Check(err)
 
 	buf := make([]byte, 8)
 	mac := hmac.New(sha1.New, secretBytes)

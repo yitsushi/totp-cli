@@ -1,19 +1,25 @@
 package main
 
-import "flag"
+import (
+	"github.com/Yitsushi/totp-cli/command"
+	"github.com/Yitsushi/totp-cli/commander"
+)
 
-const AppName string = "totp-cli"
-const AppVersion string = "1.0.2"
+func registerCommands(registry *commander.CommandRegistry) {
+	// Register available commands
+	registry.Register("generate", &command.Generate{})
+	registry.Register("add-token", &command.AddToken{})
+	registry.Register("list", &command.List{})
+	registry.Register("delete", &command.Delete{})
+	registry.Register("change-password", &command.ChangePassword{})
+	registry.Register("update", &command.Update{})
+	registry.Register("version", &command.Version{})
+}
 
 func main() {
-	flag.Parse()
+	registry := commander.NewCommandRegistry()
 
-	var command CommandFunction
-	var ok bool
+	registerCommands(registry)
 
-	if command, ok = commandHandlers[flag.Arg(0)]; !ok {
-		command = Command_Help
-	}
-
-	command()
+	registry.Execute()
 }

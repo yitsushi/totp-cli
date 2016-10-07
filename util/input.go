@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"bufio"
@@ -9,13 +9,6 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 )
-
-func check(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-}
 
 func AskPassword(length int, prompt string) []byte {
 	var password []byte = make([]byte, length, length)
