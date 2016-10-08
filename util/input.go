@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"bufio"
@@ -10,13 +10,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func check(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-}
-
+// AskPassword asks password from the user and hides
+// the input
 func AskPassword(length int, prompt string) []byte {
 	var password []byte = make([]byte, length, length)
 	var text string
@@ -55,6 +50,8 @@ func AskPassword(length int, prompt string) []byte {
 	return password
 }
 
+// Ask can be used to get some input from the user.
+// The user input will not be hidden (not secure)
 func Ask(prompt string) (text string) {
 	fmt.Printf("%s: ", prompt)
 	reader := bufio.NewReader(os.Stdin)
@@ -64,6 +61,9 @@ func Ask(prompt string) (text string) {
 	return
 }
 
+// Confirm ask something from the user
+// Acceptable true answers: yes, y, sure
+// Everything else will be false
 func Confirm(prompt string) bool {
 	fmt.Printf("%s ", prompt)
 	reader := bufio.NewReader(os.Stdin)
@@ -73,6 +73,7 @@ func Confirm(prompt string) bool {
 	return (text == "y" || text == "yes" || text == "sure")
 }
 
+// CheckPasswordConfirm checks two byte array if the content is the same
 func CheckPasswordConfirm(password, confirm []byte) bool {
 	if password == nil && confirm == nil {
 		return true

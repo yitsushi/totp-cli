@@ -1,4 +1,4 @@
-package main
+package security
 
 import (
 	"encoding/base32"

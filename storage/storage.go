@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"bytes"
@@ -12,8 +12,13 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path/filepath"
+
+	"github.com/Yitsushi/totp-cli/util"
 )
 
+// Storage structure represents the credential storage
 type Storage struct {
 	File     string
 	Password []byte
@@ -21,16 +26,17 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
+// Decrypt tries to decrypt the storage
 func (s *Storage) Decrypt() {
 	encryptedData, err := ioutil.ReadFile(s.File)
-	check(err)
+	util.Check(err)
 	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
 	block, err := aes.NewCipher(s.Password)
-	check(err)
+	util.Check(err)
 
 	if len(decodedData)%aes.BlockSize != 0 {
 		panic("ciphertext is not a multiple of the block size")
@@ -42,6 +48,7 @@ func (s *Storage) Decrypt() {
 	s.parse(decodedData)
 }
 
+// Save tries to encrypt and save the storage
 func (s *Storage) Save() {
 	var jsonStruct map[string]map[string]string = map[string]map[string]string{}
 
@@ -53,7 +60,7 @@ func (s *Storage) Save() {
 	}
 
 	plaintext, err := json.Marshal(jsonStruct)
-	check(err)
+	util.Check(err)
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
 	padded := make([]byte, len(plaintext)+missing, len(plaintext)+missing)
@@ -65,7 +72,7 @@ func (s *Storage) Save() {
 	}
 
 	block, err := aes.NewCipher(s.Password)
-	check(err)
+	util.Check(err)
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 	iv := ciphertext[:aes.BlockSize]
@@ -79,7 +86,93 @@ func (s *Storage) Save() {
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
 	err = ioutil.WriteFile(s.File, []byte(encodedContent), 0644)
-	check(err)
+	util.Check(err)
+}
+
+// FindNamespace returns with a namespace
+// if the namespace does not exist error is not nil
+func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
+	for _, namespace = range s.Namespaces {
+		if namespace.Name == name {
+			return
+		}
+	}
+	namespace = &Namespace{}
+	err = errors.New("Namespace not found.")
+
+	return
+}
+
+// DeleteNamespace removes a specific namespace from the Storage
+func (s *Storage) DeleteNamespace(namespace *Namespace) {
+	var position int = -1
+	for i, item := range s.Namespaces {
+		if item == namespace {
+			position = i
+			break
+		}
+	}
+
+	if position < 0 {
+		return
+	}
+
+	copy(s.Namespaces[position:], s.Namespaces[position+1:])
+	s.Namespaces[len(s.Namespaces)-1] = nil
+	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
+}
+
+var storage *Storage
+
+func PrepareStorage() *Storage {
+	initStorage()
+
+	if storage != nil {
+		return storage
+	}
+
+	password := util.AskPassword(32, "")
+
+	currentUser, err := user.Current()
+	util.Check(err)
+	homePath := currentUser.HomeDir
+
+	storage = &Storage{
+		File:     filepath.Join(homePath, ".config/totp-cli/credentials"),
+		Password: password,
+	}
+
+	storage.Decrypt()
+
+	return storage
+}
+
+func initStorage() {
+	currentUser, err := user.Current()
+	util.Check(err)
+	homePath := currentUser.HomeDir
+	documentDirectory := filepath.Join(homePath, ".config/totp-cli")
+
+	if _, err := os.Stat(documentDirectory); err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(documentDirectory, 0700)
+			util.Check(err)
+		} else {
+			util.Check(err)
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(documentDirectory, "credentials")); err == nil {
+		return
+	}
+
+	password := util.AskPassword(32, "Your Password (do not forget it)")
+	storage = &Storage{
+		File:     filepath.Join(documentDirectory, "credentials"),
+		Password: password,
+	}
+
+	storage.Save()
 }
 
 func (s *Storage) parse(decodedData []byte) {
@@ -114,34 +207,4 @@ func (s *Storage) parse(decodedData []byte) {
 	}
 
 	s.Namespaces = namespaces
-}
-
-func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
-	for _, namespace = range s.Namespaces {
-		if namespace.Name == name {
-			return
-		}
-	}
-	namespace = &Namespace{}
-	err = errors.New("Namespace not found.")
-
-	return
-}
-
-func (s *Storage) DeleteNamespace(namespace *Namespace) {
-	var position int = -1
-	for i, item := range s.Namespaces {
-		if item == namespace {
-			position = i
-			break
-		}
-	}
-
-	if position < 0 {
-		return
-	}
-
-	copy(s.Namespaces[position:], s.Namespaces[position+1:])
-	s.Namespaces[len(s.Namespaces)-1] = nil
-	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
 }
