@@ -8,12 +8,17 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
+// CommandRegistry will handle all CLI request
+// and find the route to the proper Command
 type CommandRegistry struct {
 	Commands map[string]CommandInterface
 
 	maximumCommandLength int
 }
 
+// Register function is used to register a Command in CommandRegistry
+// the first argument will be the command from the CLI
+// the second argument will be the handler that implements CommandInterface
 func (c *CommandRegistry) Register(name string, handler CommandInterface) {
 	c.Commands[name] = handler
 	commandLength := len(fmt.Sprintf("%s %s", name, handler.ArgumentDescription()))
@@ -23,6 +28,9 @@ func (c *CommandRegistry) Register(name string, handler CommandInterface) {
 	util.Debugln(fmt.Sprintf("'%s' command is registered.", name))
 }
 
+// Execute finds the proper command, handle errors from the command and print Help
+// if the given command it unknown or print the Command specific help
+// if something went wrong or the user asked for it.
 func (c *CommandRegistry) Execute() {
 	name := flag.Arg(0)
 	if command, ok := c.Commands[name]; ok {
@@ -39,6 +47,7 @@ func (c *CommandRegistry) Execute() {
 	}
 }
 
+// Help lists all available commands to the user
 func (c *CommandRegistry) Help() {
 	if flag.Arg(0) == "help" && flag.Arg(1) != "" {
 		c.CommandHelp(flag.Arg(1))
@@ -55,6 +64,7 @@ func (c *CommandRegistry) Help() {
 	}
 }
 
+// CommandHelp prints more detailed help for a specific Command
 func (c *CommandRegistry) CommandHelp(name string) {
 	util.Debugln(name)
 	if command, ok := c.Commands[name]; ok {

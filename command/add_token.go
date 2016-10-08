@@ -8,9 +8,11 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
+// AddToken stucture is the representation of the add-token command
 type AddToken struct {
 }
 
+// Execute is the main function. It will be called on add-token command
 func (c *AddToken) Execute() {
 	var namespace *s.Namespace
 	var account *s.Account
@@ -38,18 +40,22 @@ func (c *AddToken) Execute() {
 	storage.Save()
 }
 
+// ArgumentDescription descripts the required and potential arguments
 func (c *AddToken) ArgumentDescription() string {
 	return "[namespace] [account]"
 }
 
+// Description will be displayed as Description (woooo) in the general help
 func (c *AddToken) Description() string {
 	return fmt.Sprintf("Add new token")
 }
 
+// Help is a general (human readable) command specific (long) help
 func (c *AddToken) Help() string {
 	return ""
 }
 
+// Examples lists a few example as array. Will be used in the command specific help
 func (c *AddToken) Examples() []string {
 	return []string{
 		"",

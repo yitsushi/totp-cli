@@ -18,6 +18,7 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
+// Storage structure represents the credential storage
 type Storage struct {
 	File     string
 	Password []byte
@@ -25,6 +26,7 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
+// Decrypt tries to decrypt the storage
 func (s *Storage) Decrypt() {
 	encryptedData, err := ioutil.ReadFile(s.File)
 	util.Check(err)
@@ -46,6 +48,7 @@ func (s *Storage) Decrypt() {
 	s.parse(decodedData)
 }
 
+// Save tries to encrypt and save the storage
 func (s *Storage) Save() {
 	var jsonStruct map[string]map[string]string = map[string]map[string]string{}
 
@@ -86,40 +89,8 @@ func (s *Storage) Save() {
 	util.Check(err)
 }
 
-func (s *Storage) parse(decodedData []byte) {
-	var parsedData map[string]map[string]string
-
-	// remove junk
-	originalDataLength := bytes.IndexByte(decodedData, 0)
-	if originalDataLength == 0 {
-		originalDataLength = bytes.IndexByte(decodedData, 13)
-	}
-
-	if originalDataLength > 0 && originalDataLength < len(decodedData) {
-		decodedData = decodedData[:originalDataLength]
-	}
-
-	err := json.Unmarshal(decodedData, &parsedData)
-	if err != nil {
-		fmt.Println("Something went wrong. Maybe this Password is not a valid one.")
-		os.Exit(1)
-	}
-
-	var namespaces []*Namespace
-
-	for namespaceName, value := range parsedData {
-		var accounts []*Account
-		for accountName, secretKey := range value {
-			account := &Account{Name: accountName, Token: secretKey}
-			accounts = append(accounts, account)
-		}
-		namespace := &Namespace{Name: namespaceName, Accounts: accounts}
-		namespaces = append(namespaces, namespace)
-	}
-
-	s.Namespaces = namespaces
-}
-
+// FindNamespace returns with a namespace
+// if the namespace does not exist error is not nil
 func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 	for _, namespace = range s.Namespaces {
 		if namespace.Name == name {
@@ -132,6 +103,7 @@ func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 	return
 }
 
+// DeleteNamespace removes a specific namespace from the Storage
 func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	var position int = -1
 	for i, item := range s.Namespaces {
@@ -201,4 +173,38 @@ func initStorage() {
 	}
 
 	storage.Save()
+}
+
+func (s *Storage) parse(decodedData []byte) {
+	var parsedData map[string]map[string]string
+
+	// remove junk
+	originalDataLength := bytes.IndexByte(decodedData, 0)
+	if originalDataLength == 0 {
+		originalDataLength = bytes.IndexByte(decodedData, 13)
+	}
+
+	if originalDataLength > 0 && originalDataLength < len(decodedData) {
+		decodedData = decodedData[:originalDataLength]
+	}
+
+	err := json.Unmarshal(decodedData, &parsedData)
+	if err != nil {
+		fmt.Println("Something went wrong. Maybe this Password is not a valid one.")
+		os.Exit(1)
+	}
+
+	var namespaces []*Namespace
+
+	for namespaceName, value := range parsedData {
+		var accounts []*Account
+		for accountName, secretKey := range value {
+			account := &Account{Name: accountName, Token: secretKey}
+			accounts = append(accounts, account)
+		}
+		namespace := &Namespace{Name: namespaceName, Accounts: accounts}
+		namespaces = append(namespaces, namespace)
+	}
+
+	s.Namespaces = namespaces
 }

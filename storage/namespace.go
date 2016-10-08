@@ -2,11 +2,14 @@ package storage
 
 import "errors"
 
+// Namespace represents a Namespace "category"
 type Namespace struct {
 	Name     string
 	Accounts []*Account
 }
 
+// FindAccount returns with an account under a specific Namespace
+// if the account does not exist error is not nil
 func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 	for _, account = range n.Accounts {
 		if account.Name == name {
@@ -19,6 +22,7 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 	return
 }
 
+// DeleteAccount removes a specific Account from the Namespace
 func (n *Namespace) DeleteAccount(account *Account) {
 	var position int = -1
 	for i, item := range n.Accounts {

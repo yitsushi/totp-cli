@@ -13,6 +13,7 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
+// GenerateOTPCode generates a 6 digit TOTP from the secret Token
 func GenerateOTPCode(token string, when time.Time) string {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(30)))
 	secretBytes, err := base32.StdEncoding.DecodeString(strings.ToUpper(token))

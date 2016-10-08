@@ -9,9 +9,11 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
+// Delete stucture is the representation of the delete command
 type Delete struct {
 }
 
+// Execute is the main function. It will be called on delete command
 func (c *Delete) Execute() {
 	term := flag.Arg(1)
 	if len(term) < 1 {
@@ -56,18 +58,22 @@ func (c *Delete) Execute() {
 	}
 }
 
+// ArgumentDescription descripts the required and potential arguments
 func (c *Delete) ArgumentDescription() string {
 	return "<namespace>[.account]"
 }
 
+// Description will be displayed as Description (woooo) in the general help
 func (c *Delete) Description() string {
 	return "Delete an account or a whole namespace"
 }
 
+// Help is a general (human readable) command specific (long) help
 func (c *Delete) Help() string {
 	return ""
 }
 
+// Examples lists a few example as array. Will be used in the command specific help
 func (c *Delete) Examples() []string {
 	return []string{
 		"mynamespace myaccount",
