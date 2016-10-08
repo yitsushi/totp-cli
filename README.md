@@ -111,6 +111,10 @@ import "github.com/Yitsuhsi/totp-cli/commander"
 type YourCommand struct {
 }
 
+func (c *YourCommand) Execute() {
+  // Command Action
+}
+
 func (c *YourCommand) ArgumentDescription() string {
   return ""
 }
