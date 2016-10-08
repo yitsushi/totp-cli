@@ -1,8 +1,6 @@
 package command
 
 import (
-	"fmt"
-
 	s "github.com/Yitsushi/totp-cli/storage"
 	"github.com/Yitsushi/totp-cli/util"
 )
@@ -16,8 +14,7 @@ func (c *ChangePassword) Execute() {
 	newPasswordConfirm := util.AskPassword(32, "Again")
 
 	if !util.CheckPasswordConfirm(newPassword, newPasswordConfirm) {
-		fmt.Println("New Password and the confirm mismatch!")
-		return
+		panic("New Password and the confirm mismatch!")
 	}
 
 	storage.Password = newPassword

@@ -16,7 +16,6 @@ func (c *Delete) Execute() {
 	term := flag.Arg(1)
 	if len(term) < 1 {
 		panic("Wrong number of arguments")
-		return
 	}
 
 	path := strings.Split(term, ".")
@@ -31,17 +30,11 @@ func (c *Delete) Execute() {
 	storage := s.PrepareStorage()
 
 	namespace, err := storage.FindNamespace(nsName)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	util.Check(err)
 
 	if accName != "" {
 		account, err := namespace.FindAccount(accName)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		util.Check(err)
 
 		fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
 

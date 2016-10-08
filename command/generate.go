@@ -8,6 +8,7 @@ import (
 
 	"github.com/Yitsushi/totp-cli/security"
 	s "github.com/Yitsushi/totp-cli/storage"
+	"github.com/Yitsushi/totp-cli/util"
 )
 
 type Generate struct {
@@ -36,15 +37,10 @@ func (c *Generate) Execute() {
 	storage := s.PrepareStorage()
 
 	namespace, err := storage.FindNamespace(path[0])
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	util.Check(err)
+
 	account, err := namespace.FindAccount(path[1])
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	util.Check(err)
 
 	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
 }

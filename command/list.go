@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	s "github.com/Yitsushi/totp-cli/storage"
+	"github.com/Yitsushi/totp-cli/util"
 )
 
 type List struct {
@@ -30,10 +31,7 @@ func (c *List) Execute() {
 	}
 
 	namespace, err := storage.FindNamespace(ns)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	util.Check(err)
 
 	for _, account := range namespace.Accounts {
 		fmt.Printf("%s.%s\n", namespace.Name, account.Name)
