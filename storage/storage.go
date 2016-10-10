@@ -124,6 +124,7 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 
 var storage *Storage
 
+// PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
 func PrepareStorage() *Storage {
 	initStorage()
 

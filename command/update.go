@@ -40,7 +40,7 @@ func (c *Update) Execute() {
 
 	var assetToDownload *grc.Asset
 	for _, asset := range release.Assets {
-		if asset.Name == c.BuildFilename() {
+		if asset.Name == c.buildFilename() {
 			assetToDownload = &asset
 			break
 		}
@@ -56,7 +56,7 @@ func (c *Update) Execute() {
 	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
 }
 
-func (c *Update) BuildFilename() string {
+func (c *Update) buildFilename() string {
 	extension := ""
 	if runtime.GOOS == "windows" {
 		extension = ".exe"
