@@ -15,7 +15,7 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
-// Update stucture is the representation of the update command
+// Update structure is the representation of the update command
 type Update struct {
 }
 

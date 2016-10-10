@@ -32,7 +32,7 @@ func TestFindNamespace_NotFound(t *testing.T) {
 
 	namespace, err := storage.FindNamespace("NamespaceNotFound")
 
-	assert.EqualError(t, err, "Namespace not found.", "Error sould be 'Namespace not found.'")
+	assert.EqualError(t, err, "Namespace not found.", "Error should be 'Namespace not found.'")
 	assert.Equal(t, namespace, &Namespace{}, "Namespace should be nil")
 }
 
@@ -55,7 +55,7 @@ func TestDeleteNamespace(t *testing.T) {
 	storage.DeleteNamespace(namespace)
 	assert.Equal(t, len(storage.Namespaces), 2)
 	namespace, err = storage.FindNamespace("Namespace1")
-	assert.EqualError(t, err, "Namespace not found.", "Error sould be 'Namespace not found.'")
+	assert.EqualError(t, err, "Namespace not found.", "Error should be 'Namespace not found.'")
 	// Delete again :D
 	storage.DeleteNamespace(namespace)
 	assert.Equal(t, len(storage.Namespaces), 2)

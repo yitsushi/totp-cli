@@ -7,7 +7,7 @@ import (
 	"github.com/Yitsushi/totp-cli/info"
 )
 
-// Version stucture is the representation of the Version command
+// Version structure is the representation of the Version command
 type Version struct {
 }
 

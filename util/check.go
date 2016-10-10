@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Check is for error handlig. If an error occured it will simply
+// Check is for error handlig. If an error occurred it will simply
 // Exit from the application with status code 1
 func Check(err error) {
 	if err != nil {

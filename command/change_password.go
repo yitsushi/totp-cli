@@ -5,7 +5,7 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
-// ChangePassword stucture is the representation of the change-password command
+// ChangePassword structure is the representation of the change-password command
 type ChangePassword struct {
 }
 

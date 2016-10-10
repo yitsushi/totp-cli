@@ -9,7 +9,7 @@ import (
 	"github.com/Yitsushi/totp-cli/util"
 )
 
-// Delete stucture is the representation of the delete command
+// Delete structure is the representation of the delete command
 type Delete struct {
 }
 
