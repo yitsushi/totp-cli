@@ -10,9 +10,9 @@ func TestFindAccount(t *testing.T) {
 	namespace := &Namespace{
 		Name: "mynamespace",
 		Accounts: []*Account{
-			&Account{Name: "Account1", Token: "token1"},
-			&Account{Name: "Account2", Token: "token2"},
-			&Account{Name: "Account3", Token: "token3"},
+			{Name: "Account1", Token: "token1"},
+			{Name: "Account2", Token: "token2"},
+			{Name: "Account3", Token: "token3"},
 		},
 	}
 
@@ -26,9 +26,9 @@ func TestFindAccount_NotFound(t *testing.T) {
 	namespace := &Namespace{
 		Name: "mynamespace",
 		Accounts: []*Account{
-			&Account{Name: "Account1", Token: "token1"},
-			&Account{Name: "Account2", Token: "token2"},
-			&Account{Name: "Account3", Token: "token3"},
+			{Name: "Account1", Token: "token1"},
+			{Name: "Account2", Token: "token2"},
+			{Name: "Account3", Token: "token3"},
 		},
 	}
 
@@ -45,9 +45,9 @@ func TestDeleteAccount(t *testing.T) {
 	namespace := &Namespace{
 		Name: "mynamespace",
 		Accounts: []*Account{
-			&Account{Name: "Account1", Token: "token1"},
-			&Account{Name: "Account2", Token: "token2"},
-			&Account{Name: "Account3", Token: "token3"},
+			{Name: "Account1", Token: "token1"},
+			{Name: "Account2", Token: "token2"},
+			{Name: "Account3", Token: "token3"},
 		},
 	}
 

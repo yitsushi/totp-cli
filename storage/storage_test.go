@@ -9,9 +9,9 @@ import (
 func TestFindNamespace(t *testing.T) {
 	storage := &Storage{
 		Namespaces: []*Namespace{
-			&Namespace{Name: "Namespace1"},
-			&Namespace{Name: "Namespace2"},
-			&Namespace{Name: "Namespace3"},
+			{Name: "Namespace1"},
+			{Name: "Namespace2"},
+			{Name: "Namespace3"},
 		},
 	}
 
@@ -24,9 +24,9 @@ func TestFindNamespace(t *testing.T) {
 func TestFindNamespace_NotFound(t *testing.T) {
 	storage := &Storage{
 		Namespaces: []*Namespace{
-			&Namespace{Name: "Namespace1"},
-			&Namespace{Name: "Namespace2"},
-			&Namespace{Name: "Namespace3"},
+			{Name: "Namespace1"},
+			{Name: "Namespace2"},
+			{Name: "Namespace3"},
 		},
 	}
 
@@ -42,9 +42,9 @@ func TestDeleteNamespace(t *testing.T) {
 
 	storage := &Storage{
 		Namespaces: []*Namespace{
-			&Namespace{Name: "Namespace1"},
-			&Namespace{Name: "Namespace2"},
-			&Namespace{Name: "Namespace3"},
+			{Name: "Namespace1"},
+			{Name: "Namespace2"},
+			{Name: "Namespace3"},
 		},
 	}
 
