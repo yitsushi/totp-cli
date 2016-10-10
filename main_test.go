@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Yitsushi/totp-cli/commander"
+	"github.com/Yitsushi/go-commander"
 	"github.com/stretchr/testify/assert"
 )
 
