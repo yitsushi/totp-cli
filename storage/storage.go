@@ -50,7 +50,7 @@ func (s *Storage) Decrypt() {
 
 // Save tries to encrypt and save the storage
 func (s *Storage) Save() {
-	var jsonStruct map[string]map[string]string = map[string]map[string]string{}
+	jsonStruct := map[string]map[string]string{}
 
 	for _, namespace := range s.Namespaces {
 		jsonStruct[namespace.Name] = map[string]string{}
@@ -105,7 +105,7 @@ func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 
 // DeleteNamespace removes a specific namespace from the Storage
 func (s *Storage) DeleteNamespace(namespace *Namespace) {
-	var position int = -1
+	position := -1
 	for i, item := range s.Namespaces {
 		if item == namespace {
 			position = i

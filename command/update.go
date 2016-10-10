@@ -51,7 +51,7 @@ func (c *Update) Execute() {
 		return
 	}
 
-	c.DownloadBinary(assetToDownload.BrowserDownloadURL)
+	c.downloadBinary(assetToDownload.BrowserDownloadURL)
 
 	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
 }
@@ -64,7 +64,7 @@ func (c *Update) buildFilename() string {
 	return fmt.Sprintf("%s-%s-%s%s", info.AppName, runtime.GOOS, runtime.GOARCH, extension)
 }
 
-func (c *Update) DownloadBinary(uri string) {
+func (c *Update) downloadBinary(uri string) {
 	fmt.Println("Download...")
 	response, err := http.Get(uri)
 	util.Check(err)

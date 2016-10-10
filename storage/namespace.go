@@ -24,7 +24,7 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 
 // DeleteAccount removes a specific Account from the Namespace
 func (n *Namespace) DeleteAccount(account *Account) {
-	var position int = -1
+	position := -1
 	for i, item := range n.Accounts {
 		if item == account {
 			position = i

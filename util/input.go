@@ -13,8 +13,8 @@ import (
 // AskPassword asks password from the user and hides
 // the input
 func AskPassword(length int, prompt string) []byte {
-	var password []byte = make([]byte, length, length)
 	var text string
+	password := make([]byte, length, length)
 
 	if prompt == "" {
 		prompt = "Password"
