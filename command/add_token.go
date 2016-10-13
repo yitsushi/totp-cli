@@ -1,9 +1,9 @@
 package command
 
 import (
-	"flag"
 	"fmt"
 
+	"github.com/Yitsushi/go-commander"
 	s "github.com/Yitsushi/totp-cli/storage"
 	"github.com/Yitsushi/totp-cli/util"
 )
@@ -13,12 +13,12 @@ type AddToken struct {
 }
 
 // Execute is the main function. It will be called on add-token command
-func (c *AddToken) Execute() {
+func (c *AddToken) Execute(opts *commander.CommandHelper) {
 	var namespace *s.Namespace
 	var account *s.Account
 	var err error
 
-	nsName, accName, token := c.askForAddTokenDetails()
+	nsName, accName, token := c.askForAddTokenDetails(opts)
 
 	storage := s.PrepareStorage()
 
@@ -64,11 +64,27 @@ func (c *AddToken) Examples() []string {
 	}
 }
 
+func NewAddToken(appName string) *commander.CommandWrapper {
+	return &commander.CommandWrapper{
+		Handler: &AddToken{},
+		Help: &commander.CommandDescriptor{
+			Name:             "add-token",
+			ShortDescription: "Add new token",
+			Arguments:        "[namespace] [account]",
+			Examples: []string{
+				"",
+				"mynamespace",
+				"mynamespace myaccount",
+			},
+		},
+	}
+}
+
 // Private functions
 
-func (c *AddToken) askForAddTokenDetails() (namespace, account, token string) {
-	namespace = flag.Arg(1)
-	account = flag.Arg(2)
+func (c *AddToken) askForAddTokenDetails(opts *commander.CommandHelper) (namespace, account, token string) {
+	namespace = opts.Arg(0)
+	account = opts.Arg(1)
 	for len(namespace) < 1 {
 		namespace = util.Ask("Namespace")
 	}

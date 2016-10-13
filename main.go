@@ -7,13 +7,13 @@ import (
 
 func registerCommands(registry *commander.CommandRegistry) {
 	// Register available commands
-	registry.Register("generate", &command.Generate{})
-	registry.Register("add-token", &command.AddToken{})
-	registry.Register("list", &command.List{})
-	registry.Register("delete", &command.Delete{})
-	registry.Register("change-password", &command.ChangePassword{})
-	registry.Register("update", &command.Update{})
-	registry.Register("version", &command.Version{})
+	registry.Register(command.NewGenerate)
+	registry.Register(command.NewAddToken)
+	registry.Register(command.NewList)
+	registry.Register(command.NewDelete)
+	registry.Register(command.NewChangePassword)
+	registry.Register(command.NewVersion)
+	registry.Register(command.NewUpdate)
 }
 
 func main() {

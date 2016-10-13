@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	grc "github.com/Yitsushi/github-release-check"
+	"github.com/Yitsushi/go-commander"
 	"github.com/kardianos/osext"
 
 	"github.com/Yitsushi/totp-cli/info"
@@ -19,18 +20,8 @@ import (
 type Update struct {
 }
 
-// Description will be displayed as Description (woooo) in the general help
-func (c *Update) Description() string {
-	return fmt.Sprintf("Check and update %s itself", info.AppName)
-}
-
-// ArgumentDescription descripts the required and potential arguments
-func (c *Update) ArgumentDescription() string {
-	return ""
-}
-
 // Execute is the main function. It will be called on update command
-func (c *Update) Execute() {
+func (c *Update) Execute(opts *commander.CommandHelper) {
 	hasUpdate, release, _ := grc.Check(info.AppRepoOwner, info.AppName, info.AppVersion)
 
 	if !hasUpdate {
@@ -83,14 +74,15 @@ func (c *Update) downloadBinary(uri string) {
 	os.Rename(file.Name(), currentExecutable)
 }
 
-// Help is a general (human readable) command specific (long) help
-func (c *Update) Help() string {
-	return `Check for updates.
+func NewUpdate(appName string) *commander.CommandWrapper {
+	return &commander.CommandWrapper{
+		Handler: &Update{},
+		Help: &commander.CommandDescriptor{
+			Name:             "update",
+			ShortDescription: fmt.Sprintf("Check and update %s itself", appName),
+			LongDescription: `Check for updates.
 If there is a newer version of this application for this OS and ARCH,
-then download it and replace this application with the newer one.`
-}
-
-// Examples lists a few example as array. Will be used in the command specific help
-func (c *Update) Examples() []string {
-	return []string{""}
+then download it and replace this application with the newer one.`,
+		},
+	}
 }

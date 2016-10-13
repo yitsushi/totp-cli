@@ -1,9 +1,9 @@
 package command
 
 import (
-	"flag"
 	"fmt"
 
+	"github.com/Yitsushi/go-commander"
 	s "github.com/Yitsushi/totp-cli/storage"
 	"github.com/Yitsushi/totp-cli/util"
 )
@@ -12,20 +12,10 @@ import (
 type List struct {
 }
 
-// Description will be displayed as Description (woooo) in the general help
-func (c *List) Description() string {
-	return "List all available namespaces or accounts under a namespace"
-}
-
-// ArgumentDescription descripts the required and potential arguments
-func (c *List) ArgumentDescription() string {
-	return "[namespace]"
-}
-
 // Execute is the main function. It will be called on list command
-func (c *List) Execute() {
+func (c *List) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
-	ns := flag.Arg(1)
+	ns := opts.Arg(0)
 	if len(ns) < 1 {
 		for _, namespace := range storage.Namespaces {
 			fmt.Printf("%s (Number of accounts: %d)\n", namespace.Name, len(namespace.Accounts))
@@ -42,15 +32,17 @@ func (c *List) Execute() {
 	}
 }
 
-// Help is a general (human readable) command specific (long) help
-func (c *List) Help() string {
-	return ""
-}
-
-// Examples lists a few example as array. Will be used in the command specific help
-func (c *List) Examples() []string {
-	return []string{
-		"",
-		"mynamespace",
+func NewList(appName string) *commander.CommandWrapper {
+	return &commander.CommandWrapper{
+		Handler: &List{},
+		Help: &commander.CommandDescriptor{
+			Name:             "list",
+			ShortDescription: "List all available namespaces or accounts under a namespace",
+			Arguments:        "[namespace]",
+			Examples: []string{
+				"",
+				"mynamespace",
+			},
+		},
 	}
 }
