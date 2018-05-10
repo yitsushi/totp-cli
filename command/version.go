@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/Yitsushi/go-commander"
-	"github.com/Yitsushi/totp-cli/info"
+	"github.com/yitsushi/go-commander"
+	"github.com/yitsushi/totp-cli/info"
 )
 
 // Version structure is the representation of the Version command

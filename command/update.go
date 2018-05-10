@@ -8,12 +8,12 @@ import (
 	"os"
 	"runtime"
 
-	grc "github.com/Yitsushi/github-release-check"
-	"github.com/Yitsushi/go-commander"
 	"github.com/kardianos/osext"
+	grc "github.com/yitsushi/github-release-check"
+	"github.com/yitsushi/go-commander"
 
-	"github.com/Yitsushi/totp-cli/info"
-	"github.com/Yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/info"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // Update structure is the representation of the update command

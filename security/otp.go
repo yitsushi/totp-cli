@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token

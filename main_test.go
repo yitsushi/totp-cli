@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Yitsushi/go-commander"
 	"github.com/stretchr/testify/assert"
+	"github.com/yitsushi/go-commander"
 )
 
 func TestRegisterCommands(t *testing.T) {

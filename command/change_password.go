@@ -1,9 +1,9 @@
 package command
 
 import (
-	"github.com/Yitsushi/go-commander"
-	s "github.com/Yitsushi/totp-cli/storage"
-	"github.com/Yitsushi/totp-cli/util"
+	"github.com/yitsushi/go-commander"
+	s "github.com/yitsushi/totp-cli/storage"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // ChangePassword structure is the representation of the change-password command

@@ -1,5 +1,5 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/Yitsushi/totp-cli)](https://goreportcard.com/report/github.com/Yitsushi/totp-cli)
-[![Build Status](https://travis-ci.org/Yitsushi/totp-cli.svg?branch=master)](https://travis-ci.org/Yitsushi/totp-cli)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/totp-cli)](https://goreportcard.com/report/github.com/yitsushi/totp-cli)
+[![Build Status](https://travis-ci.org/yitsushi/totp-cli.svg?branch=master)](https://travis-ci.org/yitsushi/totp-cli)
 
 This is a simple TOTP _(Time-based One-time Password)_ CLI tool.
 TOTP is the most common mechanism for 2FA _(Two-Factor-Authentication)_.
@@ -9,7 +9,7 @@ and protect your data with a password.
 ### Install
 
 Download the latest version of the application
-from the [releases page](https://github.com/Yitsushi/totp-cli/releases/latest).
+from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest).
 
 ### Update
 

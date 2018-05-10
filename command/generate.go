@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Yitsushi/go-commander"
-	"github.com/Yitsushi/totp-cli/security"
-	s "github.com/Yitsushi/totp-cli/storage"
-	"github.com/Yitsushi/totp-cli/util"
+	"github.com/yitsushi/go-commander"
+	"github.com/yitsushi/totp-cli/security"
+	s "github.com/yitsushi/totp-cli/storage"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // Generate structure is the representation of the generate command

@@ -15,7 +15,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/Yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // Storage structure represents the credential storage
@@ -98,7 +98,7 @@ func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 		}
 	}
 	namespace = &Namespace{}
-	err = errors.New("Namespace not found.")
+	err = errors.New("Namespace not found")
 
 	return
 }

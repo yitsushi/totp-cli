@@ -17,7 +17,7 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 		}
 	}
 	account = &Account{}
-	err = errors.New("Account not found.")
+	err = errors.New("Account not found")
 
 	return
 }
