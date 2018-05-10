@@ -29,7 +29,7 @@ func NewChangePassword(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &ChangePassword{},
 		Help: &commander.CommandDescriptor{
-			Name:             "delete",
+			Name:             "change-password",
 			ShortDescription: "Change password",
 		},
 	}
