@@ -32,6 +32,7 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 	}
 }
 
+// NewList creates a new List command
 func NewList(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &List{},

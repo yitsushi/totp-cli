@@ -58,6 +58,7 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 	}
 }
 
+// NewDelete create a new Delete command
 func NewDelete(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Delete{},

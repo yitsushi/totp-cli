@@ -39,6 +39,7 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
 }
 
+// NewGenerate creates a new Generate command
 func NewGenerate(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Generate{},

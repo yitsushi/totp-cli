@@ -64,6 +64,7 @@ func (c *AddToken) Examples() []string {
 	}
 }
 
+// NewAddToken createa new AddToken command
 func NewAddToken(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &AddToken{},

@@ -74,6 +74,7 @@ func (c *Update) downloadBinary(uri string) {
 	os.Rename(file.Name(), currentExecutable)
 }
 
+// NewUpdate creates a new Update command
 func NewUpdate(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Update{},

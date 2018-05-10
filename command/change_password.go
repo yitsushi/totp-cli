@@ -24,6 +24,7 @@ func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
 	storage.Save()
 }
 
+// NewChangePassword create a new ChangePassword command
 func NewChangePassword(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &ChangePassword{},

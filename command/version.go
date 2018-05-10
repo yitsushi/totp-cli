@@ -17,6 +17,7 @@ func (c *Version) Execute(opts *commander.CommandHelper) {
 	fmt.Printf("%s %s (%s/%s)\n", info.AppName, info.AppVersion, runtime.GOOS, runtime.GOARCH)
 }
 
+// NewVersion creates a new Version command
 func NewVersion(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Version{},
