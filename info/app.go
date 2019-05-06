@@ -7,4 +7,4 @@ const AppRepoOwner string = "yitsushi"
 const AppName string = "totp-cli"
 
 // AppVersion defined current version of this application
-const AppVersion string = "1.0.4"
+const AppVersion string = "1.0.5"
