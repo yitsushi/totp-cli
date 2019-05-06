@@ -16,7 +16,15 @@ import (
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token
 func GenerateOTPCode(token string, when time.Time) string {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(30)))
-	secretBytes, err := base32.StdEncoding.DecodeString(strings.ToUpper(token))
+	// Remove spaces, some providers are giving us in a readable format
+	// so they add spaces in there. If it's not removed while pasting in,
+	// remove it now.
+	token = strings.Replace(token, " ", "", -1)
+
+	// It should be uppercase always
+	token = strings.ToUpper(token)
+
+	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
 	util.Check(err)
 
 	buf := make([]byte, 8)

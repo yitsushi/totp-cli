@@ -24,3 +24,37 @@ func TestTOTP(t *testing.T) {
 		assert.Equal(t, expected, code, when.String())
 	}
 }
+
+func TestSpaceSeparatedToken(t *testing.T) {
+	secret := "37kh vdxt c5hj ttfp ujok cipy jy"
+	table := map[time.Time]string{
+		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "066634",
+		time.Date(2005, 3, 18, 1, 58, 29, 0, time.UTC):   "597310",
+		time.Date(2005, 3, 18, 1, 58, 31, 0, time.UTC):   "174182",
+		time.Date(2009, 2, 13, 23, 31, 30, 0, time.UTC):  "623746",
+		time.Date(2016, 9, 16, 12, 40, 12, 0, time.UTC):  "330739",
+		time.Date(2033, 5, 18, 3, 33, 20, 0, time.UTC):   "556617",
+		time.Date(2603, 10, 11, 11, 33, 20, 0, time.UTC): "608345",
+	}
+	for when, expected := range table {
+		code := GenerateOTPCode(secret, when)
+		assert.Equal(t, expected, code, when.String())
+	}
+}
+
+func TestNonPaddedHashes(t *testing.T) {
+	secret := "a6mryljlbufszudtjdt42nh5by"
+	table := map[time.Time]string{
+		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "866149",
+		time.Date(2005, 3, 18, 1, 58, 29, 0, time.UTC):   "996077",
+		time.Date(2005, 3, 18, 1, 58, 31, 0, time.UTC):   "421761",
+		time.Date(2009, 2, 13, 23, 31, 30, 0, time.UTC):  "903464",
+		time.Date(2016, 9, 16, 12, 40, 12, 0, time.UTC):  "997249",
+		time.Date(2033, 5, 18, 3, 33, 20, 0, time.UTC):   "210476",
+		time.Date(2603, 10, 11, 11, 33, 20, 0, time.UTC): "189144",
+	}
+	for when, expected := range table {
+		code := GenerateOTPCode(secret, when)
+		assert.Equal(t, expected, code, when.String())
+	}
+}
