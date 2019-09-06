@@ -1,6 +1,8 @@
 package command
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,7 +33,7 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 
 	var assetToDownload *grc.Asset
 	for _, asset := range release.Assets {
-		if asset.Name == c.buildFilename() {
+		if asset.Name == c.buildFilename(release.TagName) {
 			assetToDownload = &asset
 			break
 		}
@@ -47,12 +49,8 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
 }
 
-func (c *Update) buildFilename() string {
-	extension := ""
-	if runtime.GOOS == "windows" {
-		extension = ".exe"
-	}
-	return fmt.Sprintf("%s-%s-%s%s", info.AppName, runtime.GOOS, runtime.GOARCH, extension)
+func (c *Update) buildFilename(version string) string {
+	return fmt.Sprintf("%s_%s_%s_%s.tar.gz", info.AppName, version, runtime.GOOS, runtime.GOARCH)
 }
 
 func (c *Update) downloadBinary(uri string) {
@@ -61,11 +59,17 @@ func (c *Update) downloadBinary(uri string) {
 	util.Check(err)
 	defer response.Body.Close()
 
+	gzipReader, _ := gzip.NewReader(response.Body)
+	defer gzipReader.Close()
+
+	tarReader := tar.NewReader(gzipReader)
+	tarReader.Next()
+
 	file, _ := ioutil.TempFile("", info.AppName)
 	util.Check(err)
 	defer file.Close()
 
-	_, err = io.Copy(file, response.Body)
+	_, err = io.Copy(file, tarReader)
 	util.Check(err)
 
 	file.Chmod(0755)
