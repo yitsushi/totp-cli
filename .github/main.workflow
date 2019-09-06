@@ -12,7 +12,6 @@ action "release darwin/amd64" {
   env = {
     GOOS = "darwin"
     GOARCH = "amd64"
-    GO111MODULE = "on"
   }
   secrets = ["GITHUB_TOKEN"]
 }
@@ -22,7 +21,6 @@ action "release windows/amd64" {
   env = {
     GOOS = "windows"
     GOARCH = "amd64"
-    GO111MODULE = "on"
   }
   secrets = ["GITHUB_TOKEN"]
 }
@@ -32,7 +30,6 @@ action "release linux/amd64" {
   env = {
     GOOS = "linux"
     GOARCH = "amd64"
-    GO111MODULE = "on"
   }
   secrets = ["GITHUB_TOKEN"]
 }
