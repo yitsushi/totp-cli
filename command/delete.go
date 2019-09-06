@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/yitsushi/go-commander"
 	s "github.com/yitsushi/totp-cli/storage"
@@ -15,27 +14,19 @@ type Delete struct {
 
 // Execute is the main function. It will be called on delete command
 func (c *Delete) Execute(opts *commander.CommandHelper) {
-	term := opts.Arg(0)
-	if len(term) < 1 {
+	namespaceName := opts.Arg(0)
+	if len(namespaceName) < 1 {
 		panic("Wrong number of arguments")
 	}
-
-	path := strings.Split(term, ".")
-
-	nsName := path[0]
-	accName := ""
-
-	if len(path) > 1 {
-		accName = path[1]
-	}
+	accountName := opts.Arg(1)
 
 	storage := s.PrepareStorage()
 
-	namespace, err := storage.FindNamespace(nsName)
+	namespace, err := storage.FindNamespace(namespaceName)
 	util.Check(err)
 
-	if accName != "" {
-		account, err := namespace.FindAccount(accName)
+	if accountName != "" {
+		account, err := namespace.FindAccount(accountName)
 		util.Check(err)
 
 		fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
@@ -65,10 +56,10 @@ func NewDelete(appName string) *commander.CommandWrapper {
 		Help: &commander.CommandDescriptor{
 			Name:             "delete",
 			ShortDescription: "Delete an account or a whole namespace",
-			Arguments:        "<namespace>[.account]",
+			Arguments:        "<namespace> [account]",
 			Examples: []string{
 				"mynamespace",
-				"mynamespace.maccount",
+				"mynamespace myaccount",
 			},
 		},
 	}

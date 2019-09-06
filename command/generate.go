@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/yitsushi/go-commander"
@@ -17,23 +16,22 @@ type Generate struct {
 
 // Execute is the main function. It will be called on generate command
 func (c *Generate) Execute(opts *commander.CommandHelper) {
-	term := opts.Arg(0)
-	if len(term) < 1 {
-		panic("Namespace and Account are not defined")
+	namespaceName := opts.Arg(0)
+	if len(namespaceName) < 1 {
+		panic("Namespace is not defined")
 	}
 
-	path := strings.Split(term, ".")
-
-	if len(path) < 2 {
+	accountName := opts.Arg(1)
+	if len(accountName) < 1 {
 		panic("Account is not defined")
 	}
 
 	storage := s.PrepareStorage()
 
-	namespace, err := storage.FindNamespace(path[0])
+	namespace, err := storage.FindNamespace(namespaceName)
 	util.Check(err)
 
-	account, err := namespace.FindAccount(path[1])
+	account, err := namespace.FindAccount(accountName)
 	util.Check(err)
 
 	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
@@ -46,8 +44,8 @@ func NewGenerate(appName string) *commander.CommandWrapper {
 		Help: &commander.CommandDescriptor{
 			Name:             "generate",
 			ShortDescription: "Generate a specific OTP",
-			Arguments:        "<namespace>.<account>",
-			Examples:         []string{"mynamespace.myaccount"},
+			Arguments:        "<namespace> <account>",
+			Examples:         []string{"mynamespace myaccount"},
 		},
 	}
 }
