@@ -12,6 +12,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
         GOOS: linux
+        CGO_ENABLED: 0
     - name: release windows/amd64
       uses: ngs/go-release.action@v1.0.1
       env:
