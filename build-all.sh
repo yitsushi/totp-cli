@@ -12,6 +12,6 @@ for arch in ${ARCH[*]}; do
       outname="${outname}.exe"
     fi
 
-    GOOS="${os}" GOARCH="${arch}" go build -o "${outname}" .
+    GOOS="${os}" GOARCH="${arch}" CGO_ENABLED=0 go build -o "${outname}" .
   done
 done
