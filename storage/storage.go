@@ -126,7 +126,7 @@ var storage *Storage
 
 // PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
 func PrepareStorage() *Storage {
-	initStorage()
+	credentialFile := initStorage()
 
 	if storage != nil {
 		return storage
@@ -134,12 +134,8 @@ func PrepareStorage() *Storage {
 
 	password := util.AskPassword(32, "")
 
-	currentUser, err := user.Current()
-	util.Check(err)
-	homePath := currentUser.HomeDir
-
 	storage = &Storage{
-		File:     filepath.Join(homePath, ".config/totp-cli/credentials"),
+		File:     credentialFile,
 		Password: password,
 	}
 
@@ -148,32 +144,42 @@ func PrepareStorage() *Storage {
 	return storage
 }
 
-func initStorage() {
-	currentUser, err := user.Current()
-	util.Check(err)
-	homePath := currentUser.HomeDir
-	documentDirectory := filepath.Join(homePath, ".config/totp-cli")
+func initStorage() string {
+	var credentialFile string
 
-	if _, err := os.Stat(documentDirectory); err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(documentDirectory, 0700)
-			util.Check(err)
-		} else {
-			util.Check(err)
+	credentialFile = os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
+
+	if credentialFile == "" {
+		currentUser, err := user.Current()
+		util.Check(err)
+		homePath := currentUser.HomeDir
+		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
+
+		if _, err := os.Stat(documentDirectory); err != nil {
+			if os.IsNotExist(err) {
+				err = os.MkdirAll(documentDirectory, 0700)
+				util.Check(err)
+			} else {
+				util.Check(err)
+			}
 		}
+
+		credentialFile = filepath.Join(documentDirectory, "credentials")
 	}
 
-	if _, err := os.Stat(filepath.Join(documentDirectory, "credentials")); err == nil {
-		return
+	if _, err := os.Stat(credentialFile); err == nil {
+		return credentialFile
 	}
 
 	password := util.AskPassword(32, "Your Password (do not forget it)")
 	storage = &Storage{
-		File:     filepath.Join(documentDirectory, "credentials"),
+		File:     credentialFile,
 		Password: password,
 	}
 
 	storage.Save()
+
+	return credentialFile
 }
 
 func (s *Storage) parse(decodedData []byte) {
