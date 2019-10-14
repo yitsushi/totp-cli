@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+  "path"
 	"runtime"
 
 	"github.com/kardianos/osext"
@@ -54,7 +55,7 @@ func (c *Update) buildFilename(version string) string {
 }
 
 func (c *Update) downloadBinary(uri string) {
-	fmt.Println("Download...")
+	fmt.Println(" -> Download...")
 	response, err := http.Get(uri)
 	util.Check(err)
 	defer response.Body.Close()
@@ -62,10 +63,14 @@ func (c *Update) downloadBinary(uri string) {
 	gzipReader, _ := gzip.NewReader(response.Body)
 	defer gzipReader.Close()
 
+	fmt.Println(" -> Extract...")
 	tarReader := tar.NewReader(gzipReader)
 	tarReader.Next()
 
-	file, _ := ioutil.TempFile("", info.AppName)
+	currentExecutable, _ := osext.Executable()
+  originalPath := path.Dir(currentExecutable)
+
+	file, err := ioutil.TempFile(originalPath, info.AppName)
 	util.Check(err)
 	defer file.Close()
 
@@ -74,8 +79,8 @@ func (c *Update) downloadBinary(uri string) {
 
 	file.Chmod(0755)
 
-	currentExecutable, _ := osext.Executable()
-	os.Rename(file.Name(), currentExecutable)
+	err = os.Rename(file.Name(), currentExecutable)
+  util.Check(err)
 }
 
 // NewUpdate creates a new Update command
