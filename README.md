@@ -93,3 +93,22 @@ personal.facebook
 
 If you want to change your password,
 you can do it with the `change-password` command.
+
+### Changing the location of the credentials file
+
+Simply put this into your `.zshrc` (or `.{YourSell}rc` or `.profile`):
+
+```
+export TOTP_CLI_CREDENTIAL_FILE="/mnt/mydrive/totp-credentials"
+```
+
+Or call the client with `TOTP_CLI_CREDENTIAL_FILE`:
+
+```
+$ TOTP_CLI_CREDENTIAL_FILE=/mnt/mydrive/totp-credentials totp-cli list
+```
+
+Note: It's a filename not just a directory.
+
+Note: It does not traverse through the given path,
+      parent directory has to be there already.
