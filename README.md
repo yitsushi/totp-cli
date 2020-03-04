@@ -96,7 +96,7 @@ you can do it with the `change-password` command.
 
 ### Changing the location of the credentials file
 
-Simply put this into your `.zshrc` (or `.{YourSell}rc` or `.profile`):
+Simply put this into your `.zshrc` (or `.{YourShell}rc` or `.profile`):
 
 ```
 export TOTP_CLI_CREDENTIAL_FILE="/mnt/mydrive/totp-credentials"
