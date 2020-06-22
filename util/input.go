@@ -2,7 +2,7 @@ package util
 
 import (
 	"bufio"
-	"crypto/sha1"
+	"crypto/sha1" // nolint:gosec
 	"fmt"
 	"os"
 	"strings"
@@ -11,10 +11,11 @@ import (
 )
 
 // AskPassword asks password from the user and hides
-// the input
+// the input.
 func AskPassword(length int, prompt string) []byte {
 	var text string
-	password := make([]byte, length, length)
+
+	password := make([]byte, length)
 
 	if prompt == "" {
 		prompt = "Password"
@@ -26,6 +27,7 @@ func AskPassword(length int, prompt string) []byte {
 		prompt = fmt.Sprintf("%s: ", prompt)
 		os.Stderr.Write([]byte(prompt))
 		stdin := int(os.Stdin.Fd())
+
 		if terminal.IsTerminal(stdin) {
 			var lineBytes []byte
 
@@ -35,13 +37,14 @@ func AskPassword(length int, prompt string) []byte {
 			reader := bufio.NewReader(os.Stdin)
 			text, _ = reader.ReadString('\n')
 		}
+
 		os.Stderr.Write([]byte("***\n"))
 
 		text = strings.TrimSpace(text)
 	}
 
-	hash := sha1.New()
-	hash.Write([]byte(text))
+	hash := sha1.New() // nolint:gosec
+	_, _ = hash.Write([]byte(text))
 	h := hash.Sum(nil)
 	text = fmt.Sprintf("%x", h)
 
@@ -51,9 +54,10 @@ func AskPassword(length int, prompt string) []byte {
 }
 
 // Ask can be used to get some input from the user.
-// The user input will not be hidden (not secure)
+// The user input will not be hidden (not secure).
 func Ask(prompt string) (text string) {
 	fmt.Printf("%s: ", prompt)
+
 	reader := bufio.NewReader(os.Stdin)
 	text, _ = reader.ReadString('\n')
 	text = strings.TrimSpace(text)
@@ -63,9 +67,10 @@ func Ask(prompt string) (text string) {
 
 // Confirm ask something from the user
 // Acceptable true answers: yes, y, sure
-// Everything else will be false
+// Everything else will be false.
 func Confirm(prompt string) bool {
 	fmt.Printf("%s ", prompt)
+
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.ToLower(strings.TrimSpace(text))
@@ -73,7 +78,7 @@ func Confirm(prompt string) bool {
 	return (text == "y" || text == "yes" || text == "sure")
 }
 
-// CheckPasswordConfirm checks two byte array if the content is the same
+// CheckPasswordConfirm checks two byte array if the content is the same.
 func CheckPasswordConfirm(password, confirm []byte) bool {
 	if password == nil && confirm == nil {
 		return true

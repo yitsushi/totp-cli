@@ -8,18 +8,18 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// Delete structure is the representation of the delete command
+// Delete structure is the representation of the delete command.
 type Delete struct {
 }
 
-// Execute is the main function. It will be called on delete command
+// Execute is the main function. It will be called on delete command.
 func (c *Delete) Execute(opts *commander.CommandHelper) {
 	namespaceName := opts.Arg(0)
 	if len(namespaceName) < 1 {
 		panic("Wrong number of arguments")
 	}
-	accountName := opts.Arg(1)
 
+	accountName := opts.Arg(1)
 	storage := s.PrepareStorage()
 
 	namespace, err := storage.FindNamespace(namespaceName)
@@ -35,7 +35,6 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 			namespace.DeleteAccount(account)
 			storage.Save()
 		}
-
 	} else {
 		fmt.Printf("You want to delete '%s' namespace with %d accounts.\n", namespace.Name, len(namespace.Accounts))
 		for _, account := range namespace.Accounts {
@@ -49,7 +48,7 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 	}
 }
 
-// NewDelete create a new Delete command
+// NewDelete create a new Delete command.
 func NewDelete(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Delete{},

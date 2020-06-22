@@ -10,11 +10,11 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// Generate structure is the representation of the generate command
+// Generate structure is the representation of the generate command.
 type Generate struct {
 }
 
-// Execute is the main function. It will be called on generate command
+// Execute is the main function. It will be called on generate command.
 func (c *Generate) Execute(opts *commander.CommandHelper) {
 	namespaceName := opts.Arg(0)
 	if len(namespaceName) < 1 {
@@ -37,7 +37,7 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
 }
 
-// NewGenerate creates a new Generate command
+// NewGenerate creates a new Generate command.
 func NewGenerate(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Generate{},

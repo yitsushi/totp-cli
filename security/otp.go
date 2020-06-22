@@ -2,7 +2,7 @@ package security
 
 import (
 	"crypto/hmac"
-	"crypto/sha1"
+	"crypto/sha1" // nolint:gosec
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
@@ -13,9 +13,20 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// GenerateOTPCode generates a 6 digit TOTP from the secret Token
+const (
+	mask1              = 0xf
+	mask2              = 0x7f
+	mask3              = 0xff
+	timeSplitInSeconds = 30
+	shift24            = 24
+	shift16            = 16
+	shift8             = 8
+	codeLength         = 6
+)
+
+// GenerateOTPCode generates a 6 digit TOTP from the secret Token.
 func GenerateOTPCode(token string, when time.Time) string {
-	timer := uint64(math.Floor(float64(when.Unix()) / float64(30)))
+	timer := uint64(math.Floor(float64(when.Unix()) / float64(timeSplitInSeconds)))
 	// Remove spaces, some providers are giving us in a readable format
 	// so they add spaces in there. If it's not removed while pasting in,
 	// remove it now.
@@ -31,19 +42,19 @@ func GenerateOTPCode(token string, when time.Time) string {
 	mac := hmac.New(sha1.New, secretBytes)
 
 	binary.BigEndian.PutUint64(buf, timer)
-	mac.Write(buf)
+	_, _ = mac.Write(buf)
 	sum := mac.Sum(nil)
 
 	// http://tools.ietf.org/html/rfc4226#section-5.4
-	offset := sum[len(sum)-1] & 0xf
-	value := int64(((int(sum[offset]) & 0x7f) << 24) |
-		((int(sum[offset+1] & 0xff)) << 16) |
-		((int(sum[offset+2] & 0xff)) << 8) |
-		(int(sum[offset+3]) & 0xff))
-	length := 6
+	offset := sum[len(sum)-1] & mask1
+	value := int64(((int(sum[offset]) & mask2) << shift24) |
+		((int(sum[offset+1] & mask3)) << shift16) |
+		((int(sum[offset+2] & mask3)) << shift8) |
+		(int(sum[offset+3]) & mask3))
 
-	modulo := int32(value % int64(math.Pow10(length)))
+	modulo := int32(value % int64(math.Pow10(codeLength)))
 
-	format := fmt.Sprintf("%%0%dd", length)
+	format := fmt.Sprintf("%%0%dd", codeLength)
+
 	return fmt.Sprintf(format, modulo)
 }
