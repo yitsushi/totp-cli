@@ -1,9 +1,30 @@
 language: go
 
-go: tip
+go: 
+  - '1.14.x'
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
 
 install:
   - go get ./...
   - go get github.com/stretchr/testify/assert
 
-script: go test -v ./...
+jobs:
+  include:
+    - stage:
+      name: Test
+      script: go test -v ./...
+    - stage:
+      name: Lint
+      install:
+        - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.27.0
+      script:
+        - go mod download
+        - golangci-lint run --enable-all --new
+    - stage:
+      name: build
+      script:
+        - CGO_ENABLED=0 go build -o totp-cli

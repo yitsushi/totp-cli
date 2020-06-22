@@ -6,15 +6,19 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// ChangePassword structure is the representation of the change-password command
+const (
+	askPasswordLength = 32
+)
+
+// ChangePassword structure is the representation of the change-password command.
 type ChangePassword struct {
 }
 
-// Execute is the main function. It will be called on change-password command
+// Execute is the main function. It will be called on change-password command.
 func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
-	newPassword := util.AskPassword(32, "New Password")
-	newPasswordConfirm := util.AskPassword(32, "Again")
+	newPassword := util.AskPassword(askPasswordLength, "New Password")
+	newPasswordConfirm := util.AskPassword(askPasswordLength, "Again")
 
 	if !util.CheckPasswordConfirm(newPassword, newPasswordConfirm) {
 		panic("New Password and the confirm mismatch!")
@@ -24,7 +28,7 @@ func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
 	storage.Save()
 }
 
-// NewChangePassword create a new ChangePassword command
+// NewChangePassword create a new ChangePassword command.
 func NewChangePassword(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &ChangePassword{},

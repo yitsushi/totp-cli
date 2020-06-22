@@ -1,15 +1,16 @@
-package storage
+package storage_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yitsushi/totp-cli/storage"
 )
 
 func TestFindAccount(t *testing.T) {
-	namespace := &Namespace{
+	namespace := &storage.Namespace{
 		Name: "mynamespace",
-		Accounts: []*Account{
+		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},
 			{Name: "Account3", Token: "token3"},
@@ -23,9 +24,9 @@ func TestFindAccount(t *testing.T) {
 }
 
 func TestFindAccount_NotFound(t *testing.T) {
-	namespace := &Namespace{
+	namespace := &storage.Namespace{
 		Name: "mynamespace",
-		Accounts: []*Account{
+		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},
 			{Name: "Account3", Token: "token3"},
@@ -35,16 +36,16 @@ func TestFindAccount_NotFound(t *testing.T) {
 	account, err := namespace.FindAccount("AccountNotFound")
 
 	assert.EqualError(t, err, "Account not found", "Error should be 'Account not found'")
-	assert.Equal(t, account, &Account{}, "Account should be nil")
+	assert.Equal(t, account, &storage.Account{}, "Account should be nil")
 }
 
 func TestDeleteAccount(t *testing.T) {
-	var account *Account
+	var account *storage.Account
 	var err error
 
-	namespace := &Namespace{
+	namespace := &storage.Namespace{
 		Name: "mynamespace",
-		Accounts: []*Account{
+		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},
 			{Name: "Account3", Token: "token3"},

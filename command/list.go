@@ -8,13 +8,14 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// List structure is the representation of the list command
+// List structure is the representation of the list command.
 type List struct {
 }
 
-// Execute is the main function. It will be called on list command
+// Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
+
 	ns := opts.Arg(0)
 	if len(ns) < 1 {
 		for _, namespace := range storage.Namespaces {
@@ -32,7 +33,7 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 	}
 }
 
-// NewList creates a new List command
+// NewList creates a new List command.
 func NewList(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &List{},

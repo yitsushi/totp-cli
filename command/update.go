@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-  "path"
+	"path"
 	"runtime"
 
 	"github.com/kardianos/osext"
@@ -19,11 +19,15 @@ import (
 	"github.com/yitsushi/totp-cli/util"
 )
 
-// Update structure is the representation of the update command
+// Update structure is the representation of the update command.
 type Update struct {
 }
 
-// Execute is the main function. It will be called on update command
+const (
+	binaryChmodValue = 0755
+)
+
+// Execute is the main function. It will be called on update command.
 func (c *Update) Execute(opts *commander.CommandHelper) {
 	hasUpdate, release, _ := grc.Check(info.AppRepoOwner, info.AppName, info.AppVersion)
 
@@ -33,6 +37,7 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 	}
 
 	var assetToDownload *grc.Asset
+
 	for _, asset := range release.Assets {
 		if asset.Name == c.buildFilename(release.TagName) {
 			assetToDownload = &asset
@@ -58,32 +63,38 @@ func (c *Update) downloadBinary(uri string) {
 	fmt.Println(" -> Download...")
 	response, err := http.Get(uri)
 	util.Check(err)
+
 	defer response.Body.Close()
 
 	gzipReader, _ := gzip.NewReader(response.Body)
 	defer gzipReader.Close()
 
 	fmt.Println(" -> Extract...")
+
 	tarReader := tar.NewReader(gzipReader)
-	tarReader.Next()
+
+	_, err = tarReader.Next()
+	util.Check(err)
 
 	currentExecutable, _ := osext.Executable()
-  originalPath := path.Dir(currentExecutable)
+	originalPath := path.Dir(currentExecutable)
 
 	file, err := ioutil.TempFile(originalPath, info.AppName)
 	util.Check(err)
+
 	defer file.Close()
 
 	_, err = io.Copy(file, tarReader)
 	util.Check(err)
 
-	file.Chmod(0755)
+	err = file.Chmod(binaryChmodValue)
+	util.Check(err)
 
 	err = os.Rename(file.Name(), currentExecutable)
-  util.Check(err)
+	util.Check(err)
 }
 
-// NewUpdate creates a new Update command
+// NewUpdate creates a new Update command.
 func NewUpdate(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Update{},

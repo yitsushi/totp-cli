@@ -1,10 +1,11 @@
-package util
+package util_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 type PasswordPair struct {
@@ -15,19 +16,19 @@ type PasswordPair struct {
 
 func TestCheckPasswordConfirm(t *testing.T) {
 	var passwordPairs []PasswordPair = []PasswordPair{
-		PasswordPair{[]byte("asdf"), []byte("asdf"), true},
-		PasswordPair{[]byte("asdfg"), []byte("asdf"), false},
-		PasswordPair{[]byte("asdfg"), []byte("asdfh"), false},
-		PasswordPair{[]byte("asdf"), []byte("asdfh"), false},
-		PasswordPair{[]byte("asdf"), nil, false},
-		PasswordPair{nil, []byte("asdf"), false},
-		PasswordPair{nil, nil, true},
+		{[]byte("asdf"), []byte("asdf"), true},
+		{[]byte("asdfg"), []byte("asdf"), false},
+		{[]byte("asdfg"), []byte("asdfh"), false},
+		{[]byte("asdf"), []byte("asdfh"), false},
+		{[]byte("asdf"), nil, false},
+		{nil, []byte("asdf"), false},
+		{nil, nil, true},
 	}
 
 	for _, pair := range passwordPairs {
 		assert.Equal(
 			t,
-			CheckPasswordConfirm(pair.Password, pair.Confirm),
+			util.CheckPasswordConfirm(pair.Password, pair.Confirm),
 			pair.Correct,
 			fmt.Sprintf("%s == %s -> %t", pair.Password, pair.Confirm, pair.Correct),
 		)
