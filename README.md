@@ -1,5 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/totp-cli)](https://goreportcard.com/report/github.com/yitsushi/totp-cli)
 [![Build Status](https://travis-ci.org/yitsushi/totp-cli.svg?branch=master)](https://travis-ci.org/yitsushi/totp-cli)
+[![Coverage Status](https://coveralls.io/repos/github/yitsushi/totp-cli/badge.svg?branch=master)](https://coveralls.io/github/yitsushi/totp-cli?branch=master)
 
 This is a simple TOTP _(Time-based One-time Password)_ CLI tool.
 TOTP is the most common mechanism for 2FA _(Two-Factor-Authentication)_.
