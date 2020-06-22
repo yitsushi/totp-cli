@@ -16,7 +16,12 @@ jobs:
   include:
     - stage:
       name: Test
-      script: go test -v ./...
+      script:
+        - go test -v -covermode=count -coverprofile=coverage.out ./...
+      after_success:
+        - echo "Sending coverage report to coveralls.io"
+        - go get github.com/mattn/goveralls
+        - goveralls -coverprofile=coverage.out -repotoken=$COVERALLS_TOKEN -service=travis-ci
     - stage:
       name: Lint
       install:

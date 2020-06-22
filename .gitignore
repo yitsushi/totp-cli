@@ -1,1 +1,3 @@
-bin
+bin/
+totp-cli
+coverage.out
