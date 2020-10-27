@@ -22,7 +22,9 @@ type List struct {
 // Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
-	var namespaceIdx int
+
+	var namespaceIdx int = -1
+	var namespace *s.Namespace
 	err := errors.New("")
 
 	ns := opts.Arg(0)
@@ -40,10 +42,15 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 		util.Check(err)
 	}
 
-	namespace := storage.Namespaces[namespaceIdx]
+	if namespaceIdx == -1 {
+		namespace, err = storage.FindNamespace(ns)
+		util.Check(err)
+	} else {
+		namespace = storage.Namespaces[namespaceIdx]
+	}
 
 	var otps []*string
-	selectedIndex, _ := fuzzyfinder.Find(namespace.Accounts,
+	accountIdx, _ := fuzzyfinder.Find(namespace.Accounts,
 		func(i int) string {
 			now := time.Now()
 			timer := uint64(math.Floor(float64(now.Unix()) / float64(30)))
@@ -54,7 +61,7 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 			otps = append(otps, &generatedOtp)
 			return namespace.Accounts[i].Name + strings.Repeat(" ", (10-len(namespace.Accounts[i].Name))) + "  |  " + generatedOtp + "  |  " + strconv.Itoa(int(secondsUntilInvalid))
 		})
-	fmt.Println(*otps[selectedIndex])
+	fmt.Println(*otps[accountIdx])
 
 }
 
