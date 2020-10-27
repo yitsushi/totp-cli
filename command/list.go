@@ -1,9 +1,16 @@
 package command
 
 import (
+	"errors"
 	"fmt"
+	"math"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/yitsushi/go-commander"
+	"github.com/yitsushi/totp-cli/security"
 	s "github.com/yitsushi/totp-cli/storage"
 	"github.com/yitsushi/totp-cli/util"
 )
@@ -15,22 +22,36 @@ type List struct {
 // Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
+	var namespaceId int
+	err := errors.New("")
 
 	ns := opts.Arg(0)
 	if len(ns) < 1 {
-		for _, namespace := range storage.Namespaces {
-			fmt.Printf("%s (Number of accounts: %d)\n", namespace.Name, len(namespace.Accounts))
+
+		namespaceId, err = fuzzyfinder.Find(storage.Namespaces, func(i int) string {
+			return storage.Namespaces[i].Name
+		})
+
+		if err == fuzzyfinder.ErrAbort {
+			fmt.Println("No Selection")
+			return
 		}
 
-		return
+		util.Check(err)
 	}
 
-	namespace, err := storage.FindNamespace(ns)
-	util.Check(err)
+	namespace := storage.Namespaces[namespaceId]
 
-	for _, account := range namespace.Accounts {
-		fmt.Printf("%s.%s\n", namespace.Name, account.Name)
-	}
+	fuzzyfinder.Find(namespace.Accounts,
+		func(i int) string {
+			now := time.Now()
+			timer := uint64(math.Floor(float64(now.Unix()) / float64(30)))
+			secondsUntilInvalid := ((timer+1)*30 - uint64(now.Unix()))
+
+			account, _ := namespace.FindAccount(namespace.Accounts[i].Name)
+			return namespace.Accounts[i].Name + strings.Repeat(" ", (10-len(namespace.Accounts[i].Name))) + "  |  " + security.GenerateOTPCode(account.Token, now) + "  |  " + strconv.Itoa(int(secondsUntilInvalid))
+		})
+
 }
 
 // NewList creates a new List command.
