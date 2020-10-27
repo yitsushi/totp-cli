@@ -34,11 +34,6 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 			return storage.Namespaces[i].Name
 		})
 
-		if err == fuzzyfinder.ErrAbort {
-			fmt.Println("No Selection")
-			return
-		}
-
 		util.Check(err)
 	}
 
@@ -50,7 +45,9 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 	}
 
 	var otps []*string
-	accountIdx, _ := fuzzyfinder.Find(namespace.Accounts,
+	accountIdx := -1
+
+	accountIdx, err = fuzzyfinder.Find(namespace.Accounts,
 		func(i int) string {
 			now := time.Now()
 			timer := uint64(math.Floor(float64(now.Unix()) / float64(30)))
@@ -61,6 +58,12 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 			otps = append(otps, &generatedOtp)
 			return namespace.Accounts[i].Name + strings.Repeat(" ", (10-len(namespace.Accounts[i].Name))) + "  |  " + generatedOtp + "  |  " + strconv.Itoa(int(secondsUntilInvalid))
 		})
+
+	if err == fuzzyfinder.ErrAbort {
+		fmt.Println("No Selection")
+		return
+	}
+
 	fmt.Println(*otps[accountIdx])
 
 }
