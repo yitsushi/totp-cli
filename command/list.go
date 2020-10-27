@@ -34,6 +34,11 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 			return storage.Namespaces[i].Name
 		})
 
+		if err == fuzzyfinder.ErrAbort {
+			fmt.Println("No Selection")
+			return
+		}
+
 		util.Check(err)
 	}
 
