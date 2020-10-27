@@ -22,13 +22,13 @@ type List struct {
 // Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
-	var namespaceId int
+	var namespaceIdx int
 	err := errors.New("")
 
 	ns := opts.Arg(0)
 	if len(ns) < 1 {
 
-		namespaceId, err = fuzzyfinder.Find(storage.Namespaces, func(i int) string {
+		namespaceIdx, err = fuzzyfinder.Find(storage.Namespaces, func(i int) string {
 			return storage.Namespaces[i].Name
 		})
 
@@ -40,17 +40,21 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 		util.Check(err)
 	}
 
-	namespace := storage.Namespaces[namespaceId]
+	namespace := storage.Namespaces[namespaceIdx]
 
-	fuzzyfinder.Find(namespace.Accounts,
+	var otps []*string
+	selectedIndex, _ := fuzzyfinder.Find(namespace.Accounts,
 		func(i int) string {
 			now := time.Now()
 			timer := uint64(math.Floor(float64(now.Unix()) / float64(30)))
 			secondsUntilInvalid := ((timer+1)*30 - uint64(now.Unix()))
 
 			account, _ := namespace.FindAccount(namespace.Accounts[i].Name)
-			return namespace.Accounts[i].Name + strings.Repeat(" ", (10-len(namespace.Accounts[i].Name))) + "  |  " + security.GenerateOTPCode(account.Token, now) + "  |  " + strconv.Itoa(int(secondsUntilInvalid))
+			generatedOtp := string(security.GenerateOTPCode(account.Token, now))
+			otps = append(otps, &generatedOtp)
+			return namespace.Accounts[i].Name + strings.Repeat(" ", (10-len(namespace.Accounts[i].Name))) + "  |  " + generatedOtp + "  |  " + strconv.Itoa(int(secondsUntilInvalid))
 		})
+	fmt.Println(*otps[selectedIndex])
 
 }
 
