@@ -97,7 +97,7 @@ you can do it with the `change-password` command.
 
 ### Changing the location of the credentials file
 
-Simply put this into your `.zshrc` (or `.{YourSell}rc` or `.profile`):
+Simply put this into your `.zshrc` (or `.{YourShell}rc` or `.profile`):
 
 ```
 export TOTP_CLI_CREDENTIAL_FILE="/mnt/mydrive/totp-credentials"
@@ -113,3 +113,19 @@ Note: It's a filename not just a directory.
 
 Note: It does not traverse through the given path,
       parent directory has to be there already.
+
+### Zsh Completion
+
+A function to provide tab-completion for zsh is in the file `_totp-cli`.
+When installing or packaging totp-cli this should preferably be
+installed in `$prefix/share/zsh/site-functions`. Otherwise, it can be
+installed by copying to a directory where zsh searches for completion
+functions (the `$fpath` array). If you, for example, put all completion
+functions into the folder `~/.zsh/completions` you must add the
+following to your zsh main config file (`.zshrc`):
+
+```
+fpath=( ~/.zsh/completions $fpath )
+autoload -U compinit
+compinit
+```
