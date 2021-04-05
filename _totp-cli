@@ -1,0 +1,33 @@
+#compdef totp-cli
+
+# Completion function for zsh
+# Install this file in $prefix/share/zsh/site-functions or
+# update the fpath array in zsh to include its location
+
+local -a commands=(
+  'change-password:change password'
+  'delete:delete an account or a whole namespace'
+  'generate:generate a specific OTP'
+  'instant:generate an OTP from TOTP_TOKEN without the Storage backend'
+  'list:list all available namespaces or accounts under a namespace'
+  'update:check and update totp-cli itself'
+  'version:display version information'
+  'add-token:add new token'
+  'help:display general or command-specific usage information'
+)
+
+case $CURRENT:${words[2]} in
+  2:*|3:help)
+    _describe -t commands command commands
+  ;;
+  3:(add-token|delete|generate|list))
+    _message -e namespaces namespace
+  ;;
+  4:(add-token|delete|generate|list))
+    _message -e accounts account
+  ;;
+  *)
+    _message 'no more arguments'
+  ;;
+esac
+
