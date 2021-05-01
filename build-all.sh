@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARCH=(386 amd64)
+ARCH=(amd64)
 OS=(darwin linux windows)
 TARGET_DIR=bin
 
