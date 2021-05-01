@@ -1,8 +1,8 @@
 on: release
 name: Build
 jobs:
-  release:
-    name: Release
+  linux:
+    name: Release linux/amd64
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -13,15 +13,25 @@ jobs:
         GOARCH: amd64
         GOOS: linux
         CGO_ENABLED: 0
-    - name: release darwin/amd64
-      uses: ngs/go-release.action@v1.0.2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GOARCH: amd64
-        GOOS: darwin
+  windows:
+    name: Release windows/amd64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
     - name: release windows/amd64
       uses: ngs/go-release.action@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
         GOOS: windows
+  darwin:
+    name: Release darwin/amd64
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: release darwin/amd64
+      uses: ngs/go-release.action@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOARCH: amd64
+        GOOS: darwin
