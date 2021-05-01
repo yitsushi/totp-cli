@@ -1,8 +1,8 @@
 on: release
 name: Build
 jobs:
-  build:
-    name: release linux/amd64
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
