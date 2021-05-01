@@ -1,4 +1,6 @@
-on: release
+on:
+  release:
+    types: [created]
 name: Release
 jobs:
   linux:
