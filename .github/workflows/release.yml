@@ -5,10 +5,10 @@ jobs:
     name: Release linux/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - name: release linux/amd64
-      uses: ngs/go-release.action@v1.0.2
-      env:
+      uses: wangyoucao577/go-release-action@v1.17
+      with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
         GOOS: linux
@@ -17,10 +17,10 @@ jobs:
     name: Release windows/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - name: release windows/amd64
-      uses: ngs/go-release.action@v1.0.2
-      env:
+      uses: wangyoucao577/go-release-action@v1.17
+      with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
         GOOS: windows
@@ -28,10 +28,10 @@ jobs:
     name: Release darwin/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - name: release darwin/amd64
-      uses: ngs/go-release.action@v1.0.2
-      env:
+      uses: wangyoucao577/go-release-action@v1.17
+      with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
         GOOS: darwin
