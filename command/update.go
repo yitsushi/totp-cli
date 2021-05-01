@@ -56,7 +56,7 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 }
 
 func (c *Update) buildFilename(version string) string {
-	return fmt.Sprintf("%s_%s_%s_%s.tar.gz", info.AppName, version, runtime.GOOS, runtime.GOARCH)
+	return fmt.Sprintf("%s-%s-%s-%s.tar.gz", info.AppName, version, runtime.GOOS, runtime.GOARCH)
 }
 
 func (c *Update) downloadBinary(uri string) {
