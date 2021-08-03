@@ -12,6 +12,13 @@ and protect your data with a password.
 Download the latest version of the application
 from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest).
 
+Users on macOS can also install the package using [MacPorts](https://ports.macports.org/port/totp-cli/summary):
+
+```
+sudo port selfupdate
+sudo port install totp-cli
+```
+
 ### Update
 
 ```
