@@ -134,21 +134,16 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
 }
 
-var storage *Storage
-
 // PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
 func PrepareStorage() *Storage {
-	credentialFile := initStorage()
+	credentialFile, storage := initStorage()
 
-	if storage != nil {
-		return storage
-	}
-
-	password := util.AskPassword(passwordLengthLimit, "")
-
-	storage = &Storage{
-		File:     credentialFile,
-		Password: password,
+	if storage == nil {
+		password := util.AskPassword(passwordLengthLimit, "")
+		storage = &Storage{
+			File:     credentialFile,
+			Password: password,
+		}
 	}
 
 	storage.Decrypt()
@@ -156,7 +151,7 @@ func PrepareStorage() *Storage {
 	return storage
 }
 
-func initStorage() string {
+func initStorage() (string, *Storage) {
 	var credentialFile string
 
 	credentialFile = os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
@@ -181,21 +176,21 @@ func initStorage() string {
 	}
 
 	if _, err := os.Stat(credentialFile); err == nil {
-		return credentialFile
+		return credentialFile, nil
 	}
 
 	password := util.AskPassword(
 		passwordLengthLimit,
 		"Your Password (do not forget it)",
 	)
-	storage = &Storage{
+	storage := &Storage{
 		File:     credentialFile,
 		Password: password,
 	}
 
 	storage.Save()
 
-	return credentialFile
+	return credentialFile, storage
 }
 
 func (s *Storage) parse(decodedData []byte) {
