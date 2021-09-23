@@ -71,7 +71,7 @@ func (s *Storage) Save() {
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
 	padded := make([]byte, len(plaintext)+missing)
 
-	copy(padded[:], plaintext) //nolint:gocritic // it's intentional.
+	copy(padded, plaintext)
 
 	plaintext = padded
 
