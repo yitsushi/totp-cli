@@ -23,13 +23,17 @@ $ totp-cli update
 ```
 $ totp-cli help
 
-add-token [namespace] [account]   Add new token
-list [namespace]                  List all available namespaces or accounts under a namespace
-delete <namespace>[.account]      Delete an account or a whole namespace
-change-password                   Change password
+dump [namespace]                  Dump all available namespaces or accounts under a namespace
 update                            Check and update totp-cli itself
+add-token [namespace] [account]   Add new token
+delete <namespace> [account]      Delete an account or a whole namespace
+on-the-fly                        Generate OTP from token on the fly
+list [namespace]                  List all available namespaces or accounts under a namespace
+change-password                   Change password
+instant                           Generate an OTP from TOTP_TOKEN without the Storage backend
 version                           Print current version of this application
-generate <namespace>.<account>    Generate a specific OTP
+help [command]                    Display this help or a command specific help
+
 ```
 
 ### Usage
