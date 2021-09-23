@@ -65,6 +65,15 @@ func Ask(prompt string) (text string) {
 	return
 }
 
+// Read stdin without prompt..
+func Read() (text string) {
+	reader := bufio.NewReader(os.Stdin)
+	text, _ = reader.ReadString('\n')
+	text = strings.TrimSpace(text)
+
+	return
+}
+
 // Confirm ask something from the user
 // Acceptable true answers: yes, y, sure
 // Everything else will be false.
