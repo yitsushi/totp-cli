@@ -5,7 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yitsushi/totp-cli/util"
+
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 type PasswordPair struct {
@@ -15,7 +16,7 @@ type PasswordPair struct {
 }
 
 func TestCheckPasswordConfirm(t *testing.T) {
-	var passwordPairs []PasswordPair = []PasswordPair{
+	passwordPairs := []PasswordPair{
 		{[]byte("asdf"), []byte("asdf"), true},
 		{[]byte("asdfg"), []byte("asdf"), false},
 		{[]byte("asdfg"), []byte("asdfh"), false},

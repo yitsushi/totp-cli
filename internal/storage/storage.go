@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,10 +14,17 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
-// Storage structure represents the credential storage
+const (
+	dataLengthHead              = 13
+	passwordLengthLimit         = 32
+	storageDirectoryPermissions = 0o700
+	storageFilePermissions      = 0o600
+)
+
+// Storage structure represents the credential storage.
 type Storage struct {
 	File     string
 	Password []byte
@@ -26,12 +32,12 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
-// Decrypt tries to decrypt the storage
+// Decrypt tries to decrypt the storage.
 func (s *Storage) Decrypt() {
 	encryptedData, err := ioutil.ReadFile(s.File)
 	util.Check(err)
-	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 
+	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
@@ -48,7 +54,7 @@ func (s *Storage) Decrypt() {
 	s.parse(decodedData)
 }
 
-// Save tries to encrypt and save the storage
+// Save tries to encrypt and save the storage.
 func (s *Storage) Save() {
 	jsonStruct := map[string]map[string]string{}
 
@@ -63,8 +69,10 @@ func (s *Storage) Save() {
 	util.Check(err)
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
-	padded := make([]byte, len(plaintext)+missing, len(plaintext)+missing)
-	copy(padded[:], plaintext)
+	padded := make([]byte, len(plaintext)+missing)
+
+	copy(padded[:], plaintext) //nolint:gocritic // it's intentional.
+
 	plaintext = padded
 
 	if len(plaintext)%aes.BlockSize != 0 {
@@ -75,9 +83,10 @@ func (s *Storage) Save() {
 	util.Check(err)
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+
 	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
+	if _, readErr := io.ReadFull(rand.Reader, iv); err != nil {
+		panic(readErr)
 	}
 
 	mode := cipher.NewCBCEncrypter(block, iv)
@@ -85,30 +94,33 @@ func (s *Storage) Save() {
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
-	err = ioutil.WriteFile(s.File, []byte(encodedContent), 0644)
+	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
 	util.Check(err)
 }
 
 // FindNamespace returns with a namespace
-// if the namespace does not exist error is not nil
+// if the namespace does not exist error is not nil.
 func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 	for _, namespace = range s.Namespaces {
 		if namespace.Name == name {
 			return
 		}
 	}
+
 	namespace = &Namespace{}
-	err = errors.New("Namespace not found")
+	err = NotFoundError{Type: "namespace", Name: name}
 
 	return
 }
 
-// DeleteNamespace removes a specific namespace from the Storage
+// DeleteNamespace removes a specific namespace from the Storage.
 func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	position := -1
+
 	for i, item := range s.Namespaces {
 		if item == namespace {
 			position = i
+
 			break
 		}
 	}
@@ -132,7 +144,7 @@ func PrepareStorage() *Storage {
 		return storage
 	}
 
-	password := util.AskPassword(32, "")
+	password := util.AskPassword(passwordLengthLimit, "")
 
 	storage = &Storage{
 		File:     credentialFile,
@@ -152,12 +164,13 @@ func initStorage() string {
 	if credentialFile == "" {
 		currentUser, err := user.Current()
 		util.Check(err)
+
 		homePath := currentUser.HomeDir
 		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
 
 		if _, err := os.Stat(documentDirectory); err != nil {
 			if os.IsNotExist(err) {
-				err = os.MkdirAll(documentDirectory, 0700)
+				err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
 				util.Check(err)
 			} else {
 				util.Check(err)
@@ -171,7 +184,10 @@ func initStorage() string {
 		return credentialFile
 	}
 
-	password := util.AskPassword(32, "Your Password (do not forget it)")
+	password := util.AskPassword(
+		passwordLengthLimit,
+		"Your Password (do not forget it)",
+	)
 	storage = &Storage{
 		File:     credentialFile,
 		Password: password,
@@ -188,7 +204,7 @@ func (s *Storage) parse(decodedData []byte) {
 	// remove junk
 	originalDataLength := bytes.IndexByte(decodedData, 0)
 	if originalDataLength == 0 {
-		originalDataLength = bytes.IndexByte(decodedData, 13)
+		originalDataLength = bytes.IndexByte(decodedData, dataLengthHead)
 	}
 
 	if originalDataLength > 0 && originalDataLength < len(decodedData) {
@@ -201,14 +217,16 @@ func (s *Storage) parse(decodedData []byte) {
 		os.Exit(1)
 	}
 
-	var namespaces []*Namespace
+	namespaces := []*Namespace{}
 
 	for namespaceName, value := range parsedData {
 		var accounts []*Account
+
 		for accountName, secretKey := range value {
 			account := &Account{Name: accountName, Token: secretKey}
 			accounts = append(accounts, account)
 		}
+
 		namespace := &Namespace{Name: namespaceName, Accounts: accounts}
 		namespaces = append(namespaces, namespace)
 	}

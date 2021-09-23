@@ -1,16 +1,16 @@
-package command
+package cmd
 
 import (
 	"fmt"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Delete structure is the representation of the delete command.
-type Delete struct {
-}
+type Delete struct{}
 
 // Execute is the main function. It will be called on delete command.
 func (c *Delete) Execute(opts *commander.CommandHelper) {

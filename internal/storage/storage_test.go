@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	s "github.com/yitsushi/totp-cli/storage"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
 func TestFindNamespace(t *testing.T) {
@@ -38,8 +39,10 @@ func TestFindNamespace_NotFound(t *testing.T) {
 }
 
 func TestDeleteNamespace(t *testing.T) {
-	var namespace *s.Namespace
-	var err error
+	var (
+		namespace *s.Namespace
+		err       error
+	)
 
 	storage := &s.Storage{
 		Namespaces: []*s.Namespace{

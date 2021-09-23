@@ -1,4 +1,4 @@
-package command
+package cmd
 
 import (
 	"archive/tar"
@@ -15,16 +15,15 @@ import (
 	grc "github.com/yitsushi/github-release-check"
 	"github.com/yitsushi/go-commander"
 
-	"github.com/yitsushi/totp-cli/info"
-	"github.com/yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/internal/info"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Update structure is the representation of the update command.
-type Update struct {
-}
+type Update struct{}
 
 const (
-	binaryChmodValue = 0755
+	binaryChmodValue = 0o755
 )
 
 // Execute is the main function. It will be called on update command.
@@ -33,6 +32,7 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 
 	if !hasUpdate {
 		fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
+
 		return
 	}
 
@@ -41,12 +41,14 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 	for _, asset := range release.Assets {
 		if asset.Name == c.buildFilename(release.TagName) {
 			assetToDownload = &asset
+
 			break
 		}
 	}
 
 	if assetToDownload == nil {
 		fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
+
 		return
 	}
 
@@ -61,6 +63,7 @@ func (c *Update) buildFilename(version string) string {
 
 func (c *Update) downloadBinary(uri string) {
 	fmt.Println(" -> Download...")
+
 	response, err := http.Get(uri)
 	util.Check(err)
 

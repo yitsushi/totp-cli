@@ -1,18 +1,18 @@
-package command
+package cmd
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/yitsushi/go-commander"
-	"github.com/yitsushi/totp-cli/security"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	"github.com/yitsushi/totp-cli/internal/security"
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Generate structure is the representation of the generate command.
-type Generate struct {
-}
+type Generate struct{}
 
 // Execute is the main function. It will be called on generate command.
 func (c *Generate) Execute(opts *commander.CommandHelper) {

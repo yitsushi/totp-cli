@@ -1,9 +1,10 @@
-package command
+package cmd
 
 import (
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 const (
@@ -11,8 +12,7 @@ const (
 )
 
 // ChangePassword structure is the representation of the change-password command.
-type ChangePassword struct {
-}
+type ChangePassword struct{}
 
 // Execute is the main function. It will be called on change-password command.
 func (c *ChangePassword) Execute(opts *commander.CommandHelper) {

@@ -1,16 +1,16 @@
-package command
+package cmd
 
 import (
 	"fmt"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // List structure is the representation of the list command.
-type List struct {
-}
+type List struct{}
 
 // Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {

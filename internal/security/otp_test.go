@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yitsushi/totp-cli/security"
+
+	"github.com/yitsushi/totp-cli/internal/security"
 )
 
 func TestTOTP(t *testing.T) {
@@ -27,7 +28,6 @@ func TestTOTP(t *testing.T) {
 	}
 }
 
-// nolint:dupl
 func TestSpaceSeparatedToken(t *testing.T) {
 	input := "37kh vdxt c5hj ttfp ujok cipy jy"
 	table := map[time.Time]string{
@@ -46,7 +46,6 @@ func TestSpaceSeparatedToken(t *testing.T) {
 	}
 }
 
-// nolint:dupl
 func TestNonPaddedHashes(t *testing.T) {
 	input := "a6mryljlbufszudtjdt42nh5by"
 	table := map[time.Time]string{

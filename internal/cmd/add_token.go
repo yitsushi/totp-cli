@@ -1,16 +1,16 @@
-package command
+package cmd
 
 import (
 	"fmt"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // AddToken structure is the representation of the add-token command.
-type AddToken struct {
-}
+type AddToken struct{}
 
 // Execute is the main function. It will be called on add-token command.
 func (c *AddToken) Execute(opts *commander.CommandHelper) {

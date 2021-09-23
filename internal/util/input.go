@@ -2,7 +2,9 @@ package util
 
 import (
 	"bufio"
-	"crypto/sha1" // nolint:gosec
+
+	//nolint:gosec // yolo?
+	"crypto/sha1"
 	"fmt"
 	"os"
 	"strings"
@@ -43,12 +45,12 @@ func AskPassword(length int, prompt string) []byte {
 		text = strings.TrimSpace(text)
 	}
 
-	hash := sha1.New() // nolint:gosec
+	hash := sha1.New() //nolint:gosec // yolo?
 	_, _ = hash.Write([]byte(text))
 	h := hash.Sum(nil)
 	text = fmt.Sprintf("%x", h)
 
-	copy(password[:], text[0:length])
+	copy(password[:], text[0:length]) //nolint:gocritic // intentional
 
 	return password
 }

@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yitsushi/totp-cli/storage"
+
+	"github.com/yitsushi/totp-cli/internal/storage"
 )
 
 func TestFindAccount(t *testing.T) {
@@ -40,8 +41,10 @@ func TestFindAccount_NotFound(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
-	var account *storage.Account
-	var err error
+	var (
+		account *storage.Account
+		err     error
+	)
 
 	namespace := &storage.Namespace{
 		Name: "mynamespace",

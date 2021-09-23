@@ -2,7 +2,9 @@ package security
 
 import (
 	"crypto/hmac"
-	"crypto/sha1" // nolint:gosec
+
+	//nolint:gosec // yolo?
+	"crypto/sha1"
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
@@ -10,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 const (
@@ -22,6 +24,7 @@ const (
 	shift16            = 16
 	shift8             = 8
 	codeLength         = 6
+	sumByteLength      = 8
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token.
@@ -30,7 +33,7 @@ func GenerateOTPCode(token string, when time.Time) string {
 	// Remove spaces, some providers are giving us in a readable format
 	// so they add spaces in there. If it's not removed while pasting in,
 	// remove it now.
-	token = strings.Replace(token, " ", "", -1)
+	token = strings.ReplaceAll(token, " ", "")
 
 	// It should be uppercase always
 	token = strings.ToUpper(token)
@@ -38,7 +41,7 @@ func GenerateOTPCode(token string, when time.Time) string {
 	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
 	util.Check(err)
 
-	buf := make([]byte, 8)
+	buf := make([]byte, sumByteLength)
 	mac := hmac.New(sha1.New, secretBytes)
 
 	binary.BigEndian.PutUint64(buf, timer)

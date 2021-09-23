@@ -1,16 +1,16 @@
-package command
+package cmd
 
 import (
 	"fmt"
 	"runtime"
 
 	"github.com/yitsushi/go-commander"
-	"github.com/yitsushi/totp-cli/info"
+
+	"github.com/yitsushi/totp-cli/internal/info"
 )
 
 // Version structure is the representation of the Version command.
-type Version struct {
-}
+type Version struct{}
 
 // Execute is the main function. It will be called on version command.
 func (c *Version) Execute(opts *commander.CommandHelper) {

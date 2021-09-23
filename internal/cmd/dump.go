@@ -1,16 +1,16 @@
-package command
+package cmd
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
 // Dump structure is the representation of the dump command.
-type Dump struct {
-}
+type Dump struct{}
 
 // Execute is the main function. It will be called on dump command.
 func (c *Dump) Execute(opts *commander.CommandHelper) {
