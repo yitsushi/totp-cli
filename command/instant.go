@@ -7,6 +7,7 @@ import (
 
 	"github.com/yitsushi/go-commander"
 	"github.com/yitsushi/totp-cli/security"
+	"github.com/yitsushi/totp-cli/util"
 )
 
 // Instant structure is the representation of the instant command.
@@ -17,7 +18,7 @@ type Instant struct {
 func (c *Instant) Execute(opts *commander.CommandHelper) {
 	token := os.Getenv("TOTP_TOKEN")
 	if token == "" {
-		panic("TOTP_TOKEN not defined")
+		token = util.Read()
 	}
 
 	fmt.Println(security.GenerateOTPCode(token, time.Now()))
@@ -29,7 +30,7 @@ func NewInstant(appName string) *commander.CommandWrapper {
 		Handler: &Instant{},
 		Help: &commander.CommandDescriptor{
 			Name:             "instant",
-			ShortDescription: "Generate an OTP from TOTP_TOKEN without the Storage backend",
+			ShortDescription: "Generate an OTP from TOTP_TOKEN or stdin without the Storage backend",
 		},
 	}
 }
