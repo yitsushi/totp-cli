@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/yitsushi/go-commander"
 
 	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
-	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Generate structure is the representation of the generate command.
@@ -29,10 +29,16 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
 
 	namespace, err := storage.FindNamespace(namespaceName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	account, err := namespace.FindAccount(accountName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
 }

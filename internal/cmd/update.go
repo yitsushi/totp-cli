@@ -16,7 +16,6 @@ import (
 	"github.com/yitsushi/go-commander"
 
 	"github.com/yitsushi/totp-cli/internal/info"
-	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Update structure is the representation of the update command.
@@ -65,7 +64,10 @@ func (c *Update) downloadBinary(uri string) {
 	fmt.Println(" -> Download...")
 
 	response, err := http.Get(uri)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	defer response.Body.Close()
 
@@ -77,24 +79,39 @@ func (c *Update) downloadBinary(uri string) {
 	tarReader := tar.NewReader(gzipReader)
 
 	_, err = tarReader.Next()
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	currentExecutable, _ := osext.Executable()
 	originalPath := path.Dir(currentExecutable)
 
 	file, err := ioutil.TempFile(originalPath, info.AppName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	defer file.Close()
 
 	_, err = io.Copy(file, tarReader)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	err = file.Chmod(binaryChmodValue)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	err = os.Rename(file.Name(), currentExecutable)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 }
 
 // NewUpdate creates a new Update command.

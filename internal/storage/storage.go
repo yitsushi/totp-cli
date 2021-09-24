@@ -35,14 +35,20 @@ type Storage struct {
 // Decrypt tries to decrypt the storage.
 func (s *Storage) Decrypt() {
 	encryptedData, err := ioutil.ReadFile(s.File)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
 	block, err := aes.NewCipher(s.Password)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	if len(decodedData)%aes.BlockSize != 0 {
 		panic("ciphertext is not a multiple of the block size")
@@ -66,7 +72,10 @@ func (s *Storage) Save() {
 	}
 
 	plaintext, err := json.Marshal(jsonStruct)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
 	padded := make([]byte, len(plaintext)+missing)
@@ -80,7 +89,10 @@ func (s *Storage) Save() {
 	}
 
 	block, err := aes.NewCipher(s.Password)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 
@@ -95,7 +107,10 @@ func (s *Storage) Save() {
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
 	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 }
 
 // FindNamespace returns with a namespace
@@ -158,7 +173,10 @@ func initStorage() (string, *Storage) {
 
 	if credentialFile == "" {
 		currentUser, err := user.Current()
-		util.Check(err)
+		if err != nil {
+			fmt.Printf("Error: %s", err.Error())
+			os.Exit(1)
+		}
 
 		homePath := currentUser.HomeDir
 		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
@@ -166,9 +184,15 @@ func initStorage() (string, *Storage) {
 		if _, err := os.Stat(documentDirectory); err != nil {
 			if os.IsNotExist(err) {
 				err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
-				util.Check(err)
+				if err != nil {
+					fmt.Printf("Error: %s", err.Error())
+					os.Exit(1)
+				}
 			} else {
-				util.Check(err)
+				if err != nil {
+					fmt.Printf("Error: %s", err.Error())
+					os.Exit(1)
+				}
 			}
 		}
 

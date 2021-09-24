@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/yitsushi/go-commander"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
-	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // List structure is the representation of the list command.
@@ -26,7 +26,10 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 	}
 
 	namespace, err := storage.FindNamespace(ns)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	for _, account := range namespace.Accounts {
 		fmt.Printf("%s.%s\n", namespace.Name, account.Name)

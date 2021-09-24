@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/yitsushi/go-commander"
 
@@ -23,11 +24,17 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 	storage := s.PrepareStorage()
 
 	namespace, err := storage.FindNamespace(namespaceName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	if accountName != "" {
 		account, err := namespace.FindAccount(accountName)
-		util.Check(err)
+		if err != nil {
+			fmt.Printf("Error: %s", err.Error())
+			os.Exit(1)
+		}
 
 		fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
 

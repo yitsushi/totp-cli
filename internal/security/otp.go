@@ -2,6 +2,7 @@ package security
 
 import (
 	"crypto/hmac"
+	"os"
 
 	//nolint:gosec // yolo?
 	"crypto/sha1"
@@ -11,8 +12,6 @@ import (
 	"math"
 	"strings"
 	"time"
-
-	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 const (
@@ -39,7 +38,10 @@ func GenerateOTPCode(token string, when time.Time) string {
 	token = strings.ToUpper(token)
 
 	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	buf := make([]byte, sumByteLength)
 	mac := hmac.New(sha1.New, secretBytes)
