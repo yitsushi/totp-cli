@@ -23,7 +23,9 @@ func TestTOTP(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }
@@ -41,7 +43,9 @@ func TestSpaceSeparatedToken(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }
@@ -59,7 +63,9 @@ func TestNonPaddedHashes(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }

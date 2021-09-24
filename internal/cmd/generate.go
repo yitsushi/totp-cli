@@ -26,7 +26,11 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		panic("Account is not defined")
 	}
 
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	namespace, err := storage.FindNamespace(namespaceName)
 	if err != nil {
@@ -40,7 +44,12 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		os.Exit(1)
 	}
 
-	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
+	code, err := security.GenerateOTPCode(account.Token, time.Now())
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
+
+	fmt.Println(code)
 }
 
 // NewGenerate creates a new Generate command.

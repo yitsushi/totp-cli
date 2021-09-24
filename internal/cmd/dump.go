@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/yitsushi/go-commander"
 
@@ -14,7 +15,11 @@ type Dump struct{}
 
 // Execute is the main function. It will be called on dump command.
 func (c *Dump) Execute(opts *commander.CommandHelper) {
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	out, _ := json.Marshal(storage)
 

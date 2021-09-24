@@ -1,10 +1,8 @@
 package security
 
+//nolint:gosec // It's hard to change now without breaking. Issue #44.
 import (
 	"crypto/hmac"
-	"os"
-
-	//nolint:gosec // yolo?
 	"crypto/sha1"
 	"encoding/base32"
 	"encoding/binary"
@@ -27,7 +25,7 @@ const (
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token.
-func GenerateOTPCode(token string, when time.Time) string {
+func GenerateOTPCode(token string, when time.Time) (string, error) {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(timeSplitInSeconds)))
 	// Remove spaces, some providers are giving us in a readable format
 	// so they add spaces in there. If it's not removed while pasting in,
@@ -39,8 +37,7 @@ func GenerateOTPCode(token string, when time.Time) string {
 
 	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return "", OTPError{Message: err.Error()}
 	}
 
 	buf := make([]byte, sumByteLength)
@@ -61,5 +58,5 @@ func GenerateOTPCode(token string, when time.Time) string {
 
 	format := fmt.Sprintf("%%0%dd", codeLength)
 
-	return fmt.Sprintf(format, modulo)
+	return fmt.Sprintf(format, modulo), nil
 }

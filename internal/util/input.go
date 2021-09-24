@@ -50,7 +50,7 @@ func AskPassword(length int, prompt string) []byte {
 	h := hash.Sum(nil)
 	text = fmt.Sprintf("%x", h)
 
-	copy(password, text[0:length]) //nolint:gocritic // intentional
+	copy(password, text[0:length])
 
 	return password
 }

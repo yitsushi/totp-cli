@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -33,11 +32,10 @@ type Storage struct {
 }
 
 // Decrypt tries to decrypt the storage.
-func (s *Storage) Decrypt() {
+func (s *Storage) Decrypt() error {
 	encryptedData, err := ioutil.ReadFile(s.File)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return StoargeError{Message: err.Error()}
 	}
 
 	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
@@ -46,22 +44,23 @@ func (s *Storage) Decrypt() {
 
 	block, err := aes.NewCipher(s.Password)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return StoargeError{Message: err.Error()}
 	}
 
 	if len(decodedData)%aes.BlockSize != 0 {
-		panic("ciphertext is not a multiple of the block size")
+		return StoargeError{
+			Message: "ciphertext is not a multiple of the block size",
+		}
 	}
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(decodedData, decodedData)
 
-	s.parse(decodedData)
+	return s.parse(decodedData)
 }
 
 // Save tries to encrypt and save the storage.
-func (s *Storage) Save() {
+func (s *Storage) Save() error {
 	jsonStruct := map[string]map[string]string{}
 
 	for _, namespace := range s.Namespaces {
@@ -73,8 +72,7 @@ func (s *Storage) Save() {
 
 	plaintext, err := json.Marshal(jsonStruct)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return StoargeError{Message: err.Error()}
 	}
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
@@ -90,8 +88,7 @@ func (s *Storage) Save() {
 
 	block, err := aes.NewCipher(s.Password)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return StoargeError{Message: err.Error()}
 	}
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
@@ -108,9 +105,10 @@ func (s *Storage) Save() {
 
 	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return StoargeError{Message: err.Error()}
 	}
+
+	return nil
 }
 
 // FindNamespace returns with a namespace
@@ -150,8 +148,11 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 }
 
 // PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
-func PrepareStorage() *Storage {
-	credentialFile, storage := initStorage()
+func PrepareStorage() (*Storage, error) {
+	credentialFile, storage, err := initStorage()
+	if err != nil {
+		return nil, err
+	}
 
 	if storage == nil {
 		password := util.AskPassword(passwordLengthLimit, "")
@@ -161,12 +162,12 @@ func PrepareStorage() *Storage {
 		}
 	}
 
-	storage.Decrypt()
+	err = storage.Decrypt()
 
-	return storage
+	return storage, err
 }
 
-func initStorage() (string, *Storage) {
+func initStorage() (string, *Storage, error) {
 	var credentialFile string
 
 	credentialFile = os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
@@ -174,33 +175,26 @@ func initStorage() (string, *Storage) {
 	if credentialFile == "" {
 		currentUser, err := user.Current()
 		if err != nil {
-			fmt.Printf("Error: %s", err.Error())
-			os.Exit(1)
+			return "", nil, StoargeError{Message: err.Error()}
 		}
 
 		homePath := currentUser.HomeDir
 		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
 
-		if _, err := os.Stat(documentDirectory); err != nil {
-			if os.IsNotExist(err) {
-				err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
-				if err != nil {
-					fmt.Printf("Error: %s", err.Error())
-					os.Exit(1)
-				}
-			} else {
-				if err != nil {
-					fmt.Printf("Error: %s", err.Error())
-					os.Exit(1)
-				}
-			}
+		_, err = os.Stat(documentDirectory)
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
+		}
+
+		if err != nil {
+			return "", nil, StoargeError{Message: err.Error()}
 		}
 
 		credentialFile = filepath.Join(documentDirectory, "credentials")
 	}
 
 	if _, err := os.Stat(credentialFile); err == nil {
-		return credentialFile, nil
+		return credentialFile, nil, nil
 	}
 
 	password := util.AskPassword(
@@ -212,12 +206,12 @@ func initStorage() (string, *Storage) {
 		Password: password,
 	}
 
-	storage.Save()
+	err := storage.Save()
 
-	return credentialFile, storage
+	return credentialFile, storage, err
 }
 
-func (s *Storage) parse(decodedData []byte) {
+func (s *Storage) parse(decodedData []byte) error {
 	var parsedData map[string]map[string]string
 
 	// remove junk
@@ -232,8 +226,9 @@ func (s *Storage) parse(decodedData []byte) {
 
 	err := json.Unmarshal(decodedData, &parsedData)
 	if err != nil {
-		fmt.Println("Something went wrong. Maybe this Password is not a valid one.")
-		os.Exit(1)
+		return StoargeError{
+			Message: "Something went wrong. Maybe this Password is not a valid one.",
+		}
 	}
 
 	namespaces := []*Namespace{}
@@ -251,4 +246,6 @@ func (s *Storage) parse(decodedData []byte) {
 	}
 
 	s.Namespaces = namespaces
+
+	return nil
 }

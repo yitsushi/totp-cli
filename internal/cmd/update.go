@@ -3,6 +3,7 @@ package cmd
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -35,23 +36,30 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 		return
 	}
 
-	var assetToDownload *grc.Asset
+	var (
+		assetToDownload grc.Asset
+		found           bool
+	)
 
 	for _, asset := range release.Assets {
 		if asset.Name == c.buildFilename(release.TagName) {
-			assetToDownload = &asset
+			assetToDownload = asset
+			found = true
 
 			break
 		}
 	}
 
-	if assetToDownload == nil {
+	if !found {
 		fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
 
 		return
 	}
 
-	c.downloadBinary(assetToDownload.BrowserDownloadURL)
+	downloadError := c.downloadBinary(assetToDownload.BrowserDownloadURL)
+	if downloadError != nil {
+		fmt.Printf("Error: %s\n", downloadError.Error())
+	}
 
 	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
 }
@@ -60,13 +68,19 @@ func (c *Update) buildFilename(version string) string {
 	return fmt.Sprintf("%s-%s-%s-%s.tar.gz", info.AppName, version, runtime.GOOS, runtime.GOARCH)
 }
 
-func (c *Update) downloadBinary(uri string) {
+func (c *Update) downloadBinary(uri string) error {
 	fmt.Println(" -> Download...")
 
-	response, err := http.Get(uri)
+	client := http.Client{}
+
+	request, err := http.NewRequestWithContext(context.Background(), "GET", uri, nil)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
+	}
+
+	response, err := client.Do(request)
+	if err != nil {
+		return DownloadError{Message: err.Error()}
 	}
 
 	defer response.Body.Close()
@@ -80,8 +94,7 @@ func (c *Update) downloadBinary(uri string) {
 
 	_, err = tarReader.Next()
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
 	}
 
 	currentExecutable, _ := osext.Executable()
@@ -89,29 +102,27 @@ func (c *Update) downloadBinary(uri string) {
 
 	file, err := ioutil.TempFile(originalPath, info.AppName)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
 	}
 
 	defer file.Close()
 
-	_, err = io.Copy(file, tarReader)
+	_, err = io.Copy(file, tarReader) //nolint:gosec // I don't have better option right now.
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
 	}
 
 	err = file.Chmod(binaryChmodValue)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
 	}
 
 	err = os.Rename(file.Name(), currentExecutable)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-		os.Exit(1)
+		return DownloadError{Message: err.Error()}
 	}
+
+	return nil
 }
 
 // NewUpdate creates a new Update command.

@@ -21,7 +21,13 @@ func (c *Instant) Execute(opts *commander.CommandHelper) {
 		token = util.Read()
 	}
 
-	fmt.Println(security.GenerateOTPCode(token, time.Now()))
+	code, err := security.GenerateOTPCode(token, time.Now())
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Println(code)
 }
 
 // NewInstant creates a new Instant command.

@@ -10,11 +10,11 @@ func registerCommands(registry *commander.CommandRegistry) {
 	registry.Register(cmd.NewAddToken)
 	registry.Register(cmd.NewChangePassword)
 	registry.Register(cmd.NewDelete)
+	registry.Register(cmd.NewDump)
+	registry.Register(cmd.NewGenerate)
 	registry.Register(cmd.NewInstant)
 	registry.Register(cmd.NewList)
-	registry.Register(cmd.NewDump)
 	registry.Register(cmd.NewUpdate)
-	registry.Register(cmd.NewGenerate)
 	registry.Register(cmd.NewVersion)
 }
 
