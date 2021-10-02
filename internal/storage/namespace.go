@@ -1,7 +1,5 @@
 package storage
 
-import "errors"
-
 // Namespace represents a Namespace "category".
 type Namespace struct {
 	Name     string
@@ -16,8 +14,9 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 			return
 		}
 	}
+
 	account = &Account{}
-	err = errors.New("Account not found")
+	err = NotFoundError{Type: "account", Name: name}
 
 	return
 }
@@ -25,9 +24,11 @@ func (n *Namespace) FindAccount(name string) (account *Account, err error) {
 // DeleteAccount removes a specific Account from the Namespace.
 func (n *Namespace) DeleteAccount(account *Account) {
 	position := -1
+
 	for i, item := range n.Accounts {
 		if item == account {
 			position = i
+
 			break
 		}
 	}

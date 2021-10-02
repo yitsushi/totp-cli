@@ -1,16 +1,17 @@
-package command
+package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // AddToken structure is the representation of the add-token command.
-type AddToken struct {
-}
+type AddToken struct{}
 
 // Execute is the main function. It will be called on add-token command.
 func (c *AddToken) Execute(opts *commander.CommandHelper) {
@@ -22,7 +23,11 @@ func (c *AddToken) Execute(opts *commander.CommandHelper) {
 
 	nsName, accName, token := c.askForAddTokenDetails(opts)
 
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	namespace, err = storage.FindNamespace(nsName)
 	if err != nil {
@@ -39,7 +44,11 @@ func (c *AddToken) Execute(opts *commander.CommandHelper) {
 
 	namespace.Accounts = append(namespace.Accounts, account)
 
-	storage.Save()
+	err = storage.Save()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 }
 
 // ArgumentDescription descripts the required and potential arguments.

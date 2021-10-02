@@ -7,18 +7,23 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
 
-	"github.com/yitsushi/totp-cli/util"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
-// Storage structure represents the credential storage
+const (
+	dataLengthHead              = 13
+	passwordLengthLimit         = 32
+	storageDirectoryPermissions = 0o700
+	storageFilePermissions      = 0o600
+)
+
+// Storage structure represents the credential storage.
 type Storage struct {
 	File     string
 	Password []byte
@@ -26,30 +31,36 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
-// Decrypt tries to decrypt the storage
-func (s *Storage) Decrypt() {
+// Decrypt tries to decrypt the storage.
+func (s *Storage) Decrypt() error {
 	encryptedData, err := ioutil.ReadFile(s.File)
-	util.Check(err)
-	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
+	if err != nil {
+		return StoargeError{Message: err.Error()}
+	}
 
+	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
 	block, err := aes.NewCipher(s.Password)
-	util.Check(err)
+	if err != nil {
+		return StoargeError{Message: err.Error()}
+	}
 
 	if len(decodedData)%aes.BlockSize != 0 {
-		panic("ciphertext is not a multiple of the block size")
+		return StoargeError{
+			Message: "ciphertext is not a multiple of the block size",
+		}
 	}
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(decodedData, decodedData)
 
-	s.parse(decodedData)
+	return s.parse(decodedData)
 }
 
-// Save tries to encrypt and save the storage
-func (s *Storage) Save() {
+// Save tries to encrypt and save the storage.
+func (s *Storage) Save() error {
 	jsonStruct := map[string]map[string]string{}
 
 	for _, namespace := range s.Namespaces {
@@ -60,11 +71,15 @@ func (s *Storage) Save() {
 	}
 
 	plaintext, err := json.Marshal(jsonStruct)
-	util.Check(err)
+	if err != nil {
+		return StoargeError{Message: err.Error()}
+	}
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
-	padded := make([]byte, len(plaintext)+missing, len(plaintext)+missing)
-	copy(padded[:], plaintext)
+	padded := make([]byte, len(plaintext)+missing)
+
+	copy(padded, plaintext)
+
 	plaintext = padded
 
 	if len(plaintext)%aes.BlockSize != 0 {
@@ -72,12 +87,15 @@ func (s *Storage) Save() {
 	}
 
 	block, err := aes.NewCipher(s.Password)
-	util.Check(err)
+	if err != nil {
+		return StoargeError{Message: err.Error()}
+	}
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+
 	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
+	if _, readErr := io.ReadFull(rand.Reader, iv); err != nil {
+		panic(readErr)
 	}
 
 	mode := cipher.NewCBCEncrypter(block, iv)
@@ -85,30 +103,37 @@ func (s *Storage) Save() {
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
-	err = ioutil.WriteFile(s.File, []byte(encodedContent), 0644)
-	util.Check(err)
+	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
+	if err != nil {
+		return StoargeError{Message: err.Error()}
+	}
+
+	return nil
 }
 
 // FindNamespace returns with a namespace
-// if the namespace does not exist error is not nil
+// if the namespace does not exist error is not nil.
 func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
 	for _, namespace = range s.Namespaces {
 		if namespace.Name == name {
 			return
 		}
 	}
+
 	namespace = &Namespace{}
-	err = errors.New("Namespace not found")
+	err = NotFoundError{Type: "namespace", Name: name}
 
 	return
 }
 
-// DeleteNamespace removes a specific namespace from the Storage
+// DeleteNamespace removes a specific namespace from the Storage.
 func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	position := -1
+
 	for i, item := range s.Namespaces {
 		if item == namespace {
 			position = i
+
 			break
 		}
 	}
@@ -122,73 +147,77 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
 }
 
-var storage *Storage
-
 // PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
-func PrepareStorage() *Storage {
-	credentialFile := initStorage()
-
-	if storage != nil {
-		return storage
+func PrepareStorage() (*Storage, error) {
+	credentialFile, storage, err := initStorage()
+	if err != nil {
+		return nil, err
 	}
 
-	password := util.AskPassword(32, "")
-
-	storage = &Storage{
-		File:     credentialFile,
-		Password: password,
+	if storage == nil {
+		password := util.AskPassword(passwordLengthLimit, "")
+		storage = &Storage{
+			File:     credentialFile,
+			Password: password,
+		}
 	}
 
-	storage.Decrypt()
+	err = storage.Decrypt()
 
-	return storage
+	return storage, err
 }
 
-func initStorage() string {
+func initStorage() (string, *Storage, error) {
 	var credentialFile string
 
 	credentialFile = os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
 
 	if credentialFile == "" {
 		currentUser, err := user.Current()
-		util.Check(err)
+		if err != nil {
+			return "", nil, StoargeError{Message: err.Error()}
+		}
+
 		homePath := currentUser.HomeDir
 		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
 
-		if _, err := os.Stat(documentDirectory); err != nil {
-			if os.IsNotExist(err) {
-				err = os.MkdirAll(documentDirectory, 0700)
-				util.Check(err)
-			} else {
-				util.Check(err)
-			}
+		_, err = os.Stat(documentDirectory)
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
+		}
+
+		if err != nil {
+			return "", nil, StoargeError{Message: err.Error()}
 		}
 
 		credentialFile = filepath.Join(documentDirectory, "credentials")
 	}
 
 	if _, err := os.Stat(credentialFile); err == nil {
-		return credentialFile
+		return credentialFile, nil, nil
 	}
 
-	password := util.AskPassword(32, "Your Password (do not forget it)")
-	storage = &Storage{
+	password := util.AskPassword(
+		passwordLengthLimit,
+		"Your Password (do not forget it)",
+	)
+	storage := &Storage{
 		File:     credentialFile,
 		Password: password,
 	}
 
-	storage.Save()
+	err := storage.Save()
 
-	return credentialFile
+	return credentialFile, storage, err
 }
 
-func (s *Storage) parse(decodedData []byte) {
+func (s *Storage) parse(decodedData []byte) error {
 	var parsedData map[string]map[string]string
 
 	// remove junk
 	originalDataLength := bytes.IndexByte(decodedData, 0)
 	if originalDataLength == 0 {
-		originalDataLength = bytes.IndexByte(decodedData, 13)
+		originalDataLength = bytes.IndexByte(decodedData, dataLengthHead)
 	}
 
 	if originalDataLength > 0 && originalDataLength < len(decodedData) {
@@ -197,21 +226,26 @@ func (s *Storage) parse(decodedData []byte) {
 
 	err := json.Unmarshal(decodedData, &parsedData)
 	if err != nil {
-		fmt.Println("Something went wrong. Maybe this Password is not a valid one.")
-		os.Exit(1)
+		return StoargeError{
+			Message: "Something went wrong. Maybe this Password is not a valid one.",
+		}
 	}
 
-	var namespaces []*Namespace
+	namespaces := []*Namespace{}
 
 	for namespaceName, value := range parsedData {
 		var accounts []*Account
+
 		for accountName, secretKey := range value {
 			account := &Account{Name: accountName, Token: secretKey}
 			accounts = append(accounts, account)
 		}
+
 		namespace := &Namespace{Name: namespaceName, Accounts: accounts}
 		namespaces = append(namespaces, namespace)
 	}
 
 	s.Namespaces = namespaces
+
+	return nil
 }

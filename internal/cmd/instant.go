@@ -1,4 +1,4 @@
-package command
+package cmd
 
 import (
 	"fmt"
@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/yitsushi/go-commander"
-	"github.com/yitsushi/totp-cli/security"
-	"github.com/yitsushi/totp-cli/util"
+
+	"github.com/yitsushi/totp-cli/internal/security"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 // Instant structure is the representation of the instant command.
-type Instant struct {
-}
+type Instant struct{}
 
 // Execute is the main function. It will be called on instant command.
 func (c *Instant) Execute(opts *commander.CommandHelper) {
@@ -21,7 +21,13 @@ func (c *Instant) Execute(opts *commander.CommandHelper) {
 		token = util.Read()
 	}
 
-	fmt.Println(security.GenerateOTPCode(token, time.Now()))
+	code, err := security.GenerateOTPCode(token, time.Now())
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Println(code)
 }
 
 // NewInstant creates a new Instant command.

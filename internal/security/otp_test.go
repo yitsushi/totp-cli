@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yitsushi/totp-cli/security"
+
+	"github.com/yitsushi/totp-cli/internal/security"
 )
 
 func TestTOTP(t *testing.T) {
@@ -22,12 +23,13 @@ func TestTOTP(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }
 
-// nolint:dupl
 func TestSpaceSeparatedToken(t *testing.T) {
 	input := "37kh vdxt c5hj ttfp ujok cipy jy"
 	table := map[time.Time]string{
@@ -41,12 +43,13 @@ func TestSpaceSeparatedToken(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }
 
-// nolint:dupl
 func TestNonPaddedHashes(t *testing.T) {
 	input := "a6mryljlbufszudtjdt42nh5by"
 	table := map[time.Time]string{
@@ -60,7 +63,9 @@ func TestNonPaddedHashes(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code := security.GenerateOTPCode(input, when)
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }

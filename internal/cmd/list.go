@@ -1,20 +1,24 @@
-package command
+package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
 // List structure is the representation of the list command.
-type List struct {
-}
+type List struct{}
 
 // Execute is the main function. It will be called on list command.
 func (c *List) Execute(opts *commander.CommandHelper) {
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	ns := opts.Arg(0)
 	if len(ns) < 1 {
@@ -26,7 +30,10 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 	}
 
 	namespace, err := storage.FindNamespace(ns)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		os.Exit(1)
+	}
 
 	for _, account := range namespace.Accounts {
 		fmt.Printf("%s.%s\n", namespace.Name, account.Name)

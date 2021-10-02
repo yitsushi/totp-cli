@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	s "github.com/yitsushi/totp-cli/storage"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
 func TestFindNamespace(t *testing.T) {
@@ -33,13 +34,20 @@ func TestFindNamespace_NotFound(t *testing.T) {
 
 	namespace, err := storage.FindNamespace("NamespaceNotFound")
 
-	assert.EqualError(t, err, "Namespace not found", "Error should be 'Namespace not found'")
+	assert.EqualError(
+		t,
+		err,
+		"namespace not found: NamespaceNotFound",
+		"Error should be 'namespace not found: NamespaceNotFound'",
+	)
 	assert.Equal(t, namespace, &s.Namespace{}, "Namespace should be nil")
 }
 
 func TestDeleteNamespace(t *testing.T) {
-	var namespace *s.Namespace
-	var err error
+	var (
+		namespace *s.Namespace
+		err       error
+	)
 
 	storage := &s.Storage{
 		Namespaces: []*s.Namespace{
@@ -56,7 +64,11 @@ func TestDeleteNamespace(t *testing.T) {
 	storage.DeleteNamespace(namespace)
 	assert.Equal(t, len(storage.Namespaces), 2)
 	namespace, err = storage.FindNamespace("Namespace1")
-	assert.EqualError(t, err, "Namespace not found", "Error should be 'Namespace not found'")
+	assert.EqualError(
+		t,
+		err,
+		"namespace not found: Namespace1",
+		"Error should be 'namespace not found: Namespace1'")
 	// Delete again :D
 	storage.DeleteNamespace(namespace)
 	assert.Equal(t, len(storage.Namespaces), 2)

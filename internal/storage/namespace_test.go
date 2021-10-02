@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yitsushi/totp-cli/storage"
+
+	"github.com/yitsushi/totp-cli/internal/storage"
 )
 
 func TestFindAccount(t *testing.T) {
@@ -35,13 +36,20 @@ func TestFindAccount_NotFound(t *testing.T) {
 
 	account, err := namespace.FindAccount("AccountNotFound")
 
-	assert.EqualError(t, err, "Account not found", "Error should be 'Account not found'")
+	assert.EqualError(
+		t,
+		err,
+		"account not found: AccountNotFound",
+		"Error should be 'account not found: AccountNotFound'",
+	)
 	assert.Equal(t, account, &storage.Account{}, "Account should be nil")
 }
 
 func TestDeleteAccount(t *testing.T) {
-	var account *storage.Account
-	var err error
+	var (
+		account *storage.Account
+		err     error
+	)
 
 	namespace := &storage.Namespace{
 		Name: "mynamespace",
@@ -59,7 +67,12 @@ func TestDeleteAccount(t *testing.T) {
 	namespace.DeleteAccount(account)
 	assert.Equal(t, len(namespace.Accounts), 2)
 	account, err = namespace.FindAccount("Account1")
-	assert.EqualError(t, err, "Account not found", "Error should be 'Account not found'")
+	assert.EqualError(
+		t,
+		err,
+		"account not found: Account1",
+		"Error should be 'account not found: Account1'",
+	)
 	// Delete again :D
 	namespace.DeleteAccount(account)
 	assert.Equal(t, len(namespace.Accounts), 2)

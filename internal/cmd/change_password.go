@@ -1,9 +1,13 @@
-package command
+package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/yitsushi/go-commander"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/util"
 )
 
 const (
@@ -11,21 +15,31 @@ const (
 )
 
 // ChangePassword structure is the representation of the change-password command.
-type ChangePassword struct {
-}
+type ChangePassword struct{}
 
 // Execute is the main function. It will be called on change-password command.
 func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+
 	newPassword := util.AskPassword(askPasswordLength, "New Password")
 	newPasswordConfirm := util.AskPassword(askPasswordLength, "Again")
 
 	if !util.CheckPasswordConfirm(newPassword, newPasswordConfirm) {
-		panic("New Password and the confirm mismatch!")
+		fmt.Println("New Password and the confirm mismatch!")
+		os.Exit(1)
 	}
 
 	storage.Password = newPassword
-	storage.Save()
+
+	err = storage.Save()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 }
 
 // NewChangePassword create a new ChangePassword command.

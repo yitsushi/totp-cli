@@ -1,18 +1,18 @@
-package command
+package cmd
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/yitsushi/go-commander"
-	"github.com/yitsushi/totp-cli/security"
-	s "github.com/yitsushi/totp-cli/storage"
-	"github.com/yitsushi/totp-cli/util"
+
+	"github.com/yitsushi/totp-cli/internal/security"
+	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
 // Generate structure is the representation of the generate command.
-type Generate struct {
-}
+type Generate struct{}
 
 // Execute is the main function. It will be called on generate command.
 func (c *Generate) Execute(opts *commander.CommandHelper) {
@@ -26,15 +26,30 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		panic("Account is not defined")
 	}
 
-	storage := s.PrepareStorage()
+	storage, err := s.PrepareStorage()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	namespace, err := storage.FindNamespace(namespaceName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	account, err := namespace.FindAccount(accountName)
-	util.Check(err)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
 
-	fmt.Println(security.GenerateOTPCode(account.Token, time.Now()))
+	code, err := security.GenerateOTPCode(account.Token, time.Now())
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
+
+	fmt.Println(code)
 }
 
 // NewGenerate creates a new Generate command.
