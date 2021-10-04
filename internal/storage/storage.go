@@ -25,8 +25,8 @@ const (
 
 // Storage structure represents the credential storage.
 type Storage struct {
-	File     string
-	Password []byte
+	File     string `json:"-"`
+	Password []byte `json:"-"`
 
 	Namespaces []*Namespace
 }
