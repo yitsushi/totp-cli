@@ -10,7 +10,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/security"
 )
 
-func TestTOTP(t *testing.T) {
+func TestGenerateOTPCode(t *testing.T) {
 	input := base32.StdEncoding.EncodeToString([]byte("82394783472398472348"))
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "007459",
@@ -30,7 +30,7 @@ func TestTOTP(t *testing.T) {
 	}
 }
 
-func TestSpaceSeparatedToken(t *testing.T) {
+func TestGenerateOTPCode_SpaceSeparatedToken(t *testing.T) {
 	input := "37kh vdxt c5hj ttfp ujok cipy jy"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "066634",
@@ -50,7 +50,7 @@ func TestSpaceSeparatedToken(t *testing.T) {
 	}
 }
 
-func TestNonPaddedHashes(t *testing.T) {
+func TestGenerateOTPCode_NonPaddedHashes(t *testing.T) {
 	input := "a6mryljlbufszudtjdt42nh5by"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "866149",
@@ -66,6 +66,21 @@ func TestNonPaddedHashes(t *testing.T) {
 		code, err := security.GenerateOTPCode(input, when)
 
 		assert.NoError(t, err)
+		assert.Equal(t, expected, code, when.String())
+	}
+}
+
+func TestGenerateOTPCode_InvaidPadding(t *testing.T) {
+	input := "a6mr*&^&*%*&ylj|'[lbufszudtjdt42nh5by"
+	table := map[time.Time]string{
+		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):   "",
+		time.Date(2005, 3, 18, 1, 58, 29, 0, time.UTC): "",
+	}
+
+	for when, expected := range table {
+		code, err := security.GenerateOTPCode(input, when)
+
+		assert.Error(t, err)
 		assert.Equal(t, expected, code, when.String())
 	}
 }
