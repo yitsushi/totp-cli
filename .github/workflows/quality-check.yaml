@@ -1,4 +1,4 @@
-name: Pull Request Check
+name: Quality Check
 
 on:
   push:

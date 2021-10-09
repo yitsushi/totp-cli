@@ -1,5 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/yitsushi/totp-cli)](https://goreportcard.com/report/github.com/yitsushi/totp-cli)
-[![Actions Status](https://github.com/yitsushi/totp-cli/actions/workflows/pr-checker.yaml/badge.svg)](https://github.com/yitsushi/totp-cli/actions/workflows/pr-checker.yaml)
+[![Actions Status](https://github.com/yitsushi/totp-cli/actions/workflows/quality-check.yaml/badge.svg)](https://github.com/yitsushi/totp-cli/actions/workflows/quality-check.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/yitsushi/totp-cli/badge.svg?branch=main)](https://coveralls.io/github/yitsushi/totp-cli?branch=main)
 
 This is a simple TOTP _(Time-based One-time Password)_ CLI tool.
