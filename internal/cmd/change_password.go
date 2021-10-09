@@ -11,10 +11,6 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-const (
-	askPasswordLength = 32
-)
-
 // ChangePassword structure is the representation of the change-password command.
 type ChangePassword struct{}
 

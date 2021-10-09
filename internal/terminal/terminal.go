@@ -73,7 +73,7 @@ func (t Terminal) Hidden(prompt string) (string, error) {
 	in, inIsFile := t.Input.(*os.File)
 
 	if inIsFile && terminal.IsTerminal(int(in.Fd())) {
-		lineBytes := []byte{}
+		var lineBytes []byte
 
 		lineBytes, err = terminal.ReadPassword(int(in.Fd()))
 		text = string(lineBytes)

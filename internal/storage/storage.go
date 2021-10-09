@@ -19,7 +19,6 @@ import (
 
 const (
 	dataLengthHead              = 13
-	passwordLengthLimit         = 32
 	storageDirectoryPermissions = 0o700
 	storageFilePermissions      = 0o600
 )
@@ -36,7 +35,7 @@ type Storage struct {
 func (s *Storage) Decrypt() error {
 	encryptedData, err := ioutil.ReadFile(s.File)
 	if err != nil {
-		return StorageError{Message: err.Error()}
+		return BackendError{Message: err.Error()}
 	}
 
 	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
@@ -45,11 +44,11 @@ func (s *Storage) Decrypt() error {
 
 	block, err := aes.NewCipher(s.Password)
 	if err != nil {
-		return StorageError{Message: err.Error()}
+		return BackendError{Message: err.Error()}
 	}
 
 	if len(decodedData)%aes.BlockSize != 0 {
-		return StorageError{
+		return BackendError{
 			Message: "ciphertext is not a multiple of the block size",
 		}
 	}
@@ -73,7 +72,7 @@ func (s *Storage) Save() error {
 
 	plaintext, err := json.Marshal(jsonStruct)
 	if err != nil {
-		return StorageError{Message: err.Error()}
+		return BackendError{Message: err.Error()}
 	}
 
 	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
@@ -89,7 +88,7 @@ func (s *Storage) Save() error {
 
 	block, err := aes.NewCipher(s.Password)
 	if err != nil {
-		return StorageError{Message: err.Error()}
+		return BackendError{Message: err.Error()}
 	}
 
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
@@ -106,7 +105,7 @@ func (s *Storage) Save() error {
 
 	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
 	if err != nil {
-		return StorageError{Message: err.Error()}
+		return BackendError{Message: err.Error()}
 	}
 
 	return nil
@@ -158,9 +157,9 @@ func PrepareStorage() (*Storage, error) {
 	if storage == nil {
 		term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-		password, err := term.Hidden("Password:")
-		if err != nil {
-			return nil, StorageError{Message: err.Error()}
+		password, termErr := term.Hidden("Password:")
+		if termErr != nil {
+			return nil, BackendError{Message: err.Error()}
 		}
 
 		storage = &Storage{
@@ -182,7 +181,7 @@ func initStorage() (string, *Storage, error) {
 	if credentialFile == "" {
 		currentUser, err := user.Current()
 		if err != nil {
-			return "", nil, StorageError{Message: err.Error()}
+			return "", nil, BackendError{Message: err.Error()}
 		}
 
 		homePath := currentUser.HomeDir
@@ -194,7 +193,7 @@ func initStorage() (string, *Storage, error) {
 		}
 
 		if err != nil {
-			return "", nil, StorageError{Message: err.Error()}
+			return "", nil, BackendError{Message: err.Error()}
 		}
 
 		credentialFile = filepath.Join(documentDirectory, "credentials")
@@ -208,7 +207,7 @@ func initStorage() (string, *Storage, error) {
 
 	password, err := term.Hidden("Your Password (do not forget it):")
 	if err != nil {
-		return "", nil, StorageError{Message: err.Error()}
+		return "", nil, BackendError{Message: err.Error()}
 	}
 
 	storage := &Storage{
@@ -236,7 +235,7 @@ func (s *Storage) parse(decodedData []byte) error {
 
 	err := json.Unmarshal(decodedData, &parsedData)
 	if err != nil {
-		return StorageError{
+		return BackendError{
 			Message: "Something went wrong. Maybe this Password is not a valid one.",
 		}
 	}
