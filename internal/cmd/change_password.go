@@ -6,12 +6,9 @@ import (
 
 	"github.com/yitsushi/go-commander"
 
+	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
-	"github.com/yitsushi/totp-cli/internal/util"
-)
-
-const (
-	askPasswordLength = 32
+	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 // ChangePassword structure is the representation of the change-password command.
@@ -25,10 +22,24 @@ func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
 		os.Exit(1)
 	}
 
-	newPassword := util.AskPassword(askPasswordLength, "New Password")
-	newPasswordConfirm := util.AskPassword(askPasswordLength, "Again")
+	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-	if !util.CheckPasswordConfirm(newPassword, newPasswordConfirm) {
+	newPasswordIn, err := term.Hidden("New Password:")
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	newPasswordConfirmIn, err := term.Hidden("Again:")
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	newPassword := security.UnsecureSHA1(newPasswordIn)
+	newPasswordConfirm := security.UnsecureSHA1(newPasswordConfirmIn)
+
+	if !CheckPasswordConfirm(newPassword, newPasswordConfirm) {
 		fmt.Println("New Password and the confirm mismatch!")
 		os.Exit(1)
 	}

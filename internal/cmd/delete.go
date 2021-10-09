@@ -7,7 +7,7 @@ import (
 	"github.com/yitsushi/go-commander"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
-	"github.com/yitsushi/totp-cli/internal/util"
+	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 // Delete structure is the representation of the delete command.
@@ -47,6 +47,8 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 		return
 	}
 
+	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+
 	if accountName != "" {
 		account, err := namespace.FindAccount(accountName)
 		if err != nil {
@@ -55,7 +57,7 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 
 		fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
 
-		if util.Confirm("Are you sure?") {
+		if term.Confirm("Are you sure?") {
 			namespace.DeleteAccount(account)
 
 			return
@@ -66,7 +68,7 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 			fmt.Printf(" - %s.%s\n", namespace.Name, account.Name)
 		}
 
-		if util.Confirm("Are you sure?") {
+		if term.Confirm("Are you sure?") {
 			storage.DeleteNamespace(namespace)
 
 			return
