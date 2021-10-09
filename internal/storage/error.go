@@ -12,12 +12,12 @@ func (e NotFoundError) Error() string {
 	return fmt.Sprintf("%s not found: %s", e.Type, e.Name)
 }
 
-// StoargeError is an error to tell the user something went wrong processing
+// StorageError is an error to tell the user something went wrong processing
 // the backend storage.
-type StoargeError struct {
+type StorageError struct {
 	Message string
 }
 
-func (e StoargeError) Error() string {
+func (e StorageError) Error() string {
 	return fmt.Sprintf("storage error: %s", e.Message)
 }

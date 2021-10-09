@@ -7,7 +7,7 @@ import (
 	"github.com/yitsushi/go-commander"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
-	"github.com/yitsushi/totp-cli/internal/util"
+	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 // AddToken structure is the representation of the add-token command.
@@ -95,18 +95,20 @@ func NewAddToken(appName string) *commander.CommandWrapper {
 // Private functions
 
 func (c *AddToken) askForAddTokenDetails(opts *commander.CommandHelper) (namespace, account, token string) {
+	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+
 	namespace = opts.Arg(0)
 	for len(namespace) < 1 {
-		namespace = util.Ask("Namespace")
+		namespace, _ = term.Read("Namespace:")
 	}
 
 	account = opts.Arg(1)
 	for len(account) < 1 {
-		account = util.Ask("Account")
+		account, _ = term.Read("Account:")
 	}
 
 	for len(token) < 1 {
-		token = util.Ask("Token")
+		token, _ = term.Read("Token:")
 	}
 
 	return
