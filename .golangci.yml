@@ -1,23 +1,35 @@
 run:
   timeout: 5m
   issues-exit-code: 1
-  tests: true
-  modules-download-mode: readonly
+  tests: false
+  allow-parallel-runners: true
 
 linters-settings:
+  gci:
+    local-prefixes: github.com/yitsushi/totp-cli
   goimports:
     local-prefixes: github.com/yitsushi/totp-cli
-  golint:
-    min-confidence: 0
+  staticcheck:
+    go: "1.18"
+  stylecheck:
+    go: "1.18"
   govet:
     check-shadowing: true
   misspell:
     locale: US
+  cyclop:
+    max-complexity: 15
+    skip-tests: true
   nolintlint:
     allow-leading-space: false
     allow-unused: false
     require-explanation: true
     require-specific: false
+  varnamelen:
+    ignore-names:
+      - ns
+      - err
+      - iv
 
 issues:
   exclude-rules:
@@ -31,67 +43,15 @@ issues:
     - funlen
     - scopelint
     - testpackage
+    - varnamelen
   - path: commands/
     linters:
     - exhaustivestruct
 
 linters:
-  disable-all: true
-  enable:
-    - deadcode
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - structcheck
-    - typecheck
-    - unused
-    - varcheck
-    - bodyclose
-    - depguard
-    - dogsled
-    - dupl
-    - exhaustive
-    - exportloopref
-    - funlen
-    - gci
-    - gochecknoglobals
-    - gochecknoinits
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - godox
-    - goerr113
-    - gofmt
-    - gofumpt
-    - goheader
-    - goimports
-    # - golint # replaced with revive
-    - revive
-    - gomnd
-    - gomodguard
-    - goprintffuncname
-    - gosec
-    # - interfacer  # deprecated
-    - lll
-    # - maligned # Replaced by govet 'fieldalignment'.
-    - misspell
-    - nakedret
-    - nestif
-    - nlreturn
-    - noctx
-    - nolintlint
-    - prealloc
-    - rowserrcheck
-    # - scopelint # replaced with exportloopref
-    - exportloopref
-    - sqlclosecheck
-    - stylecheck
-    - testpackage
-    - unconvert
-    - unparam
-    - whitespace
-    - wsl
+  enable-all: true
+  disable:
+    - paralleltest
+    - wrapcheck
+    - exhaustivestruct
+    - forbidigo

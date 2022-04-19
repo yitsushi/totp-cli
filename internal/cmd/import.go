@@ -8,7 +8,6 @@ import (
 	"github.com/yitsushi/go-commander"
 	"gopkg.in/yaml.v3"
 
-	"github.com/yitsushi/totp-cli/internal/storage"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
@@ -26,7 +25,7 @@ func (c *Import) Execute(opts *commander.CommandHelper) {
 	if err != nil {
 	}
 
-	nsList := []*storage.Namespace{}
+	nsList := []*s.Namespace{}
 
 	err = yaml.Unmarshal(file, &nsList)
 	if err != nil {
