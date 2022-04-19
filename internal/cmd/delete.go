@@ -22,8 +22,6 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 		panic("Wrong number of arguments")
 	}
 
-	accountName := opts.Arg(1)
-
 	storage, err := s.PrepareStorage()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -49,7 +47,7 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-	if accountName != "" {
+	if accountName := opts.Arg(1); accountName != "" {
 		account, err := namespace.FindAccount(accountName)
 		if err != nil {
 			return

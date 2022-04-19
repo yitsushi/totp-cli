@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/yitsushi/go-commander"
+	"gopkg.in/yaml.v3"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
@@ -21,7 +21,7 @@ func (c *Dump) Execute(opts *commander.CommandHelper) {
 		os.Exit(1)
 	}
 
-	out, _ := json.Marshal(storage)
+	out, _ := yaml.Marshal(storage.Namespaces)
 
 	fmt.Printf("%s\n", out)
 }
@@ -33,7 +33,6 @@ func NewDump(appName string) *commander.CommandWrapper {
 		Help: &commander.CommandDescriptor{
 			Name:             "dump",
 			ShortDescription: "Dump all available namespaces or accounts under a namespace",
-			Arguments:        "[namespace]",
 			Examples: []string{
 				"",
 			},
