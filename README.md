@@ -30,15 +30,17 @@ $ totp-cli update
 ```
 $ totp-cli help
 
-version                           Print current version of this application
+
 add-token [namespace] [account]   Add new token
-delete <namespace> [account]      Delete an account or a whole namespace
+change-password                   Change password
+generate <namespace> <account>    Generate a specific OTP
+import <input-file>               Import tokens from a yaml file.
 instant                           Generate an OTP from TOTP_TOKEN or stdin without the Storage backend
+version                           Print current version of this application
+delete <namespace> [account]      Delete an account or a whole namespace
+dump                              Dump all available namespaces or accounts under a namespace
 list [namespace]                  List all available namespaces or accounts under a namespace
 update                            Check and update totp-cli itself
-change-password                   Change password
-dump [namespace]                  Dump all available namespaces or accounts under a namespace
-generate <namespace> <account>    Generate a specific OTP
 help [command]                    Display this help or a command specific help
 ```
 
@@ -123,6 +125,32 @@ Note: It's a filename not just a directory.
 
 Note: It does not traverse through the given path,
       parent directory has to be there already.
+
+### Import
+
+You can import tokens from a YAML file. The syntax is the same as the output of
+the `dump` command.
+
+```yaml
+- name: ns1
+  accounts:
+    - name: acc1
+      token: updatedtoken
+    - name: acc2
+      token: mytoken
+    - name: acc3
+      token: tokenish
+- name: ns2
+  accounts:
+    - name: acc1
+      token: token
+```
+
+If a token already exists, it will ask you if you want to overwrite it or not.
+
+```
+$ tot-cli import list.yaml
+```
 
 ### Zsh Completion
 

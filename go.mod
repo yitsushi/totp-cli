@@ -8,5 +8,5 @@ require (
 	github.com/yitsushi/github-release-check v1.0.1
 	github.com/yitsushi/go-commander v1.1.0
 	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
-	gopkg.in/yaml.v2 v2.2.2 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
