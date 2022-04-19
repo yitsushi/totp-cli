@@ -1,6 +1,8 @@
 on:
   release:
     types: [created, published]
+  workflow_dispatch:
+
 name: Release
 jobs:
   linux:
@@ -9,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: release linux/amd64
-      uses: wangyoucao577/go-release-action@v1.17
+      uses: wangyoucao577/go-release-action@v1.18
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
@@ -21,7 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: release windows/amd64
-      uses: wangyoucao577/go-release-action@v1.17
+      uses: wangyoucao577/go-release-action@v1.18
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
@@ -32,7 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: release darwin/amd64
-      uses: wangyoucao577/go-release-action@v1.17
+      uses: wangyoucao577/go-release-action@v1.18
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOARCH: amd64
