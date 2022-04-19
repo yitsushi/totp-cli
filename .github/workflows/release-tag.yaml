@@ -1,0 +1,31 @@
+name: release tag
+
+on:
+  push:
+    tags:
+    - "v*.*.*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Generate release notes
+        run: |
+          release_notes=$(gh api repos/{owner}/{repo}/releases/generate-notes -F tag_name=${{ github.ref }} --jq .body)
+          echo 'RELEASE_NOTES<<EOF' >> $GITHUB_ENV
+          echo "${release_notes}" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: false
+          draft: true
+          body: ${{ env.RELEASE_NOTES }}
