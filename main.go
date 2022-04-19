@@ -15,6 +15,7 @@ func registerCommands(registry *commander.CommandRegistry) {
 	registry.Register(cmd.NewImport)
 	registry.Register(cmd.NewInstant)
 	registry.Register(cmd.NewList)
+	registry.Register(cmd.NewSetPrefix)
 	registry.Register(cmd.NewUpdate)
 	registry.Register(cmd.NewVersion)
 }
