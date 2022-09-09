@@ -13,7 +13,7 @@ Download the latest version of the application
 from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest) or using the `go` tool:
 
 ```shell
-go install https://github.com/yitsushi/totp-cli@latest
+go install github.com/yitsushi/totp-cli@latest
 ```
 
 Users on macOS can also install the package using [MacPorts](https://ports.macports.org/port/totp-cli/summary):
