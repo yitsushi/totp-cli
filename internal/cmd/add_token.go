@@ -94,22 +94,20 @@ func NewAddToken(appName string) *commander.CommandWrapper {
 
 // Private functions
 
-func (c *AddToken) askForAddTokenDetails(opts *commander.CommandHelper) (namespace, account, token string) {
+func (c *AddToken) askForAddTokenDetails(opts *commander.CommandHelper) (string, string, string) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-	namespace = opts.Arg(0)
+	namespace := opts.Arg(0)
 	for len(namespace) < 1 {
 		namespace, _ = term.Read("Namespace:")
 	}
 
-	account = opts.Arg(1)
+	account := opts.Arg(1)
 	for len(account) < 1 {
 		account, _ = term.Read("Account:")
 	}
 
-	for len(token) < 1 {
-		token, _ = term.Read("Token:")
-	}
+	token, _ := term.Read("Token:")
 
-	return
+	return namespace, account, token
 }

@@ -113,17 +113,14 @@ func (s *Storage) Save() error {
 
 // FindNamespace returns with a namespace
 // if the namespace does not exist error is not nil.
-func (s *Storage) FindNamespace(name string) (namespace *Namespace, err error) {
-	for _, namespace = range s.Namespaces {
+func (s *Storage) FindNamespace(name string) (*Namespace, error) {
+	for _, namespace := range s.Namespaces {
 		if namespace.Name == name {
-			return
+			return namespace, nil
 		}
 	}
 
-	namespace = &Namespace{}
-	err = NotFoundError{Type: "namespace", Name: name}
-
-	return
+	return nil, NotFoundError{Type: "namespace", Name: name}
 }
 
 // DeleteNamespace removes a specific namespace from the Storage.

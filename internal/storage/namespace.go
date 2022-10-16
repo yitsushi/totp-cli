@@ -8,17 +8,14 @@ type Namespace struct {
 
 // FindAccount returns with an account under a specific Namespace
 // if the account does not exist error is not nil.
-func (n *Namespace) FindAccount(name string) (account *Account, err error) {
-	for _, account = range n.Accounts {
+func (n *Namespace) FindAccount(name string) (*Account, error) {
+	for _, account := range n.Accounts {
 		if account.Name == name {
-			return
+			return account, nil
 		}
 	}
 
-	account = &Account{}
-	err = NotFoundError{Type: "account", Name: name}
-
-	return
+	return nil, NotFoundError{Type: "account", Name: name}
 }
 
 // DeleteAccount removes a specific Account from the Namespace.
