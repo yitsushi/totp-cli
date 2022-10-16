@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // Terminal represents the terminal with input, output and error output.
@@ -36,7 +36,7 @@ func (t Terminal) Read(prompt string) (string, error) {
 
 	text, readErr := reader.ReadString('\n')
 	if readErr != nil {
-		return "", readErr
+		return "", fmt.Errorf("error reading from input: %w", readErr)
 	}
 
 	text = strings.TrimSpace(text)
@@ -72,10 +72,10 @@ func (t Terminal) Hidden(prompt string) (string, error) {
 
 	in, inIsFile := t.Input.(*os.File)
 
-	if inIsFile && terminal.IsTerminal(int(in.Fd())) {
+	if inIsFile && term.IsTerminal(int(in.Fd())) {
 		var lineBytes []byte
 
-		lineBytes, err = terminal.ReadPassword(int(in.Fd()))
+		lineBytes, err = term.ReadPassword(int(in.Fd()))
 		text = string(lineBytes)
 	} else {
 		text, err = t.Read("")

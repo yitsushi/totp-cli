@@ -44,14 +44,25 @@ issues:
     - scopelint
     - testpackage
     - varnamelen
-  - path: commands/
+  - path: internal/cmd/
     linters:
-    - exhaustivestruct
+    - forbidigo
 
 linters:
   enable-all: true
   disable:
-    - paralleltest
-    - wrapcheck
+    # Deprecated
+    - interfacer
+    - nosnakecase
+    - varcheck
+    - deadcode
+    - golint
+    - ifshort
+    - maligned
     - exhaustivestruct
-    - forbidigo
+    - scopelint
+    - structcheck
+
+    # Just disabled them...
+    - exhaustruct
+

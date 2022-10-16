@@ -23,6 +23,7 @@ func (c *Import) Execute(opts *commander.CommandHelper) {
 
 	file, err := ioutil.ReadFile(opts.Arg(0))
 	if err != nil {
+		panic("Error: failed to read file")
 	}
 
 	nsList := []*s.Namespace{}

@@ -73,7 +73,7 @@ func (c *Update) downloadBinary(uri string) error {
 
 	client := http.Client{}
 
-	request, err := http.NewRequestWithContext(context.Background(), "GET", uri, nil)
+	request, err := http.NewRequestWithContext(context.Background(), http.MethodGet, uri, nil)
 	if err != nil {
 		return DownloadError{Message: err.Error()}
 	}
