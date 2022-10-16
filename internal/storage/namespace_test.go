@@ -42,7 +42,7 @@ func TestFindAccount_NotFound(t *testing.T) {
 		"account not found: AccountNotFound",
 		"Error should be 'account not found: AccountNotFound'",
 	)
-	assert.Equal(t, account, &storage.Account{}, "Account should be nil")
+	assert.Nil(t, account)
 }
 
 func TestDeleteAccount(t *testing.T) {
@@ -62,7 +62,7 @@ func TestDeleteAccount(t *testing.T) {
 
 	assert.Equal(t, len(namespace.Accounts), 3)
 	account, err = namespace.FindAccount("Account1")
-	assert.Equal(t, err, nil, "Error should be nil")
+	assert.NoError(t, err)
 
 	namespace.DeleteAccount(account)
 	assert.Equal(t, len(namespace.Accounts), 2)

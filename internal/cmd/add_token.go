@@ -38,6 +38,7 @@ func (c *AddToken) Execute(opts *commander.CommandHelper) {
 	account, err = namespace.FindAccount(accName)
 	if err == nil {
 		fmt.Printf("%s.%s exists!\n", namespace.Name, account.Name)
+		os.Exit(1)
 	}
 
 	account = &s.Account{Name: accName, Token: token}
