@@ -19,7 +19,9 @@ func (c *Delete) Execute(opts *commander.CommandHelper) {
 
 	namespaceName := opts.Arg(0)
 	if len(namespaceName) < 1 {
-		panic("Wrong number of arguments")
+		opts.Log(DownloadError{Message: "wrong number of argument"}.Error())
+
+		return
 	}
 
 	storage, err := s.PrepareStorage()

@@ -18,12 +18,16 @@ type Generate struct{}
 func (c *Generate) Execute(opts *commander.CommandHelper) {
 	namespaceName := opts.Arg(0)
 	if len(namespaceName) < 1 {
-		panic("Namespace is not defined")
+		opts.Log(GenerateError{Message: "namespace is not defined"}.Error())
+
+		return
 	}
 
 	accountName := opts.Arg(1)
 	if len(accountName) < 1 {
-		panic("Account is not defined")
+		opts.Log(GenerateError{Message: "account is not defined"}.Error())
+
+		return
 	}
 
 	storage, err := s.PrepareStorage()

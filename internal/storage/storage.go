@@ -83,7 +83,7 @@ func (s *Storage) Save() error {
 	plaintext = padded
 
 	if len(plaintext)%aes.BlockSize != 0 {
-		panic("plaintext is not a multiple of the block size")
+		return BackendError{Message: "plaintext is not a multiple of the block size"}
 	}
 
 	block, err := aes.NewCipher(s.Password)
@@ -95,7 +95,7 @@ func (s *Storage) Save() error {
 
 	iv := ciphertext[:aes.BlockSize]
 	if _, readErr := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(readErr)
+		return BackendError{Message: readErr.Error()}
 	}
 
 	mode := cipher.NewCBCEncrypter(block, iv)

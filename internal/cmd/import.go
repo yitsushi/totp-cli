@@ -18,19 +18,25 @@ type Import struct{}
 // Execute is the main function. It will be called on instant command.
 func (c *Import) Execute(opts *commander.CommandHelper) {
 	if opts.Arg(0) == "" {
-		panic("Error: Wrong number of arguments")
+		opts.Log(DownloadError{Message: "wrong number of argument"}.Error())
+
+		return
 	}
 
 	file, err := ioutil.ReadFile(opts.Arg(0))
 	if err != nil {
-		panic("Error: failed to read file")
+		opts.Log(DownloadError{Message: "failed to read file"}.Error())
+
+		return
 	}
 
 	nsList := []*s.Namespace{}
 
 	err = yaml.Unmarshal(file, &nsList)
 	if err != nil {
-		panic("Error: Invalid file format")
+		opts.Log(DownloadError{Message: "invalid file format"}.Error())
+
+		return
 	}
 
 	storage, err := s.PrepareStorage()
@@ -46,6 +52,10 @@ func (c *Import) Execute(opts *commander.CommandHelper) {
 		}
 	}()
 
+	c.importNamespaces(storage, nsList)
+}
+
+func (c *Import) importNamespaces(storage *s.Storage, nsList []*s.Namespace) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
 	for _, ns := range nsList {
