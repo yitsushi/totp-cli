@@ -9,7 +9,7 @@ jobs:
     name: Release linux/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: release linux/amd64
       uses: wangyoucao577/go-release-action@v1.32
       with:
@@ -20,7 +20,7 @@ jobs:
     name: Release windows/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: release windows/amd64
       uses: wangyoucao577/go-release-action@v1.32
       with:
@@ -31,7 +31,7 @@ jobs:
     name: Release darwin/amd64
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: release darwin/amd64
       uses: wangyoucao577/go-release-action@v1.32
       with:

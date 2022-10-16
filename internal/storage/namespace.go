@@ -15,7 +15,7 @@ func (n *Namespace) FindAccount(name string) (*Account, error) {
 		}
 	}
 
-	return nil, NotFoundError{Type: "account", Name: name}
+	return &Account{}, NotFoundError{Type: "account", Name: name}
 }
 
 // DeleteAccount removes a specific Account from the Namespace.

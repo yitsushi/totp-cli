@@ -120,7 +120,7 @@ func (s *Storage) FindNamespace(name string) (*Namespace, error) {
 		}
 	}
 
-	return nil, NotFoundError{Type: "namespace", Name: name}
+	return &Namespace{}, NotFoundError{Type: "namespace", Name: name}
 }
 
 // DeleteNamespace removes a specific namespace from the Storage.
