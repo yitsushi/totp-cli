@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,7 +32,7 @@ type Storage struct {
 
 // Decrypt tries to decrypt the storage.
 func (s *Storage) Decrypt() error {
-	encryptedData, err := ioutil.ReadFile(s.File)
+	encryptedData, err := os.ReadFile(s.File)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -61,16 +60,7 @@ func (s *Storage) Decrypt() error {
 
 // Save tries to encrypt and save the storage.
 func (s *Storage) Save() error {
-	jsonStruct := map[string]map[string]string{}
-
-	for _, namespace := range s.Namespaces {
-		jsonStruct[namespace.Name] = map[string]string{}
-		for _, account := range namespace.Accounts {
-			jsonStruct[namespace.Name][account.Name] = account.Token
-		}
-	}
-
-	plaintext, err := json.Marshal(jsonStruct)
+	plaintext, err := json.Marshal(s.Namespaces)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -103,7 +93,7 @@ func (s *Storage) Save() error {
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
-	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
+	err = os.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -218,6 +208,14 @@ func initStorage() (string, *Storage, error) {
 }
 
 func (s *Storage) parse(decodedData []byte) error {
+	if err := s.parseV1(decodedData); err == nil {
+		return nil
+	}
+
+	return s.parseV2(decodedData)
+}
+
+func (s *Storage) parseV1(decodedData []byte) error {
 	var parsedData map[string]map[string]string
 
 	// remove junk
@@ -249,6 +247,31 @@ func (s *Storage) parse(decodedData []byte) error {
 
 		namespace := &Namespace{Name: namespaceName, Accounts: accounts}
 		namespaces = append(namespaces, namespace)
+	}
+
+	s.Namespaces = namespaces
+
+	return nil
+}
+
+func (s *Storage) parseV2(decodedData []byte) error {
+	namespaces := []*Namespace{}
+
+	// remove junk
+	originalDataLength := bytes.IndexByte(decodedData, 0)
+	if originalDataLength == 0 {
+		originalDataLength = bytes.IndexByte(decodedData, dataLengthHead)
+	}
+
+	if originalDataLength > 0 && originalDataLength < len(decodedData) {
+		decodedData = decodedData[:originalDataLength]
+	}
+
+	err := json.Unmarshal(decodedData, &namespaces)
+	if err != nil {
+		return BackendError{
+			Message: "Something went wrong. Maybe this Password is not a valid one.",
+		}
 	}
 
 	s.Namespaces = namespaces

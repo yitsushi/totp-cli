@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -100,7 +99,7 @@ func (c *Update) downloadBinary(uri string) error {
 	currentExecutable, _ := osext.Executable()
 	originalPath := path.Dir(currentExecutable)
 
-	file, err := ioutil.TempFile(originalPath, info.AppName)
+	file, err := os.CreateTemp(originalPath, info.AppName)
 	if err != nil {
 		return DownloadError{Message: err.Error()}
 	}

@@ -53,6 +53,10 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		fmt.Printf("Error: %s\n", err.Error())
 	}
 
+	if account.Prefix != "" {
+		code = account.Prefix + code
+	}
+
 	fmt.Println(code)
 }
 
