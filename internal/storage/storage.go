@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,7 +32,7 @@ type Storage struct {
 
 // Decrypt tries to decrypt the storage.
 func (s *Storage) Decrypt() error {
-	encryptedData, err := ioutil.ReadFile(s.File)
+	encryptedData, err := os.ReadFile(s.File)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -94,7 +93,7 @@ func (s *Storage) Save() error {
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
-	err = ioutil.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
+	err = os.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}

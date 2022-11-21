@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/yitsushi/go-commander"
@@ -23,7 +22,7 @@ func (c *Import) Execute(opts *commander.CommandHelper) {
 		return
 	}
 
-	file, err := ioutil.ReadFile(opts.Arg(0))
+	file, err := os.ReadFile(opts.Arg(0))
 	if err != nil {
 		opts.Log(DownloadError{Message: "failed to read file"}.Error())
 

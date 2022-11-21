@@ -10,6 +10,12 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+const (
+	argPositionNamespace = 0
+	argPositionAccount   = 1
+	argPositionPrefix    = 2
+)
+
 // SetPrefix structure is the representation of the add-token command.
 type SetPrefix struct{}
 
@@ -30,7 +36,7 @@ func (c *SetPrefix) Execute(opts *commander.CommandHelper) {
 	}
 
 	defer func() {
-		if err := storage.Save(); err != nil {
+		if err = storage.Save(); err != nil {
 			fmt.Printf("Error: %s\n", err.Error())
 			os.Exit(1)
 		}
@@ -94,23 +100,25 @@ func NewSetPrefix(appName string) *commander.CommandWrapper {
 
 // Private functions
 
-func (c *SetPrefix) askForSetPrefixDetails(opts *commander.CommandHelper) (namespace, account, prefix string) {
+func (c *SetPrefix) askForSetPrefixDetails(opts *commander.CommandHelper) (string, string, string) {
+	var namespace, account, prefix string
+
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-	namespace = opts.Arg(0)
+	namespace = opts.Arg(argPositionNamespace)
 	for len(namespace) < 1 {
 		namespace, _ = term.Read("Namespace:")
 	}
 
-	account = opts.Arg(1)
+	account = opts.Arg(argPositionAccount)
 	for len(account) < 1 {
 		account, _ = term.Read("Account:")
 	}
 
-	prefix = opts.Arg(2)
+	prefix = opts.Arg(argPositionPrefix)
 	for len(prefix) < 1 {
 		prefix, _ = term.Read("Prefix:")
 	}
 
-	return
+	return namespace, account, prefix
 }
