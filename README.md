@@ -128,6 +128,19 @@ personal.facebook
 If you want to change your password,
 you can do it with the `change-password` command.
 
+A prefix can be set with `set-prefix`:
+
+```
+totp-cli set-prefix ns account
+Prefix: myprefix
+
+# Or with positional argument
+totp-cli set-prefix ns account myprefix
+```
+
+To remove the prefix from an account, set the prefix to `-` (and because of
+that, we can't set the prefix to be `-`).
+
 ### Changing the location of the credentials file
 
 Simply put this into your `.zshrc` (or `.{YourShell}rc` or `.profile`):

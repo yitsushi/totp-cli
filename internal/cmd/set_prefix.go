@@ -52,6 +52,10 @@ func (c *SetPrefix) Execute(opts *commander.CommandHelper) {
 		panic(fmt.Sprintf("%s/%s does not exist!\n", namespace.Name, accName))
 	}
 
+	if prefix == "-" {
+		prefix = ""
+	}
+
 	account.Prefix = prefix
 }
 
