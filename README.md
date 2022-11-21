@@ -36,17 +36,18 @@ totp-cli help
 ```
 
 ```
-add-token [namespace] [account]   Add new token
-change-password                   Change password
-generate <namespace> <account>    Generate a specific OTP
-import <input-file>               Import tokens from a yaml file.
-instant                           Generate an OTP from TOTP_TOKEN or stdin without the Storage backend
-version                           Print current version of this application
-delete <namespace> [account]      Delete an account or a whole namespace
-dump                              Dump all available namespaces or accounts under a namespace
-list [namespace]                  List all available namespaces or accounts under a namespace
-update                            Check and update totp-cli itself
-help [command]                    Display this help or a command specific help
+version                                     Print current version of this application
+delete <namespace> [account]                Delete an account or a whole namespace
+dump                                        Dump all available namespaces or accounts under a namespace
+instant                                     Generate an OTP from TOTP_TOKEN or stdin without the Storage backend
+update                                      Check and update totp-cli itself
+list [namespace]                            List all available namespaces or accounts under a namespace
+set-prefix [namespace] [account] [prefix]   Set prefix for a token
+add-token [namespace] [account]             Add new token
+change-password                             Change password
+generate <namespace> <account>              Generate a specific OTP
+import <input-file>                         Import tokens from a yaml file.
+help [command]                              Display this help or a command specific help
 ```
 
 ### Usage
@@ -164,6 +165,7 @@ the `dump` command.
   accounts:
     - name: acc1
       token: token
+      prefix: myprefix
 ```
 
 If a token already exists, it will ask you if you want to overwrite it or not.
