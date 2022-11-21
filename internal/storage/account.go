@@ -4,5 +4,5 @@ package storage
 type Account struct {
 	Name   string
 	Token  string
-	Prefix string `yaml:"Prefix,omitempty"`
+	Prefix string
 }
