@@ -55,6 +55,8 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 		return
 	}
 
+	fmt.Printf("Target: %s\n", assetToDownload.Name)
+
 	downloadError := c.downloadBinary(assetToDownload.BrowserDownloadURL)
 	if downloadError != nil {
 		fmt.Printf("Error: %s\n", downloadError.Error())
