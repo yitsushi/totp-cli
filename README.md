@@ -23,6 +23,12 @@ sudo port selfupdate
 sudo port install totp-cli
 ```
 
+or [Homebrew](https://brew.sh/):
+
+```
+brew install totp-cli
+```
+
 ### Update
 
 ```shell
