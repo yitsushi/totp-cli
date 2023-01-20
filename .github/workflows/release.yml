@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: release linux/amd64
-      uses: wangyoucao577/go-release-action@v1.32
+      uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
@@ -22,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: release windows/amd64
-      uses: wangyoucao577/go-release-action@v1.32
+      uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: release darwin/amd64
-      uses: wangyoucao577/go-release-action@v1.32
+      uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
