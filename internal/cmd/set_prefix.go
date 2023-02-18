@@ -88,6 +88,9 @@ func (c *SetPrefix) Examples() []string {
 func NewSetPrefix(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &SetPrefix{},
+		Arguments: []*commander.Argument{
+			{Name: "clear", Type: "bool"},
+		},
 		Help: &commander.CommandDescriptor{
 			Name:             "set-prefix",
 			ShortDescription: "Set prefix for a token",
@@ -117,6 +120,10 @@ func (c *SetPrefix) askForSetPrefixDetails(opts *commander.CommandHelper) (strin
 	account = opts.Arg(argPositionAccount)
 	for len(account) < 1 {
 		account, _ = term.Read("Account:")
+	}
+
+	if opts.Flag("clear") {
+		return namespace, account, ""
 	}
 
 	prefix = opts.Arg(argPositionPrefix)
