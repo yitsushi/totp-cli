@@ -208,3 +208,45 @@ fpath=( ~/.zsh/completions $fpath )
 autoload -U compinit
 compinit
 ```
+
+## About the password
+
+The password should never be passed directly to any applications to unlock it.
+Because of that, `totp-cli` will not support any features like that, type in the
+password. If you save it in a variable it can be exposed if your `ENV` is
+exposed somehow, if you directly type in the password in the command line, it
+can end up in your bash/zsh/whatevershell history.
+
+If you really want to skip the password prompt, it reads from `stdin`, so you
+can pipe the password.
+
+```
+❯ age \
+  --encrypt \
+  --armor \
+  --recipient age15velesv0zwpsc5w0n4da5tv64u9fzuhl8hjpvdmeayjg00fdf4wsxl834c \
+  > "${HOME}/.config/totp-cli/totp-password.age"
+myapssword
+^D
+
+❯ age --decrypt --identity ~/.age/efertone.txt ~/.config/totp-cli/totp-password.age | totp-cli list
+Password: ***
+....list of namespaces
+
+❯ age --decrypt --identity ~/.age/efertone.txt ~/.config/totp-cli/totp-password.age | totp-cli generate xxxxx xxxxx
+Password: ***
+166307
+
+❯ alias totp-pass-in="age --decrypt --identity ~/.age/efertone.txt ~/.config/totp-cli/totp-password.age"
+
+❯ totp-pass-in| totp-cli generate xxxxx xxxxx
+Password: ***
+889840
+```
+
+But I'm really against it, it's a password that can access all your stored 2FA
+tokens. With the password (even without the `totp-cli` application) and the
+credentials files, that file is not really encrypted anymore as it can be
+decrypted with the password.
+
+**Please, never store your password as clear-text. Never. Pretty please.**
