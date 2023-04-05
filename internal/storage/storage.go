@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"filippo.io/age"
+	"filippo.io/age/armor"
 
 	"github.com/yitsushi/totp-cli/internal/security"
 	"github.com/yitsushi/totp-cli/internal/terminal"
@@ -22,26 +25,39 @@ const (
 	storageFilePermissions      = 0o600
 )
 
+// age defaults to a workFactor of 18 which works out to about a 1 second
+// delay. The go docs (and the author of scrypt) suggest that a more
+// interactive use case should target about 100ms. totp-cli uses a lower
+// value of 15 in order to meet that goal. This can be adjusted in the
+// future without breaking compatibility with existing files.
+const scryptWorkFactor = 15
+
 // Storage structure represents the credential storage.
 type Storage struct {
 	File     string `json:"-"`
-	Password []byte `json:"-"`
+	Password string `json:"-"`
 
 	Namespaces []*Namespace
 }
 
-// Decrypt tries to decrypt the storage.
-func (s *Storage) Decrypt() error {
+// DecryptV1 tries to decrypt the original unsecure SHA1 storage.
+func (s *Storage) DecryptV1() error {
 	encryptedData, err := os.ReadFile(s.File)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
 
-	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
+	decodedData, err := base64.StdEncoding.DecodeString(string(encryptedData))
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
-	block, err := aes.NewCipher(s.Password)
+	key := security.UnsecureSHA1(s.Password)
+
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -58,42 +74,100 @@ func (s *Storage) Decrypt() error {
 	return s.parse(decodedData)
 }
 
+// DecryptV2 tries to decrypt the newer age storage.
+func (s *Storage) DecryptV2() error {
+	rawFile, err := os.Open(s.File)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+	defer rawFile.Close()
+
+	identity, err := age.NewScryptIdentity(s.Password)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	armorFile := armor.NewReader(rawFile)
+
+	cryptFile, err := age.Decrypt(armorFile, identity)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	decodedData := &bytes.Buffer{}
+
+	_, err = io.Copy(decodedData, cryptFile)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	return s.parse(decodedData.Bytes())
+}
+
+// Decrypt tries to decrypt the storage.
+func (s *Storage) Decrypt() error {
+	if err := s.DecryptV1(); err == nil {
+		return nil
+	}
+
+	return s.DecryptV2()
+}
+
 // Save tries to encrypt and save the storage.
 func (s *Storage) Save() error {
-	plaintext, err := json.Marshal(s.Namespaces)
+	tmpFile, err := os.CreateTemp(filepath.Dir(s.File),
+		fmt.Sprintf("%s.*.tmp", filepath.Base(s.File)))
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
 
-	missing := aes.BlockSize - (len(plaintext) % aes.BlockSize)
-	padded := make([]byte, len(plaintext)+missing)
+	defer os.Remove(tmpFile.Name())
 
-	copy(padded, plaintext)
-
-	plaintext = padded
-
-	if len(plaintext)%aes.BlockSize != 0 {
-		return BackendError{Message: "plaintext is not a multiple of the block size"}
-	}
-
-	block, err := aes.NewCipher(s.Password)
+	err = tmpFile.Chmod(storageFilePermissions)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
 
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-
-	iv := ciphertext[:aes.BlockSize]
-	if _, readErr := io.ReadFull(rand.Reader, iv); err != nil {
-		return BackendError{Message: readErr.Error()}
+	recipient, err := age.NewScryptRecipient(s.Password)
+	if err != nil {
+		return BackendError{Message: err.Error()}
 	}
 
-	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+	recipient.SetWorkFactor(scryptWorkFactor)
 
-	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
+	armorFile := armor.NewWriter(tmpFile)
 
-	err = os.WriteFile(s.File, []byte(encodedContent), storageFilePermissions)
+	cryptFile, err := age.Encrypt(armorFile, recipient)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = json.NewEncoder(cryptFile).Encode(s.Namespaces)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = cryptFile.Close()
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = armorFile.Close()
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = tmpFile.Sync()
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = tmpFile.Close()
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	err = os.Rename(tmpFile.Name(), s.File)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -151,7 +225,7 @@ func PrepareStorage() (*Storage, error) {
 
 		storage = &Storage{
 			File:     credentialFile,
-			Password: security.UnsecureSHA1(password),
+			Password: password,
 		}
 	}
 
@@ -199,7 +273,7 @@ func initStorage() (string, *Storage, error) {
 
 	storage := &Storage{
 		File:     credentialFile,
-		Password: security.UnsecureSHA1(password),
+		Password: password,
 	}
 
 	err = storage.Save()
