@@ -6,7 +6,6 @@ import (
 
 	"github.com/yitsushi/go-commander"
 
-	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
@@ -36,15 +35,12 @@ func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
 		os.Exit(1)
 	}
 
-	newPassword := security.UnsecureSHA1(newPasswordIn)
-	newPasswordConfirm := security.UnsecureSHA1(newPasswordConfirmIn)
-
-	if !CheckPasswordConfirm(newPassword, newPasswordConfirm) {
+	if !CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
 		fmt.Println("New Password and the confirm mismatch!")
 		os.Exit(1)
 	}
 
-	storage.Password = newPassword
+	storage.Password = newPasswordIn
 
 	err = storage.Save()
 	if err != nil {

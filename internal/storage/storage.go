@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	saltSize                    = 16
 	dataLengthHead              = 13
 	storageDirectoryPermissions = 0o700
 	storageFilePermissions      = 0o600
@@ -25,23 +26,30 @@ const (
 // Storage structure represents the credential storage.
 type Storage struct {
 	File     string `json:"-"`
-	Password []byte `json:"-"`
+	Password string `json:"-"`
 
 	Namespaces []*Namespace
 }
 
-// Decrypt tries to decrypt the storage.
-func (s *Storage) Decrypt() error {
-	encryptedData, err := os.ReadFile(s.File)
-	if err != nil {
-		return BackendError{Message: err.Error()}
-	}
-
-	decodedData, _ := base64.StdEncoding.DecodeString(string(encryptedData))
+// DecryptV1 tries to decrypt the original unsecure SHA1 storage.
+//
+// The AES key is from UnsecureSHA1(password)
+//
+// On disk format is a base64 encoded copy of:
+// +--------+--------+------------------------+
+// | Offset | Length | Value                  |
+// +--------+--------+------------------------+
+// | 0      | 16     | Initialization Vector  |
+// +--------+--------+------------------------+
+// | 16     | EOF    | AES-256 encrypted data |
+// +--------+--------+------------------------+.
+func (s *Storage) DecryptV1(decodedData []byte) error {
 	iv := decodedData[:aes.BlockSize]
 	decodedData = decodedData[aes.BlockSize:]
 
-	block, err := aes.NewCipher(s.Password)
+	key := security.UnsecureSHA1(s.Password)
+
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -53,9 +61,72 @@ func (s *Storage) Decrypt() error {
 	}
 
 	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(decodedData, decodedData)
+	plaintext := make([]byte, len(decodedData))
+	mode.CryptBlocks(plaintext, decodedData)
 
-	return s.parse(decodedData)
+	return s.parse(plaintext)
+}
+
+// DecryptV2 tries to decrypt the stronger scrypt storage.
+//
+// The AES key is from Scrypt(password, salt, 1<<17, 8, 1)
+//
+// On disk format is a base64 encoded copy of:
+// +--------+--------+------------------------+
+// | Offset | Length | Value                  |
+// +--------+--------+------------------------+
+// | 0      | 16     | Salt                   |
+// +--------+--------+------------------------+
+// | 16     | 16     | Initialization Vector  |
+// +--------+--------+------------------------+
+// | 32     | EOF    | AES-256 encrypted data |
+// +--------+--------+------------------------+.
+func (s *Storage) DecryptV2(decodedData []byte) error {
+	salt := decodedData[:saltSize]
+	decodedData = decodedData[saltSize:]
+	iv := decodedData[:aes.BlockSize]
+	decodedData = decodedData[aes.BlockSize:]
+
+	key, err := security.Scrypt(s.Password, salt)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	if len(decodedData)%aes.BlockSize != 0 {
+		return BackendError{
+			Message: "ciphertext is not a multiple of the block size",
+		}
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	plaintext := make([]byte, len(decodedData))
+	mode.CryptBlocks(plaintext, decodedData)
+
+	return s.parse(plaintext)
+}
+
+// Decrypt tries to decrypt the storage.
+func (s *Storage) Decrypt() error {
+	encryptedData, err := os.ReadFile(s.File)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	decodedData, err := base64.StdEncoding.DecodeString(string(encryptedData))
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
+
+	if err := s.DecryptV2(decodedData); err == nil {
+		return nil
+	}
+
+	return s.DecryptV1(decodedData)
 }
 
 // Save tries to encrypt and save the storage.
@@ -76,20 +147,30 @@ func (s *Storage) Save() error {
 		return BackendError{Message: "plaintext is not a multiple of the block size"}
 	}
 
-	block, err := aes.NewCipher(s.Password)
+	ciphertext := make([]byte, saltSize+aes.BlockSize+len(plaintext))
+
+	salt := ciphertext[:saltSize]
+	if _, readErr := io.ReadFull(rand.Reader, salt); readErr != nil {
+		return BackendError{Message: readErr.Error()}
+	}
+
+	key, err := security.Scrypt(s.Password, salt)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
 
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return BackendError{Message: err.Error()}
+	}
 
-	iv := ciphertext[:aes.BlockSize]
-	if _, readErr := io.ReadFull(rand.Reader, iv); err != nil {
+	iv := ciphertext[saltSize : saltSize+aes.BlockSize]
+	if _, readErr := io.ReadFull(rand.Reader, iv); readErr != nil {
 		return BackendError{Message: readErr.Error()}
 	}
 
 	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+	mode.CryptBlocks(ciphertext[saltSize+aes.BlockSize:], plaintext)
 
 	encodedContent := base64.StdEncoding.EncodeToString(ciphertext)
 
@@ -151,7 +232,7 @@ func PrepareStorage() (*Storage, error) {
 
 		storage = &Storage{
 			File:     credentialFile,
-			Password: security.UnsecureSHA1(password),
+			Password: password,
 		}
 	}
 
@@ -199,7 +280,7 @@ func initStorage() (string, *Storage, error) {
 
 	storage := &Storage{
 		File:     credentialFile,
-		Password: security.UnsecureSHA1(password),
+		Password: password,
 	}
 
 	err = storage.Save()

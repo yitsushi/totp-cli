@@ -1,6 +1,6 @@
 package security
 
-//nolint:gosec // It's hard to change now without breaking. Issue #44.
+//nolint:gosec // This is an implementation of an RFC that used SHA-1
 import (
 	"crypto/hmac"
 	"crypto/sha1"
