@@ -1,8 +1,7 @@
 package security
 
-//nolint:gosec // It's hard to change now without breaking. Issue #41.
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // It's hard to change now without breaking. Issue #41.
 	"fmt"
 )
 

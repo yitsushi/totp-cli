@@ -51,6 +51,10 @@ issues:
 linters:
   enable-all: true
   disable:
+    # Go Generics
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
     # Deprecated
     - interfacer
     - nosnakecase
