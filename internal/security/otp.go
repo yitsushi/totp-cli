@@ -1,9 +1,8 @@
 package security
 
-//nolint:gosec // It's hard to change now without breaking. Issue #44.
 import (
 	"crypto/hmac"
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // This is an implementation of an RFC that used SHA-1
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
