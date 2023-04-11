@@ -35,6 +35,13 @@ brew install totp-cli
 totp-cli update
 ```
 
+#### Upgrading from totp-cli v1.2.7 or below
+
+Starting with totp-cli v1.2.8 a [more secure storage
+format](https://github.com/FiloSottile/age) is used. The storage will be
+upgraded the first time it is written to by totp-cli. You can force this to
+occur by running `totp-cli change-password`.
+
 ### Help output
 
 ```shell
