@@ -168,6 +168,8 @@ Or call the client with `TOTP_CLI_CREDENTIAL_FILE`:
 $ TOTP_CLI_CREDENTIAL_FILE=/mnt/mydrive/totp-credentials totp-cli list
 ```
 
+The default location is `${HOME}/.config/totp-cli/credentials`.
+
 **Note:** It's a filename not just a directory.
 
 **Note:** It does not traverse through the given path,
