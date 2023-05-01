@@ -58,12 +58,14 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 	}
 
 	previousCode := code
+
 	for {
 		code := generateCode(account)
 		if code != previousCode {
 			fmt.Println(code)
 			previousCode = code
 		}
+
 		time.Sleep(time.Second)
 	}
 }
@@ -77,6 +79,7 @@ func generateCode(account *s.Account) string {
 	if account.Prefix != "" {
 		code = account.Prefix + code
 	}
+
 	return code
 }
 
