@@ -30,6 +30,8 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		return
 	}
 
+	mustFollow := opts.Flag("follow")
+
 	storage, err := s.PrepareStorage()
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -48,6 +50,27 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		os.Exit(1)
 	}
 
+	code := generateCode(account)
+	fmt.Println(code)
+
+	if !mustFollow {
+		return
+	}
+
+	previousCode := code
+
+	for {
+		code := generateCode(account)
+		if code != previousCode {
+			fmt.Println(code)
+			previousCode = code
+		}
+
+		time.Sleep(time.Second)
+	}
+}
+
+func generateCode(account *s.Account) string {
 	code, err := security.GenerateOTPCode(account.Token, time.Now())
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
@@ -57,13 +80,16 @@ func (c *Generate) Execute(opts *commander.CommandHelper) {
 		code = account.Prefix + code
 	}
 
-	fmt.Println(code)
+	return code
 }
 
 // NewGenerate creates a new Generate command.
 func NewGenerate(appName string) *commander.CommandWrapper {
 	return &commander.CommandWrapper{
 		Handler: &Generate{},
+		Arguments: []*commander.Argument{
+			{Name: "follow", Type: "bool", Value: false},
+		},
 		Help: &commander.CommandDescriptor{
 			Name:             "generate",
 			ShortDescription: "Generate a specific OTP",

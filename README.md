@@ -154,6 +154,26 @@ totp-cli set-prefix ns account myprefix
 totp-cli set-prefix ns account --clear
 ```
 
+To generate an OTP, you simply use the `generate` command like:
+
+```shell
+totp-cli generate namespace account
+Password: ***
+889840
+```
+
+You can also use the `--follow` flag on the `generate` command if you want to 
+have the OTP token automatically refreshed once expired:
+
+```shell
+totp-cli generate --follow namespace account
+Password: ***
+889840
+343555
+463346
+```
+
+
 ### Changing the location of the credentials file
 
 Simply put this into your `.zshrc` (or `.{YourShell}rc` or `.profile`):

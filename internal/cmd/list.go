@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/yitsushi/go-commander"
 
@@ -34,6 +35,10 @@ func (c *List) Execute(opts *commander.CommandHelper) {
 		fmt.Printf("Error: %s", err.Error())
 		os.Exit(1)
 	}
+
+	sort.Slice(namespace.Accounts, func(i, j int) bool {
+		return namespace.Accounts[i].Name < namespace.Accounts[j].Name
+	})
 
 	for _, account := range namespace.Accounts {
 		fmt.Printf("%s.%s\n", namespace.Name, account.Name)
