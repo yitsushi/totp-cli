@@ -60,6 +60,8 @@ func (c *Update) Execute(opts *commander.CommandHelper) {
 	downloadError := c.downloadBinary(assetToDownload.BrowserDownloadURL)
 	if downloadError != nil {
 		fmt.Printf("Error: %s\n", downloadError.Error())
+
+		return
 	}
 
 	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
