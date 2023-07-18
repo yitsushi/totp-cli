@@ -30,11 +30,10 @@ func newApplication() *cli.App {
 			cmd.SetPrefixCommand(),
 			cmd.UpdateCommand(),
 		},
-		Flags: []cli.Flag{},
 		Authors: []*cli.Author{
 			{Name: "Efertone", Email: "efertone@pm.me"},
 		},
-		Copyright: "",
+		EnableBashCompletion: true,
 		ExitErrHandler: func(ctx *cli.Context, err error) {
 			if err == nil {
 				return

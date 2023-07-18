@@ -49,18 +49,34 @@ totp-cli help
 ```
 
 ```
-version                                     Print current version of this application
-delete <namespace> [account]                Delete an account or a whole namespace
-dump                                        Dump all available namespaces or accounts under a namespace
-instant                                     Generate an OTP from TOTP_TOKEN or stdin without the Storage backend
-update                                      Check and update totp-cli itself
-list [namespace]                            List all available namespaces or accounts under a namespace
-set-prefix [namespace] [account] [prefix]   Set prefix for a token
-add-token [namespace] [account]             Add new token
-change-password                             Change password
-generate <namespace> <account>              Generate a specific OTP
-import <input-file>                         Import tokens from a yaml file.
-help [command]                              Display this help or a command specific help
+NAME:
+   totp-cli - Authy/Google Authenticator like TOTP CLI tool written in Go.
+
+USAGE:
+   totp-cli [global options] command [command options] [arguments...]
+
+VERSION:
+   v1.4.0
+
+AUTHOR:
+   Efertone <efertone@pm.me>
+
+COMMANDS:
+   add-token, add   Add new token.
+   change-password  Change password.
+   delete           Delete an account or a whole namespace.
+   dump             Dump all available accounts under all namespaces.
+   generate, g      Generate a specific OTP
+   import           Import tokens from a yaml file.
+   instant          Generate an OTP from TOTP_TOKEN or stdin without the Storage backend.
+   list             List all available namespaces or accounts under a namespace.
+   set-prefix       Set prefix for a token.
+   update           Check and update totp-cli itself
+   help, h          Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version
 ```
 
 ### Usage
@@ -222,15 +238,18 @@ If a token already exists, it will ask you if you want to overwrite it or not.
 totp-cli import list.yaml
 ```
 
-### Zsh Completion
+### Shell Completion
 
-A function to provide tab-completion for zsh is in the file `_totp-cli`.
-When installing or packaging totp-cli this should preferably be
-installed in `$prefix/share/zsh/site-functions`. Otherwise, it can be
-installed by copying to a directory where zsh searches for completion
+* Bash: `autocomplete/bash_autocomplete`
+* Zsh: `autocomplete/zsh_autocomplete`
+
+A function to provide tab-completion for zsh is in the file
+`autocomplete/zsh_autocomplete`. When installing or packaging totp-cli this
+should preferably be installed in `$prefix/share/zsh/site-functions`. Otherwise,
+it can be installed by copying to a directory where zsh searches for completion
 functions (the `$fpath` array). If you, for example, put all completion
-functions into the folder `~/.zsh/completions` you must add the
-following to your zsh main config file (`.zshrc`):
+functions into the folder `~/.zsh/completions` you must add the following to
+your zsh main config file (`.zshrc`):
 
 ```shell
 fpath=( ~/.zsh/completions $fpath )
