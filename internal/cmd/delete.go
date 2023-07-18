@@ -10,6 +10,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// DeleteCommand is the delete subcommand.
 func DeleteCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "delete",

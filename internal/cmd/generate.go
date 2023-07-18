@@ -10,6 +10,7 @@ import (
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
+// GenerateCommand is the generate subcommand.
 func GenerateCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "generate",
@@ -18,7 +19,7 @@ func GenerateCommand() *cli.Command {
 			&cli.BoolFlag{
 				Name:  "follow",
 				Value: false,
-				Usage: "Generate codes continously.",
+				Usage: "Generate codes continuously.",
 			},
 		},
 		Usage:     "Generate a specific OTP",

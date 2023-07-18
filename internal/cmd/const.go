@@ -5,7 +5,7 @@ const (
 	argPositionAccount   = 1
 	argPositionPrefix    = 2
 
-	strictDumpFilePerms = 0600
-
 	binaryChmodValue = 0o755
+
+	strictDumpFilePerms = 0o600
 )

@@ -11,6 +11,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// ImportCommand is the import subcommand.
 func ImportCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "import",

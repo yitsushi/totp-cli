@@ -11,6 +11,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// InstantCommand is the instant subcommand.
 func InstantCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "instant",

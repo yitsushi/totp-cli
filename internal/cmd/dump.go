@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -9,8 +10,10 @@ import (
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
+// DumpCommand is the dump subcommand.
 func DumpCommand() *cli.Command {
 	warningMsg := "The output is NOT encrypted. Use this flag to verify you really want to dump all secrets."
+
 	return &cli.Command{
 		Name:      "dump",
 		Usage:     "Dump all available accounts under all namespaces.",
@@ -41,11 +44,11 @@ func DumpCommand() *cli.Command {
 
 			out, err := yaml.Marshal(storage.Namespaces)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to marshal storage: %w", err)
 			}
 
 			if err := os.WriteFile(ctx.String("output"), out, strictDumpFilePerms); err != nil {
-				return err
+				return fmt.Errorf("failed to write output file: %w", err)
 			}
 
 			return nil

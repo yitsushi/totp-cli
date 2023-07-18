@@ -10,6 +10,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// SetPrefixCommand is the set-prefix subcommand.
 func SetPrefixCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "set-prefix",

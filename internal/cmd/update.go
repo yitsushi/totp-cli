@@ -18,6 +18,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/info"
 )
 
+// UpdateCommand is the update subcommand.
 func UpdateCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "update",

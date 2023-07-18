@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -10,6 +9,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// ChangePasswordCommand is the change-password subcommand.
 func ChangePasswordCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "change-password",
@@ -38,16 +38,12 @@ func ChangePasswordCommand() *cli.Command {
 			}
 
 			if !CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
-				return fmt.Errorf("New Password and the confirm mismatch!")
+				return CommandError{Message: "new password and the confirm mismatch"}
 			}
 
 			storage.Password = newPasswordIn
 
-			if err = storage.Save(); err != nil {
-				return err
-			}
-
-			return nil
+			return storage.Save()
 		},
 	}
 }

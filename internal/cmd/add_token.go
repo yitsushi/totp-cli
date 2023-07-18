@@ -10,6 +10,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
+// AddTokenCommand is the add-token subcommand.
 func AddTokenCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "add-token",

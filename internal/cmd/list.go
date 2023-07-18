@@ -9,6 +9,7 @@ import (
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
+// ListCommand is the list subcommand.
 func ListCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "list",
@@ -17,7 +18,7 @@ func ListCommand() *cli.Command {
 		Action: func(ctx *cli.Context) error {
 			storage, err := s.PrepareStorage()
 			if err != nil {
-				return nil
+				return err
 			}
 
 			ns := ctx.Args().Get(argPositionNamespace)
