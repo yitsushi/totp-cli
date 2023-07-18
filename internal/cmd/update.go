@@ -12,66 +12,66 @@ import (
 	"runtime"
 
 	"github.com/kardianos/osext"
+	"github.com/urfave/cli/v2"
 	grc "github.com/yitsushi/github-release-check"
-	"github.com/yitsushi/go-commander"
 
 	"github.com/yitsushi/totp-cli/internal/info"
 )
 
-// Update structure is the representation of the update command.
-type Update struct{}
+// UpdateCommand is the update subcommand.
+func UpdateCommand() *cli.Command {
+	return &cli.Command{
+		Name:      "update",
+		Usage:     fmt.Sprintf("Check and update %s itself", info.AppName),
+		ArgsUsage: " ",
+		Description: `Check for updates.
+If there is a newer version of this application for this OS and ARCH,
+then download it and replace this application with the newer one.`,
+		Action: func(_ *cli.Context) error {
+			hasUpdate, release, _ := grc.Check(info.AppRepoOwner, info.AppName, info.AppVersion)
 
-const (
-	binaryChmodValue = 0o755
-)
+			if !hasUpdate {
+				fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
 
-// Execute is the main function. It will be called on update command.
-func (c *Update) Execute(opts *commander.CommandHelper) {
-	hasUpdate, release, _ := grc.Check(info.AppRepoOwner, info.AppName, info.AppVersion)
+				return nil
+			}
 
-	if !hasUpdate {
-		fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
+			var (
+				assetToDownload grc.Asset
+				found           bool
+			)
 
-		return
+			for _, asset := range release.Assets {
+				buildFilename := fmt.Sprintf("%s-%s-%s-%s.tar.gz", info.AppName, release.TagName, runtime.GOOS, runtime.GOARCH)
+				if asset.Name == buildFilename {
+					assetToDownload = asset
+					found = true
+
+					break
+				}
+			}
+
+			if !found {
+				fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
+
+				return nil
+			}
+
+			fmt.Printf("Target: %s\n", assetToDownload.Name)
+
+			err := downloadBinary(assetToDownload.BrowserDownloadURL)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
+
+			return nil
+		},
 	}
-
-	var (
-		assetToDownload grc.Asset
-		found           bool
-	)
-
-	for _, asset := range release.Assets {
-		if asset.Name == c.buildFilename(release.TagName) {
-			assetToDownload = asset
-			found = true
-
-			break
-		}
-	}
-
-	if !found {
-		fmt.Printf("Your %s is up-to-date. \\o/\n", info.AppName)
-
-		return
-	}
-
-	fmt.Printf("Target: %s\n", assetToDownload.Name)
-
-	downloadError := c.downloadBinary(assetToDownload.BrowserDownloadURL)
-	if downloadError != nil {
-		fmt.Printf("Error: %s\n", downloadError.Error())
-
-		return
-	}
-
-	fmt.Printf("Now you have a fresh new %s \\o/\n", info.AppName)
 }
 
-func (c *Update) buildFilename(version string) string {
-	return fmt.Sprintf("%s-%s-%s-%s.tar.gz", info.AppName, version, runtime.GOOS, runtime.GOARCH)
-}
-
-func (c *Update) downloadBinary(uri string) error {
+func downloadBinary(uri string) error {
 	fmt.Println(" -> Download...")
 
 	client := http.Client{}
@@ -126,18 +126,4 @@ func (c *Update) downloadBinary(uri string) error {
 	}
 
 	return nil
-}
-
-// NewUpdate creates a new Update command.
-func NewUpdate(appName string) *commander.CommandWrapper {
-	return &commander.CommandWrapper{
-		Handler: &Update{},
-		Help: &commander.CommandDescriptor{
-			Name:             "update",
-			ShortDescription: fmt.Sprintf("Check and update %s itself", appName),
-			LongDescription: `Check for updates.
-If there is a newer version of this application for this OS and ARCH,
-then download it and replace this application with the newer one.`,
-		},
-	}
 }

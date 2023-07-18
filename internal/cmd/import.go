@@ -4,57 +4,63 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/yitsushi/go-commander"
+	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-// Import structure is the representation of the import command.
-type Import struct{}
+// ImportCommand is the import subcommand.
+func ImportCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "import",
+		Usage: "Import tokens from a yaml file.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "input",
+				Usage:    "Input YAML file. (REQUIRED)",
+				Required: true,
+			},
+		},
+		Action: func(ctx *cli.Context) (err error) {
+			var (
+				file    []byte
+				storage *s.Storage
+			)
 
-// Execute is the main function. It will be called on instant command.
-func (c *Import) Execute(opts *commander.CommandHelper) {
-	if opts.Arg(0) == "" {
-		opts.Log(DownloadError{Message: "wrong number of argument"}.Error())
+			if file, err = os.ReadFile(ctx.String("input")); err != nil {
+				return
+			}
 
-		return
+			nsList := []*s.Namespace{}
+
+			if err = yaml.Unmarshal(file, &nsList); err != nil {
+				err = CommandError{Message: "invalid file format"}
+
+				return
+			}
+
+			if storage, err = s.PrepareStorage(); err != nil {
+				return
+			}
+
+			defer func() {
+				if err != nil {
+					return
+				}
+
+				err = storage.Save()
+			}()
+
+			importNamespaces(storage, nsList)
+
+			return nil
+		},
 	}
-
-	file, err := os.ReadFile(opts.Arg(0))
-	if err != nil {
-		opts.Log(DownloadError{Message: "failed to read file"}.Error())
-
-		return
-	}
-
-	nsList := []*s.Namespace{}
-
-	err = yaml.Unmarshal(file, &nsList)
-	if err != nil {
-		opts.Log(DownloadError{Message: "invalid file format"}.Error())
-
-		return
-	}
-
-	storage, err := s.PrepareStorage()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	defer func() {
-		if err := storage.Save(); err != nil {
-			fmt.Printf("Error: %s\n", err.Error())
-			os.Exit(1)
-		}
-	}()
-
-	c.importNamespaces(storage, nsList)
 }
 
-func (c *Import) importNamespaces(storage *s.Storage, nsList []*s.Namespace) {
+func importNamespaces(storage *s.Storage, nsList []*s.Namespace) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
 	for _, ns := range nsList {
@@ -79,22 +85,8 @@ func (c *Import) importNamespaces(storage *s.Storage, nsList []*s.Namespace) {
 			)
 			if term.Confirm(msg) {
 				internalAcc.Token = acc.Token
+				internalAcc.Prefix = acc.Prefix
 			}
 		}
-	}
-}
-
-// NewImport creates a new Instant command.
-func NewImport(appName string) *commander.CommandWrapper {
-	return &commander.CommandWrapper{
-		Handler: &Import{},
-		Help: &commander.CommandDescriptor{
-			Name:             "import",
-			ShortDescription: "Import tokens from a yaml file.",
-			Arguments:        "<input-file>",
-			Examples: []string{
-				"credentials.yaml",
-			},
-		},
 	}
 }
