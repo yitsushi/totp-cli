@@ -2,71 +2,74 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"time"
 
-	"github.com/yitsushi/go-commander"
+	"github.com/urfave/cli/v2"
 
 	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
-// Generate structure is the representation of the generate command.
-type Generate struct{}
+func GenerateCommand() *cli.Command {
+	return &cli.Command{
+		Name:    "generate",
+		Aliases: []string{"g"},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "follow",
+				Value: false,
+				Usage: "Generate codes continously.",
+			},
+		},
+		Usage:     "Generate a specific OTP",
+		ArgsUsage: "<namespace> <account>",
+		Action: func(ctx *cli.Context) error {
+			namespaceName := ctx.Args().Get(argPositionNamespace)
+			if len(namespaceName) < 1 {
+				return CommandError{Message: "namespace is not defined"}
+			}
 
-// Execute is the main function. It will be called on generate command.
-func (c *Generate) Execute(opts *commander.CommandHelper) {
-	namespaceName := opts.Arg(0)
-	if len(namespaceName) < 1 {
-		opts.Log(GenerateError{Message: "namespace is not defined"}.Error())
+			accountName := ctx.Args().Get(argPositionAccount)
+			if len(accountName) < 1 {
+				return CommandError{Message: "account is not defined"}
+			}
 
-		return
-	}
+			follow := ctx.Bool("follow")
 
-	accountName := opts.Arg(1)
-	if len(accountName) < 1 {
-		opts.Log(GenerateError{Message: "account is not defined"}.Error())
+			storage, err := s.PrepareStorage()
+			if err != nil {
+				return err
+			}
 
-		return
-	}
+			namespace, err := storage.FindNamespace(namespaceName)
+			if err != nil {
+				return err
+			}
 
-	mustFollow := opts.Flag("follow")
+			account, err := namespace.FindAccount(accountName)
+			if err != nil {
+				return err
+			}
 
-	storage, err := s.PrepareStorage()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	namespace, err := storage.FindNamespace(namespaceName)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	account, err := namespace.FindAccount(accountName)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	code := generateCode(account)
-	fmt.Println(code)
-
-	if !mustFollow {
-		return
-	}
-
-	previousCode := code
-
-	for {
-		code := generateCode(account)
-		if code != previousCode {
+			code := generateCode(account)
 			fmt.Println(code)
-			previousCode = code
-		}
 
-		time.Sleep(time.Second)
+			if !follow {
+				return nil
+			}
+
+			previousCode := code
+
+			for {
+				code := generateCode(account)
+				if code != previousCode {
+					fmt.Println(code)
+					previousCode = code
+				}
+
+				time.Sleep(time.Second)
+			}
+		},
 	}
 }
 
@@ -81,20 +84,4 @@ func generateCode(account *s.Account) string {
 	}
 
 	return code
-}
-
-// NewGenerate creates a new Generate command.
-func NewGenerate(appName string) *commander.CommandWrapper {
-	return &commander.CommandWrapper{
-		Handler: &Generate{},
-		Arguments: []*commander.Argument{
-			{Name: "follow", Type: "bool", Value: false},
-		},
-		Help: &commander.CommandDescriptor{
-			Name:             "generate",
-			ShortDescription: "Generate a specific OTP",
-			Arguments:        "<namespace> <account>",
-			Examples:         []string{"mynamespace myaccount"},
-		},
-	}
 }

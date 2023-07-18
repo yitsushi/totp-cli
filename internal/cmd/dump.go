@@ -1,41 +1,54 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/yitsushi/go-commander"
+	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
-// Dump structure is the representation of the dump command.
-type Dump struct{}
-
-// Execute is the main function. It will be called on dump command.
-func (c *Dump) Execute(opts *commander.CommandHelper) {
-	storage, err := s.PrepareStorage()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	out, _ := yaml.Marshal(storage.Namespaces)
-
-	fmt.Printf("%s\n", out)
-}
-
-// NewDump creates a new Dump command.
-func NewDump(appName string) *commander.CommandWrapper {
-	return &commander.CommandWrapper{
-		Handler: &Dump{},
-		Help: &commander.CommandDescriptor{
-			Name:             "dump",
-			ShortDescription: "Dump all available namespaces or accounts under a namespace",
-			Examples: []string{
-				"",
+func DumpCommand() *cli.Command {
+	warningMsg := "The output is NOT encrypted. Use this flag to verify you really want to dump all secrets."
+	return &cli.Command{
+		Name:      "dump",
+		Usage:     "Dump all available accounts under all namespaces.",
+		ArgsUsage: " ",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "yes-please",
+				Value: false,
+				Usage: warningMsg,
 			},
+			&cli.StringFlag{
+				Name:     "output",
+				Usage:    "Output file. (REQUIRED)",
+				Required: true,
+			},
+		},
+		Action: func(ctx *cli.Context) error {
+			if !ctx.Bool("yes-please") {
+				return CommandError{
+					Message: warningMsg,
+				}
+			}
+
+			storage, err := s.PrepareStorage()
+			if err != nil {
+				return err
+			}
+
+			out, err := yaml.Marshal(storage.Namespaces)
+			if err != nil {
+				return err
+			}
+
+			if err := os.WriteFile(ctx.String("output"), out, strictDumpFilePerms); err != nil {
+				return err
+			}
+
+			return nil
 		},
 	}
 }

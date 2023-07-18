@@ -4,58 +4,50 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/yitsushi/go-commander"
+	"github.com/urfave/cli/v2"
 
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-// ChangePassword structure is the representation of the change-password command.
-type ChangePassword struct{}
+func ChangePasswordCommand() *cli.Command {
+	return &cli.Command{
+		Name:      "change-password",
+		Usage:     "Change password.",
+		ArgsUsage: "",
+		Action: func(_ *cli.Context) error {
+			var (
+				err                  error
+				storage              *s.Storage
+				newPasswordIn        string
+				newPasswordConfirmIn string
+			)
 
-// Execute is the main function. It will be called on change-password command.
-func (c *ChangePassword) Execute(opts *commander.CommandHelper) {
-	storage, err := s.PrepareStorage()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
+			if storage, err = s.PrepareStorage(); err != nil {
+				return err
+			}
 
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-	newPasswordIn, err := term.Hidden("New Password:")
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
+			if newPasswordIn, err = term.Hidden("New Password:"); err != nil {
+				return err
+			}
 
-	newPasswordConfirmIn, err := term.Hidden("Again:")
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
+			if newPasswordConfirmIn, err = term.Hidden("Again:"); err != nil {
+				return err
+			}
 
-	if !CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
-		fmt.Println("New Password and the confirm mismatch!")
-		os.Exit(1)
-	}
+			if !CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
+				return fmt.Errorf("New Password and the confirm mismatch!")
+			}
 
-	storage.Password = newPasswordIn
+			storage.Password = newPasswordIn
 
-	err = storage.Save()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-		os.Exit(1)
-	}
-}
+			if err = storage.Save(); err != nil {
+				return err
+			}
 
-// NewChangePassword create a new ChangePassword command.
-func NewChangePassword(appName string) *commander.CommandWrapper {
-	return &commander.CommandWrapper{
-		Handler: &ChangePassword{},
-		Help: &commander.CommandDescriptor{
-			Name:             "change-password",
-			ShortDescription: "Change password",
+			return nil
 		},
 	}
 }
