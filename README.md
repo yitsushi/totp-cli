@@ -260,10 +260,13 @@ compinit
 ## About the password
 
 The password should never be passed directly to any applications to unlock it.
-Because of that, `totp-cli` will not support any features like that, type in the
-password. If you save it in a variable it can be exposed if your `ENV` is
-exposed somehow, if you directly type in the password in the command line, it
-can end up in your bash/zsh/whatevershell history.
+If you save it in a variable it can be exposed if your `ENV` is exposed somehow,
+if you directly type in the password in the command line, it can end up in your
+bash/zsh/whatevershell history.
+
+Mostly to support CD/CI automation, there is an option to set the
+password/passphrase as an environment variable. **Please use it only if you know
+the system is safe to store passwords in environment variables.**
 
 If you really want to skip the password prompt, it reads from `stdin`, so you
 can pipe the password.
@@ -290,6 +293,24 @@ Password: ***
 ❯ totp-pass-in| totp-cli generate xxxxx xxxxx
 Password: ***
 889840
+```
+
+Other option is to use environment variable:
+
+```
+❯ age \
+  --encrypt \
+  --armor \
+  --recipient age15velesv0zwpsc5w0n4da5tv64u9fzuhl8hjpvdmeayjg00fdf4wsxl834c \
+  > "${HOME}/.config/totp-cli/totp-password.age"
+myapssword
+^D
+
+❯ export TOTP_PASS=$(age --decrypt --identity ~/.age/efertone.txt ~/.config/totp-cli/totp-password.age)
+Password: ***
+
+❯ totp-cli generate xxxxx xxxxx
+166307
 ```
 
 But I'm really against it, it's a password that can access all your stored 2FA
