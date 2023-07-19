@@ -218,9 +218,12 @@ func PrepareStorage() (*Storage, error) {
 	if storage == nil {
 		term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-		password, termErr := term.Hidden("Password:")
-		if termErr != nil {
-			return nil, BackendError{Message: err.Error()}
+		password := os.Getenv("TOTP_PASS")
+
+		if password == "" {
+			if password, err = term.Hidden("Password:"); err != nil {
+				return nil, BackendError{Message: err.Error()}
+			}
 		}
 
 		storage = &Storage{
