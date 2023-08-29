@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/yitsushi/totp-cli/internal/security"
 	"os"
 
 	"github.com/urfave/cli/v2"
@@ -37,7 +38,7 @@ func ChangePasswordCommand() *cli.Command {
 				return err
 			}
 
-			if !CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
+			if !security.CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
 				return CommandError{Message: "new password and the confirm mismatch"}
 			}
 
