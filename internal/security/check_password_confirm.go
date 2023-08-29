@@ -1,4 +1,4 @@
-package cmd
+package security
 
 // CheckPasswordConfirm checks two byte array if the content is the same.
 func CheckPasswordConfirm(password, confirm []byte) bool {

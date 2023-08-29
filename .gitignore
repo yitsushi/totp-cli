@@ -1,3 +1,4 @@
 bin/
 totp-cli
 coverage.out
+.idea
