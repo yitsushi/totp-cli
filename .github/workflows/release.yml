@@ -11,30 +11,36 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: release linux/amd64
-      uses: wangyoucao577/go-release-action@v1.35
+      uses: wangyoucao577/go-release-action@v1.40
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
         goos: linux
+        ldflags:
+          - -s -w
   windows:
     name: Release windows/amd64
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: release windows/amd64
-      uses: wangyoucao577/go-release-action@v1.35
+      uses: wangyoucao577/go-release-action@v1.40
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
         goos: windows
+        ldflags:
+          - -s -w
   darwin:
     name: Release darwin/amd64
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: release darwin/amd64
-      uses: wangyoucao577/go-release-action@v1.35
+      uses: wangyoucao577/go-release-action@v1.40
       with:
         github_token: ${{ secrets.github_token }}
         goarch: amd64
         goos: darwin
+        ldflags:
+          - -s -w
