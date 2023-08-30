@@ -17,7 +17,7 @@ jobs:
         goarch: amd64
         goos: linux
         ldflags:
-          - -s -w
+          - "-s -w"
   windows:
     name: Release windows/amd64
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
         goarch: amd64
         goos: windows
         ldflags:
-          - -s -w
+          - "-s -w"
   darwin:
     name: Release darwin/amd64
     runs-on: ubuntu-latest
@@ -43,4 +43,4 @@ jobs:
         goarch: amd64
         goos: darwin
         ldflags:
-          - -s -w
+          - "-s -w"
