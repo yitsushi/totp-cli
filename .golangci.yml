@@ -30,6 +30,16 @@ linters-settings:
       - ns
       - err
       - iv
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - filippo.io/age
+          - github.com/urfave/cli/v2
+          - github.com/yitsushi/totp-cli
+          - github.com/kardianos/osext
+          - github.com/yitsushi/github-release-check
 
 issues:
   exclude-rules:
@@ -68,6 +78,9 @@ linters:
     - exhaustivestruct
     - scopelint
     - structcheck
+
+    # Disabled because I need naked return to handle extra errors in defer.
+    - nakedret
 
     # Just disabled them...
     - exhaustruct
