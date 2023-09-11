@@ -25,7 +25,7 @@ const (
 	storageFilePermissions      = 0o600
 )
 
-// age defaults to a workFactor of 18 which works out to about a 1 second
+// age defaults to a workFactor of 18 which works out to about a second
 // delay. The go docs (and the author of scrypt) suggest that a more
 // interactive use case should target about 100ms. totp-cli uses a lower
 // value of 15 in order to meet that goal. This can be adjusted in the
@@ -208,7 +208,7 @@ func (s *Storage) DeleteNamespace(namespace *Namespace) {
 	s.Namespaces = s.Namespaces[:len(s.Namespaces)-1]
 }
 
-// PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exists it creates one.
+// PrepareStorage loads, decrypt and parse the Storage. If the storage file does not exist it creates one.
 func PrepareStorage() (*Storage, error) {
 	credentialFile, storage, err := initStorage()
 	if err != nil {
@@ -312,7 +312,7 @@ func (s *Storage) parseV1(decodedData []byte) error {
 		}
 	}
 
-	namespaces := []*Namespace{}
+	namespaces := make([]*Namespace, 0, len(parsedData))
 
 	for namespaceName, value := range parsedData {
 		var accounts []*Account
@@ -332,7 +332,7 @@ func (s *Storage) parseV1(decodedData []byte) error {
 }
 
 func (s *Storage) parseV2(decodedData []byte) error {
-	namespaces := []*Namespace{}
+	var namespaces []*Namespace
 
 	// remove junk
 	originalDataLength := bytes.IndexByte(decodedData, 0)

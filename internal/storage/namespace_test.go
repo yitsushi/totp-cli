@@ -10,7 +10,7 @@ import (
 
 func TestFindAccount(t *testing.T) {
 	namespace := &storage.Namespace{
-		Name: "mynamespace",
+		Name: "myNamespace",
 		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},
@@ -26,7 +26,7 @@ func TestFindAccount(t *testing.T) {
 
 func TestFindAccount_NotFound(t *testing.T) {
 	namespace := &storage.Namespace{
-		Name: "mynamespace",
+		Name: "myNamespace",
 		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},
@@ -52,7 +52,7 @@ func TestDeleteAccount(t *testing.T) {
 	)
 
 	namespace := &storage.Namespace{
-		Name: "mynamespace",
+		Name: "myNamespace",
 		Accounts: []*storage.Account{
 			{Name: "Account1", Token: "token1"},
 			{Name: "Account2", Token: "token2"},

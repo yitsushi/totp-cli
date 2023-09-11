@@ -26,10 +26,10 @@ func New(in io.Reader, out io.Writer, errorOut io.Writer) Terminal {
 	}
 }
 
-// Read text from input with optinal prompt.
+// Read text from input with optional prompt.
 func (t Terminal) Read(prompt string) (string, error) {
 	if prompt != "" {
-		fmt.Fprintf(t.Output, "%s ", prompt)
+		_, _ = fmt.Fprintf(t.Output, "%s ", prompt)
 	}
 
 	reader := bufio.NewReader(t.Input)
@@ -67,7 +67,7 @@ func (t Terminal) Hidden(prompt string) (string, error) {
 	)
 
 	if prompt != "" {
-		fmt.Fprintf(t.ErrorOutput, "%s ", prompt)
+		_, _ = fmt.Fprintf(t.ErrorOutput, "%s ", prompt)
 	}
 
 	in, inIsFile := t.Input.(*os.File)
@@ -81,7 +81,7 @@ func (t Terminal) Hidden(prompt string) (string, error) {
 		text, err = t.Read("")
 	}
 
-	fmt.Fprintln(t.ErrorOutput, "***")
+	_, _ = fmt.Fprintln(t.ErrorOutput, "***")
 
 	return strings.TrimSpace(text), err
 }

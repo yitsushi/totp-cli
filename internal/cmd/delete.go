@@ -10,14 +10,14 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-// DeleteCommand is the delete subcommand.
+// DeleteCommand is subcommand to delete an account or a namespace.
 func DeleteCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "delete",
 		Usage:     "Delete an account or a whole namespace.",
 		ArgsUsage: "<namespace> [account]",
 		Action: func(ctx *cli.Context) (err error) {
-			namespaceName := ctx.Args().Get(argPositionNamespace)
+			namespaceName := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(namespaceName) < 1 {
 				return CommandError{Message: "namespace is not defined"}
 			}
@@ -46,7 +46,7 @@ func DeleteCommand() *cli.Command {
 
 			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-			if accountName := ctx.Args().Get(argPositionAccount); accountName != "" {
+			if accountName := ctx.Args().Get(argSetPrefixPositionAccount); accountName != "" {
 				if account, err = namespace.FindAccount(accountName); err != nil {
 					return
 				}

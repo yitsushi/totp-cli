@@ -19,15 +19,14 @@ const (
 	shift24            = 24
 	shift16            = 16
 	shift8             = 8
-	codeLength         = 6
 	sumByteLength      = 8
 	passwordHashLength = 32
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token.
-func GenerateOTPCode(token string, when time.Time) (string, error) {
+func GenerateOTPCode(token string, when time.Time, length uint) (string, error) {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(timeSplitInSeconds)))
-	// Remove spaces, some providers are giving us in a readable format
+	// Remove spaces, some providers are giving us in a readable format,
 	// so they add spaces in there. If it's not removed while pasting in,
 	// remove it now.
 	token = strings.ReplaceAll(token, " ", "")
@@ -38,6 +37,10 @@ func GenerateOTPCode(token string, when time.Time) (string, error) {
 	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
 	if err != nil {
 		return "", OTPError{Message: err.Error()}
+	}
+
+	if length == 0 {
+		length = 6
 	}
 
 	buf := make([]byte, sumByteLength)
@@ -54,9 +57,9 @@ func GenerateOTPCode(token string, when time.Time) (string, error) {
 		((int(sum[offset+2] & mask3)) << shift8) |
 		(int(sum[offset+3]) & mask3))
 
-	modulo := int32(value % int64(math.Pow10(codeLength)))
+	modulo := int32(value % int64(math.Pow10(int(length))))
 
-	format := fmt.Sprintf("%%0%dd", codeLength)
+	format := fmt.Sprintf("%%0%dd", length)
 
 	return fmt.Sprintf(format, modulo), nil
 }

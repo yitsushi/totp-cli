@@ -11,7 +11,7 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-// ImportCommand is the import subcommand.
+// ImportCommand is the subcommand to import data from a YAML file.
 func ImportCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "import",
@@ -33,7 +33,7 @@ func ImportCommand() *cli.Command {
 				return
 			}
 
-			nsList := []*s.Namespace{}
+			var nsList []*s.Namespace
 
 			if err = yaml.Unmarshal(file, &nsList); err != nil {
 				err = CommandError{Message: "invalid file format"}
