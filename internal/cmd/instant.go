@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/yitsushi/totp-cli/internal/security"
+	"github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
@@ -17,14 +18,23 @@ func InstantCommand() *cli.Command {
 		Name:      "instant",
 		Usage:     "Generate an OTP from TOTP_TOKEN or stdin without the Storage backend.",
 		ArgsUsage: " ",
-		Action: func(_ *cli.Context) error {
+		Flags: []cli.Flag{
+			&cli.UintFlag{
+				Name:  "length",
+				Value: storage.DefaultTokenLength,
+				Usage: "Length of the generated token.",
+			},
+		},
+		Action: func(ctx *cli.Context) error {
 			token := os.Getenv("TOTP_TOKEN")
 			if token == "" {
 				term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 				token, _ = term.Read("")
 			}
 
-			code, err := security.GenerateOTPCode(token, time.Now())
+			length := ctx.Uint("length")
+
+			code, err := security.GenerateOTPCode(token, time.Now(), length)
 			if err != nil {
 				return err
 			}

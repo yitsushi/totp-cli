@@ -29,6 +29,7 @@ func newApplication() *cli.App {
 			cmd.ListCommand(),
 			cmd.SetPrefixCommand(),
 			cmd.UpdateCommand(),
+			cmd.SetLengthCommand(),
 		},
 		Authors: []*cli.Author{
 			{Name: "Efertone", Email: "efertone@pm.me"},
@@ -39,7 +40,7 @@ func newApplication() *cli.App {
 				return
 			}
 
-			fmt.Fprintf(stdErr, " !!! %s\n", err)
+			_, _ = fmt.Fprintf(stdErr, " !!! %s\n", err)
 
 			_ = cli.ShowAppHelp(ctx)
 		},

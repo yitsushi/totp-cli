@@ -10,7 +10,7 @@ import (
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
-// GenerateCommand is the generate subcommand.
+// GenerateCommand is the subcommand to generate a TOTP token.
 func GenerateCommand() *cli.Command {
 	return &cli.Command{
 		Name:    "generate",
@@ -25,12 +25,12 @@ func GenerateCommand() *cli.Command {
 		Usage:     "Generate a specific OTP",
 		ArgsUsage: "<namespace> <account>",
 		Action: func(ctx *cli.Context) error {
-			namespaceName := ctx.Args().Get(argPositionNamespace)
+			namespaceName := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(namespaceName) < 1 {
 				return CommandError{Message: "namespace is not defined"}
 			}
 
-			accountName := ctx.Args().Get(argPositionAccount)
+			accountName := ctx.Args().Get(argSetPrefixPositionAccount)
 			if len(accountName) < 1 {
 				return CommandError{Message: "account is not defined"}
 			}
@@ -75,7 +75,7 @@ func GenerateCommand() *cli.Command {
 }
 
 func generateCode(account *s.Account) string {
-	code, err := security.GenerateOTPCode(account.Token, time.Now())
+	code, err := security.GenerateOTPCode(account.Token, time.Now(), account.Length)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 	}

@@ -110,6 +110,14 @@ Token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 Password: ***
 ```
 
+If the provider uses a different length for tokens, you can set it on
+`add-token` or set with `set-length`.
+
+```
+totp-cli add-token --length=8 personal randomaccount
+totp-cli set-length personal randomaccount 6
+```
+
 If you want to delete `randomaccount` _(because it was a test for example)_,
 you can use `delete`:
 
@@ -154,17 +162,19 @@ personal.dropbox
 personal.facebook
 ```
 
-If you want to change your password,
-you can do it with the `change-password` command.
+If you want to change your password, you can do it with the `change-password`
+command.
 
-A prefix can be set with `set-prefix`:
+Some providers require the user to prefix the generated token with their
+password or passphrase. You can set a prefix for each account with `set-prefix`,
+or set with `add-token`.
 
 ```
 totp-cli set-prefix ns account
 Prefix: myprefix
 
-# Or with positional argument
-totp-cli set-prefix ns account myprefix
+totp-cli add-token --prefix=asd personal randomaccount
+totp-cli set-prefix personal randomaccount asd
 
 # Clear prefix
 totp-cli set-prefix ns account --clear

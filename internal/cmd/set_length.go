@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/urfave/cli/v2"
 
@@ -10,30 +11,22 @@ import (
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
-// SetPrefixCommand is the set-prefix subcommand.
-func SetPrefixCommand() *cli.Command {
+// SetLengthCommand is the set-prefix subcommand.
+func SetLengthCommand() *cli.Command {
 	return &cli.Command{
-		Name:      "set-prefix",
-		Usage:     "Set prefix for a token.",
-		ArgsUsage: "[namespace] [account] [prefix]",
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "clear",
-				Value: false,
-				Usage: "Clear prefix from account.",
-			},
-		},
+		Name:      "set-length",
+		Usage:     "Set length for a token.",
+		ArgsUsage: "[namespace] [account] [length]",
 		Action: func(ctx *cli.Context) (err error) {
 			var (
 				namespace *s.Namespace
 				account   *s.Account
 			)
 
-			nsName, accName, prefix := askForSetPrefixDetails(
-				ctx.Args().Get(argSetPrefixPositionNamespace),
-				ctx.Args().Get(argSetPrefixPositionAccount),
-				ctx.Args().Get(argSetPrefixPositionPrefix),
-				ctx.Bool("clear"),
+			nsName, accName, length := askForSetLengthDetails(
+				ctx.Args().Get(argSetLengthPositionNamespace),
+				ctx.Args().Get(argSetLengthPositionAccount),
+				ctx.Args().Get(argSetLengthPositionPrefix),
 			)
 
 			storage, err := s.PrepareStorage()
@@ -59,14 +52,14 @@ func SetPrefixCommand() *cli.Command {
 				return CommandError{Message: fmt.Sprintf("%s/%s does not exist", namespace.Name, accName)}
 			}
 
-			account.Prefix = prefix
+			account.Length = length
 
 			return nil
 		},
 	}
 }
 
-func askForSetPrefixDetails(namespace, account, prefix string, clear bool) (string, string, string) {
+func askForSetLengthDetails(namespace, account, length string) (string, string, uint) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
 	for len(namespace) < 1 {
@@ -77,13 +70,11 @@ func askForSetPrefixDetails(namespace, account, prefix string, clear bool) (stri
 		account, _ = term.Read("Account:")
 	}
 
-	if clear {
-		return namespace, account, ""
+	for len(length) < 1 {
+		length, _ = term.Read("Length:")
 	}
 
-	for len(prefix) < 1 {
-		prefix, _ = term.Read("Prefix:")
-	}
+	u64Value, _ := strconv.ParseUint(length, 10, 32)
 
-	return namespace, account, prefix
+	return namespace, account, uint(u64Value)
 }

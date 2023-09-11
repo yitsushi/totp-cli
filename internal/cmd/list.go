@@ -21,7 +21,7 @@ func ListCommand() *cli.Command {
 				return err
 			}
 
-			ns := ctx.Args().Get(argPositionNamespace)
+			ns := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(ns) < 1 {
 				for _, namespace := range storage.Namespaces {
 					fmt.Printf("%s (Number of accounts: %d)\n", namespace.Name, len(namespace.Accounts))

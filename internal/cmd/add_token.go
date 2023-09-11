@@ -17,6 +17,18 @@ func AddTokenCommand() *cli.Command {
 		Aliases:   []string{"add"},
 		Usage:     "Add new token.",
 		ArgsUsage: "[namespace] [account]",
+		Flags: []cli.Flag{
+			&cli.UintFlag{
+				Name:  "length",
+				Value: s.DefaultTokenLength,
+				Usage: "Length of the generated token.",
+			},
+			&cli.StringFlag{
+				Name:  "prefix",
+				Value: "",
+				Usage: "Prefix for the token.",
+			},
+		},
 		Action: func(ctx *cli.Context) error {
 			var (
 				namespace *s.Namespace
@@ -25,8 +37,8 @@ func AddTokenCommand() *cli.Command {
 			)
 
 			nsName, accName, token := askForAddTokenDetails(
-				ctx.Args().Get(argPositionNamespace),
-				ctx.Args().Get(argPositionAccount),
+				ctx.Args().Get(argSetPrefixPositionNamespace),
+				ctx.Args().Get(argSetPrefixPositionAccount),
 			)
 
 			storage, err := s.PrepareStorage()
@@ -47,7 +59,7 @@ func AddTokenCommand() *cli.Command {
 				}
 			}
 
-			account = &s.Account{Name: accName, Token: token}
+			account = &s.Account{Name: accName, Token: token, Prefix: ctx.String("prefix"), Length: ctx.Uint("length")}
 			namespace.Accounts = append(namespace.Accounts, account)
 
 			err = storage.Save()
