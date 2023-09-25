@@ -24,8 +24,10 @@ const (
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token.
-func GenerateOTPCode(token string, when time.Time, length uint) (string, error) {
+func GenerateOTPCode(token string, when time.Time, length uint) (string, int64, error) {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(timeSplitInSeconds)))
+	remainingTime := timeSplitInSeconds - when.Unix()%timeSplitInSeconds
+
 	// Remove spaces, some providers are giving us in a readable format,
 	// so they add spaces in there. If it's not removed while pasting in,
 	// remove it now.
@@ -36,7 +38,7 @@ func GenerateOTPCode(token string, when time.Time, length uint) (string, error) 
 
 	secretBytes, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(token)
 	if err != nil {
-		return "", OTPError{Message: err.Error()}
+		return "", 0, OTPError{Message: err.Error()}
 	}
 
 	if length == 0 {
@@ -61,5 +63,5 @@ func GenerateOTPCode(token string, when time.Time, length uint) (string, error) 
 
 	format := fmt.Sprintf("%%0%dd", length)
 
-	return fmt.Sprintf(format, modulo), nil
+	return fmt.Sprintf(format, modulo), remainingTime, nil
 }

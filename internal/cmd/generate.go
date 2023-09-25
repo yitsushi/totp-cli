@@ -6,7 +6,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
@@ -20,6 +19,11 @@ func GenerateCommand() *cli.Command {
 				Name:  "follow",
 				Value: false,
 				Usage: "Generate codes continuously.",
+			},
+			&cli.BoolFlag{
+				Name:  "show-remaining",
+				Value: false,
+				Usage: "Show how much time left until the code will be invalid.",
 			},
 		},
 		Usage:     "Generate a specific OTP",
@@ -42,18 +46,13 @@ func GenerateCommand() *cli.Command {
 				return err
 			}
 
-			namespace, err := storage.FindNamespace(namespaceName)
+			account, err := getAccount(storage, namespaceName, accountName)
 			if err != nil {
 				return err
 			}
 
-			account, err := namespace.FindAccount(accountName)
-			if err != nil {
-				return err
-			}
-
-			code := generateCode(account)
-			fmt.Println(code)
+			code, remaining := generateCode(account)
+			fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
 
 			if !follow {
 				return nil
@@ -62,9 +61,9 @@ func GenerateCommand() *cli.Command {
 			previousCode := code
 
 			for {
-				code := generateCode(account)
+				code, remaining := generateCode(account)
 				if code != previousCode {
-					fmt.Println(code)
+					fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
 					previousCode = code
 				}
 
@@ -74,15 +73,16 @@ func GenerateCommand() *cli.Command {
 	}
 }
 
-func generateCode(account *s.Account) string {
-	code, err := security.GenerateOTPCode(account.Token, time.Now(), account.Length)
+func getAccount(storage *s.Storage, namespaceName, accountName string) (*s.Account, error) {
+	namespace, err := storage.FindNamespace(namespaceName)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
+		return nil, err
 	}
 
-	if account.Prefix != "" {
-		code = account.Prefix + code
+	account, err := namespace.FindAccount(accountName)
+	if err != nil {
+		return nil, err
 	}
 
-	return code
+	return account, nil
 }

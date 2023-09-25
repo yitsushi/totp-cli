@@ -24,6 +24,11 @@ func InstantCommand() *cli.Command {
 				Value: storage.DefaultTokenLength,
 				Usage: "Length of the generated token.",
 			},
+			&cli.BoolFlag{
+				Name:  "show-remaining",
+				Value: false,
+				Usage: "Show how much time left until the code will be invalid.",
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			token := os.Getenv("TOTP_TOKEN")
@@ -34,12 +39,12 @@ func InstantCommand() *cli.Command {
 
 			length := ctx.Uint("length")
 
-			code, err := security.GenerateOTPCode(token, time.Now(), length)
+			code, remaining, err := security.GenerateOTPCode(token, time.Now(), length)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(code)
+			fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
 
 			return nil
 		},

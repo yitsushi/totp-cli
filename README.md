@@ -16,8 +16,13 @@ from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest) o
 go install github.com/yitsushi/totp-cli@latest
 ```
 
-Users on macOS can also install the package using [MacPorts](https://ports.macports.org/port/totp-cli/summary):
+#### Aletrnative
 
+I'm not the maintainer of the MacPorts or the Homebrew package, if it's outdated
+please contact with the maintainer.
+
+
+Users on macOS can also install the package using [MacPorts](https://ports.macports.org/port/totp-cli/summary):
 ```shell
 sudo port selfupdate
 sudo port install totp-cli
@@ -199,6 +204,14 @@ Password: ***
 463346
 ```
 
+If the provider is very strict with the code, with the `--show-remaining` flag
+will add extra information about how long the code will be valid.
+
+```
+totp-cli generate --show-remaining namespace account
+Password: ***
+316762 (remaining time: 17s)
+```
 
 ### Changing the location of the credentials file
 
