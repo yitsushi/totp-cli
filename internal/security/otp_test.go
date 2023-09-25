@@ -2,9 +2,10 @@ package security_test
 
 import (
 	"encoding/base32"
-	"github.com/yitsushi/totp-cli/internal/storage"
 	"testing"
 	"time"
+
+	"github.com/yitsushi/totp-cli/internal/storage"
 
 	"github.com/stretchr/testify/assert"
 
@@ -24,7 +25,7 @@ func TestGenerateOTPCode(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
@@ -44,7 +45,7 @@ func TestGenerateOTPCode_length8(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code, err := security.GenerateOTPCode(input, when, 8)
+		code, _, err := security.GenerateOTPCode(input, when, 8)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
@@ -64,7 +65,7 @@ func TestGenerateOTPCode_SpaceSeparatedToken(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
@@ -84,7 +85,7 @@ func TestGenerateOTPCode_NonPaddedHashes(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, code, when.String())
@@ -99,7 +100,7 @@ func TestGenerateOTPCode_InvaidPadding(t *testing.T) {
 	}
 
 	for when, expected := range table {
-		code, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
 		assert.Error(t, err)
 		assert.Equal(t, expected, code, when.String())
