@@ -55,7 +55,7 @@ USAGE:
    totp-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   v1.4.0
+   v1.8.0
 
 AUTHOR:
    Efertone <efertone@pm.me>
@@ -70,6 +70,8 @@ COMMANDS:
    instant          Generate an OTP from TOTP_TOKEN or stdin without the Storage backend.
    list             List all available namespaces or accounts under a namespace.
    set-prefix       Set prefix for a token.
+   set-length       Set length for a token.
+   rename           Rename an account or namespace
    help, h          Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
