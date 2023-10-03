@@ -30,6 +30,7 @@ func newApplication() *cli.App {
 			cmd.SetPrefixCommand(),
 			cmd.UpdateCommand(),
 			cmd.SetLengthCommand(),
+			cmd.RenameCommand(),
 		},
 		Authors: []*cli.Author{
 			{Name: "Efertone", Email: "efertone@pm.me"},
