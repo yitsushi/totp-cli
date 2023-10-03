@@ -28,7 +28,6 @@ func newApplication() *cli.App {
 			cmd.InstantCommand(),
 			cmd.ListCommand(),
 			cmd.SetPrefixCommand(),
-			cmd.UpdateCommand(),
 			cmd.SetLengthCommand(),
 			cmd.RenameCommand(),
 		},

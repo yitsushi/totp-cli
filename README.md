@@ -34,12 +34,6 @@ or [Homebrew](https://brew.sh/):
 brew install totp-cli
 ```
 
-### Update
-
-```shell
-totp-cli update
-```
-
 #### Upgrading from totp-cli v1.2.7 or below
 
 Starting with totp-cli v1.2.8 a [more secure storage
@@ -76,7 +70,6 @@ COMMANDS:
    instant          Generate an OTP from TOTP_TOKEN or stdin without the Storage backend.
    list             List all available namespaces or accounts under a namespace.
    set-prefix       Set prefix for a token.
-   update           Check and update totp-cli itself
    help, h          Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:

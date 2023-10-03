@@ -11,7 +11,5 @@ const (
 	argSetLengthPositionAccount   = 1
 	argSetLengthPositionPrefix    = 2
 
-	binaryChmodValue = 0o755
-
 	strictDumpFilePerms = 0o600
 )

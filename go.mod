@@ -4,10 +4,8 @@ go 1.21
 
 require (
 	filippo.io/age v1.1.1
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.25.7
-	github.com/yitsushi/github-release-check v1.0.2
 	golang.org/x/term v0.11.0
 	gopkg.in/yaml.v3 v3.0.1
 )
