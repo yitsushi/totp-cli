@@ -1,7 +1,5 @@
 #! /bin/bash
 
-: totp-cli
-
 # Macs have bash3 for which the bash-completion package doesn't include
 # _init_completion. This is a minimal version of that function.
 _cli_init_completion() {
@@ -32,4 +30,3 @@ _cli_bash_autocomplete() {
 }
 
 complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete totp-cli
-unset totp-cli
