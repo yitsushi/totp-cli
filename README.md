@@ -258,8 +258,15 @@ totp-cli import list.yaml
 
 ### Shell Completion
 
+Disclaimer: I don't have much expertise with auto-complete integrations. The
+following instructions should be enough, but it is possible they are not. Feel
+free to open a Pull Request with any additional suggestions/fixes either in the
+docs or the autocomplete scripts.
+
 * Bash: `autocomplete/bash_autocomplete`
 * Zsh: `autocomplete/zsh_autocomplete`
+
+#### Zsh
 
 A function to provide tab-completion for zsh is in the file
 `autocomplete/zsh_autocomplete`. When installing or packaging totp-cli this
@@ -270,9 +277,17 @@ functions into the folder `~/.zsh/completions` you must add the following to
 your zsh main config file (`.zshrc`):
 
 ```shell
+cp autocomplete/zsh_autocomplete ~/.zsh/functions/_totp_cli
 fpath=( ~/.zsh/completions $fpath )
 autoload -U compinit
 compinit
+```
+
+#### Bash
+
+```
+mkdir -p ~/.local/share/bash-completion/completions
+cp autocomplete/bash_autocomplete ~/.local/share/bash-completion/completions/totp-cli
 ```
 
 ## About the password
