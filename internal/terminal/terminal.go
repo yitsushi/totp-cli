@@ -36,7 +36,7 @@ func (t Terminal) Read(prompt string) (string, error) {
 
 	text, readErr := reader.ReadString('\n')
 	if readErr != nil {
-		return "", fmt.Errorf("error reading from input: %w", readErr)
+		return text, fmt.Errorf("error reading from input: %w", readErr)
 	}
 
 	text = strings.TrimSpace(text)
