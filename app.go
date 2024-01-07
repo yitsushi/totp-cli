@@ -14,10 +14,10 @@ func newApplication() *cli.App {
 	stdErr := os.Stderr
 
 	return &cli.App{
-		Name:     info.AppName,
+		Name:     info.Name,
 		HelpName: "totp-cli",
 		Usage:    "Authy/Google Authenticator like TOTP CLI tool written in Go.",
-		Version:  info.AppVersion,
+		Version:  info.Version,
 		Commands: []*cli.Command{
 			cmd.AddTokenCommand(),
 			cmd.ChangePasswordCommand(),
