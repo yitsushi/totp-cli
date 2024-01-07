@@ -92,7 +92,7 @@ func TestGenerateOTPCode_NonPaddedHashes(t *testing.T) {
 	}
 }
 
-func TestGenerateOTPCode_InvaidPadding(t *testing.T) {
+func TestGenerateOTPCode_InvalidPadding(t *testing.T) {
 	input := "a6mr*&^&*%*&ylj|'[lbufszudtjdt42nh5by"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):   "",

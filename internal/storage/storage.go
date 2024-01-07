@@ -40,7 +40,7 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
-// DecryptV1 tries to decrypt the original unsecure SHA1 storage.
+// DecryptV1 tries to decrypt the original insecure SHA1 storage.
 func (s *Storage) DecryptV1() error {
 	encryptedData, err := os.ReadFile(s.File)
 	if err != nil {
