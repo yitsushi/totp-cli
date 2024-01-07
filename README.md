@@ -34,6 +34,17 @@ or [Homebrew](https://brew.sh/):
 brew install totp-cli
 ```
 
+#### Signing key
+
+On release, there is a checksum file for all generated artefacts. This file is
+signed with the [66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF](https://keys.openpgp.org/search?q=66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF)
+GPG key.
+
+```
+gpg --keyserver keys.openpgp.org --search 66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF
+gpg --verify totp-cli_{{.Version}}_checksums.txt.sig
+```
+
 #### Upgrading from totp-cli v1.2.7 or below
 
 Starting with totp-cli v1.2.8 a [more secure storage
