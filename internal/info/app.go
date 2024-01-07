@@ -1,10 +1,13 @@
 package info
 
-// AppRepoOwner defined the owner of the repo on GitHub.
-const AppRepoOwner string = "yitsushi"
+// RepoOwner defined the owner of the repo on GitHub.
+const RepoOwner = "yitsushi"
 
-// AppName defined the application name.
-const AppName string = "totp-cli"
+// Name defined the application name.
+const Name = "totp-cli"
 
-// AppVersion defined current version of this application.
-const AppVersion string = "v1.8.5"
+// Version defined current version of this application.
+var Version = "dev"
+
+// Commit defined commit hash of the current build.
+var Commit = "unknown"
