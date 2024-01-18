@@ -96,7 +96,7 @@ When you run the application for the first time, it will ask
 for your password. **DO NOT FORGET IT!** There is no way to
 recover your password if you forget it.
 
-Your first command _(after `help`)_ would be `add-token`. You get get
+Your first command _(after `help`)_ would be `add-token`. You can get
 your token read a TOTP QR Code.
 
 ```shell
