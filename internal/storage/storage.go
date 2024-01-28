@@ -40,7 +40,8 @@ type Storage struct {
 	Namespaces []*Namespace
 }
 
-// DecryptV1 tries to decrypt the original insecure SHA1 storage.
+// DecryptV1 tries to decrypt the storage with AES encryption using the SHA1
+// hash of the password as encryption key.
 func (s *Storage) DecryptV1() error {
 	encryptedData, err := os.ReadFile(s.File)
 	if err != nil {
@@ -74,7 +75,8 @@ func (s *Storage) DecryptV1() error {
 	return s.parse(decodedData)
 }
 
-// DecryptV2 tries to decrypt the newer age storage.
+// DecryptV2 tries to decrypt the storage with "age" encryption using the
+// password as it is as password.
 func (s *Storage) DecryptV2() error {
 	rawFile, err := os.Open(s.File)
 	if err != nil {
