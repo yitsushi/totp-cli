@@ -19,12 +19,12 @@ func ChangePasswordCommand() *cli.Command {
 		Action: func(_ *cli.Context) error {
 			var (
 				err                  error
-				storage              *s.Storage
 				newPasswordIn        string
 				newPasswordConfirmIn string
 			)
 
-			if storage, err = s.PrepareStorage(); err != nil {
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
 				return err
 			}
 
@@ -42,7 +42,7 @@ func ChangePasswordCommand() *cli.Command {
 				return CommandError{Message: "new password and the confirm mismatch"}
 			}
 
-			storage.Password = newPasswordIn
+			storage.SetPassword(newPasswordIn)
 
 			return storage.Save()
 		},

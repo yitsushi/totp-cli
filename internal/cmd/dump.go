@@ -37,12 +37,12 @@ func DumpCommand() *cli.Command {
 				}
 			}
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
+			storage := s.NewFileStorage()
+			if err := storage.Prepare(); err != nil {
 				return err
 			}
 
-			out, err := yaml.Marshal(storage.Namespaces)
+			out, err := yaml.Marshal(storage.ListNamespaces())
 			if err != nil {
 				return fmt.Errorf("failed to marshal storage: %w", err)
 			}

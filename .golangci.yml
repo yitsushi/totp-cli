@@ -66,6 +66,10 @@ issues:
   - path: internal/info
     linters:
     - gochecknoglobals
+  - source: "// .* #\\d+"
+    # Ignore TODO lines if they have a GitHub Issue reference.
+    linters:
+    - godox
 
 linters:
   enable-all: true

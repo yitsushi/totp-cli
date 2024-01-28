@@ -24,10 +24,7 @@ func ImportCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx *cli.Context) (err error) {
-			var (
-				file    []byte
-				storage *s.Storage
-			)
+			var file []byte
 
 			if file, err = os.ReadFile(ctx.String("input")); err != nil {
 				return
@@ -41,8 +38,9 @@ func ImportCommand() *cli.Command {
 				return
 			}
 
-			if storage, err = s.PrepareStorage(); err != nil {
-				return
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
+				return err
 			}
 
 			defer func() {
@@ -60,16 +58,11 @@ func ImportCommand() *cli.Command {
 	}
 }
 
-func importNamespaces(storage *s.Storage, nsList []*s.Namespace) {
+func importNamespaces(storage s.Storage, nsList []*s.Namespace) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
 	for _, ns := range nsList {
-		internalNS, err := storage.FindNamespace(ns.Name)
-		if err != nil {
-			storage.Namespaces = append(storage.Namespaces, ns)
-
-			continue
-		}
+		internalNS, _ := storage.AddNamespace(ns)
 
 		for _, acc := range ns.Accounts {
 			internalAcc, err := internalNS.FindAccount(acc.Name)

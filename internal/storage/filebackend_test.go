@@ -9,13 +9,11 @@ import (
 )
 
 func TestFindNamespace(t *testing.T) {
-	storage := &s.Storage{
-		Namespaces: []*s.Namespace{
-			{Name: "Namespace1"},
-			{Name: "Namespace2"},
-			{Name: "Namespace3"},
-		},
-	}
+	storage := s.NewFileStorage()
+
+	storage.AddNamespace(&s.Namespace{Name: "Namespace1"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace2"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace3"})
 
 	namespace, err := storage.FindNamespace("Namespace1")
 
@@ -24,13 +22,11 @@ func TestFindNamespace(t *testing.T) {
 }
 
 func TestFindNamespace_NotFound(t *testing.T) {
-	storage := &s.Storage{
-		Namespaces: []*s.Namespace{
-			{Name: "Namespace1"},
-			{Name: "Namespace2"},
-			{Name: "Namespace3"},
-		},
-	}
+	storage := s.NewFileStorage()
+
+	storage.AddNamespace(&s.Namespace{Name: "Namespace1"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace2"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace3"})
 
 	namespace, err := storage.FindNamespace("NamespaceNotFound")
 
@@ -49,20 +45,18 @@ func TestDeleteNamespace(t *testing.T) {
 		err       error
 	)
 
-	storage := &s.Storage{
-		Namespaces: []*s.Namespace{
-			{Name: "Namespace1"},
-			{Name: "Namespace2"},
-			{Name: "Namespace3"},
-		},
-	}
+	storage := s.NewFileStorage()
 
-	assert.Equal(t, len(storage.Namespaces), 3)
+	storage.AddNamespace(&s.Namespace{Name: "Namespace1"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace2"})
+	storage.AddNamespace(&s.Namespace{Name: "Namespace3"})
+
+	assert.Equal(t, len(storage.ListNamespaces()), 3)
 	namespace, err = storage.FindNamespace("Namespace1")
 	assert.NoError(t, err)
 
 	storage.DeleteNamespace(namespace)
-	assert.Equal(t, len(storage.Namespaces), 2)
+	assert.Equal(t, len(storage.ListNamespaces()), 2)
 	namespace, err = storage.FindNamespace("Namespace1")
 	assert.EqualError(
 		t,
@@ -71,5 +65,5 @@ func TestDeleteNamespace(t *testing.T) {
 		"Error should be 'namespace not found: Namespace1'")
 	// Delete again :D
 	storage.DeleteNamespace(namespace)
-	assert.Equal(t, len(storage.Namespaces), 2)
+	assert.Equal(t, len(storage.ListNamespaces()), 2)
 }

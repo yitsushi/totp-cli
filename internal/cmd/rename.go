@@ -40,9 +40,9 @@ func renameNamespaceCommand() *cli.Command {
 				ctx.Args().Get(argRenameNamespacePositionNewName),
 			)
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
-				return
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
+				return err
 			}
 
 			defer func() {
@@ -76,9 +76,9 @@ func renameAccountCommand() *cli.Command {
 				ctx.Args().Get(argRenameAccountPositionNewName),
 			)
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
-				return
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
+				return err
 			}
 
 			defer func() {

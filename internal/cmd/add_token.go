@@ -41,16 +41,12 @@ func AddTokenCommand() *cli.Command {
 				ctx.Args().Get(argSetPrefixPositionAccount),
 			)
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
 				return err
 			}
 
-			namespace, err = storage.FindNamespace(nsName)
-			if err != nil {
-				namespace = &s.Namespace{Name: nsName}
-				storage.Namespaces = append(storage.Namespaces, namespace)
-			}
+			namespace, _ = storage.AddNamespace(&s.Namespace{Name: nsName})
 
 			account, err = namespace.FindAccount(accName)
 			if err == nil {

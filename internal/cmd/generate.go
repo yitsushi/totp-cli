@@ -41,8 +41,8 @@ func GenerateCommand() *cli.Command {
 
 			follow := ctx.Bool("follow")
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
+			storage := s.NewFileStorage()
+			if err := storage.Prepare(); err != nil {
 				return err
 			}
 
@@ -73,7 +73,7 @@ func GenerateCommand() *cli.Command {
 	}
 }
 
-func getAccount(storage *s.Storage, namespaceName, accountName string) (*s.Account, error) {
+func getAccount(storage s.Storage, namespaceName, accountName string) (*s.Account, error) {
 	namespace, err := storage.FindNamespace(namespaceName)
 	if err != nil {
 		return nil, err

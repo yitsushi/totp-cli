@@ -36,9 +36,9 @@ func SetPrefixCommand() *cli.Command {
 				ctx.Bool("clear"),
 			)
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
-				return
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
+				return err
 			}
 
 			defer func() {
