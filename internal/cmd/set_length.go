@@ -29,9 +29,9 @@ func SetLengthCommand() *cli.Command {
 				ctx.Args().Get(argSetLengthPositionPrefix),
 			)
 
-			storage, err := s.PrepareStorage()
-			if err != nil {
-				return
+			storage := s.NewFileStorage()
+			if err = storage.Prepare(); err != nil {
+				return err
 			}
 
 			defer func() {

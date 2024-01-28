@@ -16,14 +16,14 @@ func ListCommand() *cli.Command {
 		Usage:     "List all available namespaces or accounts under a namespace.",
 		ArgsUsage: "[namespace]",
 		Action: func(ctx *cli.Context) error {
-			storage, err := s.PrepareStorage()
-			if err != nil {
+			storage := s.NewFileStorage()
+			if err := storage.Prepare(); err != nil {
 				return err
 			}
 
 			ns := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(ns) < 1 {
-				for _, namespace := range storage.Namespaces {
+				for _, namespace := range storage.ListNamespaces() {
 					fmt.Printf("%s (Number of accounts: %d)\n", namespace.Name, len(namespace.Accounts))
 				}
 
