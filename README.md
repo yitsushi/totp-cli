@@ -16,7 +16,7 @@ from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest) o
 go install github.com/yitsushi/totp-cli@latest
 ```
 
-#### Aletrnative
+#### Alternative
 
 I'm not the maintainer of the MacPorts or the Homebrew package, if it's outdated
 please contact with the maintainer.
@@ -308,7 +308,7 @@ If you save it in a variable it can be exposed if your `ENV` is exposed somehow,
 if you directly type in the password in the command line, it can end up in your
 bash/zsh/whatevershell history.
 
-Mostly to support CD/CI automation, there is an option to set the
+Mostly to support CI/CD automation, there is an option to set the
 password/passphrase as an environment variable. **Please use it only if you know
 the system is safe to store passwords in environment variables.**
 
@@ -339,7 +339,7 @@ Password: ***
 889840
 ```
 
-Other option is to use environment variable:
+Other option is to use an environment variable:
 
 ```
 ❯ age \
