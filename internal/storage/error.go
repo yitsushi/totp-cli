@@ -19,5 +19,5 @@ type BackendError struct {
 }
 
 func (e BackendError) Error() string {
-	return fmt.Sprintf("storage error: %s", e.Message)
+	return "storage error: " + e.Message
 }
