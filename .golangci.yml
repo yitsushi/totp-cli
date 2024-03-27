@@ -14,7 +14,7 @@ linters-settings:
   stylecheck:
     go: "1.18"
   govet:
-    check-shadowing: true
+    shadow: true
   misspell:
     locale: US
   cyclop:
