@@ -3,12 +3,20 @@ package storage_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/yitsushi/totp-cli/internal/storage"
 )
 
-func TestFindAccount(t *testing.T) {
+func TestAccount(t *testing.T) {
+	suite.Run(t, &AccountTestSuite{})
+}
+
+type AccountTestSuite struct {
+	suite.Suite
+}
+
+func (suite *AccountTestSuite) TestFindAccount() {
 	namespace := &storage.Namespace{
 		Name: "myNamespace",
 		Accounts: []*storage.Account{
@@ -20,11 +28,11 @@ func TestFindAccount(t *testing.T) {
 
 	account, err := namespace.FindAccount("Account1")
 
-	assert.Equal(t, err, nil, "Error should be nil")
-	assert.Equal(t, account.Name, "Account1", "Found account name should be Account1")
+	suite.Require().NoError(err)
+	suite.Equal("Account1", account.Name, "Found account name should be Account1")
 }
 
-func TestFindAccount_NotFound(t *testing.T) {
+func (suite *AccountTestSuite) TestAccountNotFound() {
 	namespace := &storage.Namespace{
 		Name: "myNamespace",
 		Accounts: []*storage.Account{
@@ -36,16 +44,11 @@ func TestFindAccount_NotFound(t *testing.T) {
 
 	account, err := namespace.FindAccount("AccountNotFound")
 
-	assert.EqualError(
-		t,
-		err,
-		"account not found: AccountNotFound",
-		"Error should be 'account not found: AccountNotFound'",
-	)
-	assert.Nil(t, account)
+	suite.Require().ErrorIs(err, storage.NotFoundError{Type: "account", Name: "AccountNotFound"})
+	suite.Nil(account)
 }
 
-func TestDeleteAccount(t *testing.T) {
+func (suite *AccountTestSuite) TestDeleteAccount() {
 	var (
 		account *storage.Account
 		err     error
@@ -60,20 +63,15 @@ func TestDeleteAccount(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, len(namespace.Accounts), 3)
+	suite.Len(namespace.Accounts, 3)
 	account, err = namespace.FindAccount("Account1")
-	assert.NoError(t, err)
+	suite.Require().NoError(err)
 
 	namespace.DeleteAccount(account)
-	assert.Equal(t, len(namespace.Accounts), 2)
+	suite.Len(namespace.Accounts, 2)
 	account, err = namespace.FindAccount("Account1")
-	assert.EqualError(
-		t,
-		err,
-		"account not found: Account1",
-		"Error should be 'account not found: Account1'",
-	)
+	suite.Require().ErrorIs(err, storage.NotFoundError{Type: "account", Name: "Account1"})
 	// Delete again :D
 	namespace.DeleteAccount(account)
-	assert.Equal(t, len(namespace.Accounts), 2)
+	suite.Len(namespace.Accounts, 2)
 }

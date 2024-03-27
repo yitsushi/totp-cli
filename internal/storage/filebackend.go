@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"os/user"
@@ -125,7 +124,7 @@ func (s *FileBackend) DeleteNamespace(namespace *Namespace) {
 func (s *FileBackend) AddNamespace(ns *Namespace) (*Namespace, error) {
 	if lookupNS, err := s.FindNamespace(ns.Name); err == nil {
 		return lookupNS, BackendError{
-			Message: fmt.Sprintf("namespace already exists: %s", ns.Name),
+			Message: "namespace already exists: " + ns.Name,
 		}
 	}
 
@@ -141,8 +140,10 @@ func (s *FileBackend) ListNamespaces() []*Namespace {
 
 // Save tries to encrypt and save the storage.
 func (s *FileBackend) Save() error {
-	tmpFile, err := os.CreateTemp(filepath.Dir(s.file),
-		fmt.Sprintf("%s.*.tmp", filepath.Base(s.file)))
+	tmpFile, err := os.CreateTemp(
+		filepath.Dir(s.file),
+		filepath.Base(s.file)+".*.tmp",
+	)
 	if err != nil {
 		return BackendError{Message: err.Error()}
 	}
@@ -270,27 +271,9 @@ func (s *FileBackend) decryptV2() error {
 func (s *FileBackend) initfileStorage() error {
 	var credentialFile string
 
-	credentialFile = os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
-
-	if credentialFile == "" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return BackendError{Message: err.Error()}
-		}
-
-		homePath := currentUser.HomeDir
-		documentDirectory := filepath.Join(homePath, ".config/totp-cli")
-
-		_, err = os.Stat(documentDirectory)
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
-		}
-
-		if err != nil {
-			return BackendError{Message: err.Error()}
-		}
-
-		credentialFile = filepath.Join(documentDirectory, "credentials")
+	credentialFile, err := s.credentialsFilePath()
+	if err != nil {
+		return err
 	}
 
 	if _, err := os.Stat(credentialFile); err == nil {
@@ -299,11 +282,17 @@ func (s *FileBackend) initfileStorage() error {
 		return nil
 	}
 
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+	password := os.Getenv("TOTP_PASS")
 
-	password, err := term.Hidden("Your Password (do not forget it):")
-	if err != nil {
-		return BackendError{Message: err.Error()}
+	if password == "" {
+		term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+
+		var err error
+
+		password, err = term.Hidden("Your Password (do not forget it):")
+		if err != nil {
+			return BackendError{Message: err.Error()}
+		}
 	}
 
 	s.file = credentialFile
@@ -382,4 +371,30 @@ func (s *FileBackend) parseV2(decodedData []byte) error {
 	s.namespaces = namespaces
 
 	return nil
+}
+
+func (s *FileBackend) credentialsFilePath() (string, error) {
+	filePath := os.Getenv("TOTP_CLI_CREDENTIAL_FILE")
+	if filePath != "" {
+		return filePath, nil
+	}
+
+	currentUser, err := user.Current()
+	if err != nil {
+		return "", BackendError{Message: err.Error()}
+	}
+
+	homePath := currentUser.HomeDir
+	documentDirectory := filepath.Join(homePath, ".config", "totp-cli")
+
+	_, err = os.Stat(documentDirectory)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(documentDirectory, storageDirectoryPermissions)
+	}
+
+	if err != nil {
+		return "", BackendError{Message: err.Error()}
+	}
+
+	return filepath.Join(documentDirectory, "credentials"), nil
 }

@@ -7,12 +7,20 @@ import (
 
 	"github.com/yitsushi/totp-cli/internal/storage"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/yitsushi/totp-cli/internal/security"
 )
 
-func TestGenerateOTPCode(t *testing.T) {
+func TestGenerateOTPCodeSuit(t *testing.T) {
+	suite.Run(t, &GenerateOTPCodeTestSuite{})
+}
+
+type GenerateOTPCodeTestSuite struct {
+	suite.Suite
+}
+
+func (suite *GenerateOTPCodeTestSuite) TestDefault() {
 	input := base32.StdEncoding.EncodeToString([]byte("82394783472398472348"))
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "007459",
@@ -27,12 +35,12 @@ func TestGenerateOTPCode(t *testing.T) {
 	for when, expected := range table {
 		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
-		assert.NoError(t, err)
-		assert.Equal(t, expected, code, when.String())
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
 	}
 }
 
-func TestGenerateOTPCode_length8(t *testing.T) {
+func (suite *GenerateOTPCodeTestSuite) TestDifferentLength() {
 	input := base32.StdEncoding.EncodeToString([]byte("82394783472398472348"))
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "53007459",
@@ -47,12 +55,12 @@ func TestGenerateOTPCode_length8(t *testing.T) {
 	for when, expected := range table {
 		code, _, err := security.GenerateOTPCode(input, when, 8)
 
-		assert.NoError(t, err)
-		assert.Equal(t, expected, code, when.String())
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
 	}
 }
 
-func TestGenerateOTPCode_SpaceSeparatedToken(t *testing.T) {
+func (suite *GenerateOTPCodeTestSuite) TestSpaceSeparatedToken() {
 	input := "37kh vdxt c5hj ttfp ujok cipy jy"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "066634",
@@ -67,12 +75,12 @@ func TestGenerateOTPCode_SpaceSeparatedToken(t *testing.T) {
 	for when, expected := range table {
 		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
-		assert.NoError(t, err)
-		assert.Equal(t, expected, code, when.String())
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
 	}
 }
 
-func TestGenerateOTPCode_NonPaddedHashes(t *testing.T) {
+func (suite *GenerateOTPCodeTestSuite) TestNonPaddedHashes() {
 	input := "a6mryljlbufszudtjdt42nh5by"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "866149",
@@ -87,12 +95,12 @@ func TestGenerateOTPCode_NonPaddedHashes(t *testing.T) {
 	for when, expected := range table {
 		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
-		assert.NoError(t, err)
-		assert.Equal(t, expected, code, when.String())
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
 	}
 }
 
-func TestGenerateOTPCode_InvalidPadding(t *testing.T) {
+func (suite *GenerateOTPCodeTestSuite) TestInvalidPadding() {
 	input := "a6mr*&^&*%*&ylj|'[lbufszudtjdt42nh5by"
 	table := map[time.Time]string{
 		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):   "",
@@ -102,7 +110,7 @@ func TestGenerateOTPCode_InvalidPadding(t *testing.T) {
 	for when, expected := range table {
 		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
 
-		assert.Error(t, err)
-		assert.Equal(t, expected, code, when.String())
+		suite.Require().Error(err)
+		suite.Equal(expected, code, when.String())
 	}
 }

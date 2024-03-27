@@ -55,7 +55,7 @@ func renameNamespaceCommand() *cli.Command {
 
 			namespace, err := storage.FindNamespace(nsName)
 			if err != nil {
-				return CommandError{Message: fmt.Sprintf("%s does not exist", nsName)}
+				return resourceNotFoundError(nsName)
 			}
 
 			namespace.Name = newName
@@ -91,12 +91,12 @@ func renameAccountCommand() *cli.Command {
 
 			namespace, err := storage.FindNamespace(nsName)
 			if err != nil {
-				return CommandError{Message: fmt.Sprintf("%s does not exist", nsName)}
+				return resourceNotFoundError(nsName)
 			}
 
 			account, err := namespace.FindAccount(accName)
 			if err != nil {
-				return CommandError{Message: fmt.Sprintf("%s/%s does not exist", namespace.Name, accName)}
+				return resourceNotFoundError(fmt.Sprintf("%s/%s", namespace.Name, accName))
 			}
 
 			account.Name = newName

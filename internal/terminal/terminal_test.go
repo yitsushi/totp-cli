@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
@@ -14,7 +14,15 @@ func prepareIO(input []byte) (io.Reader, *bytes.Buffer, *bytes.Buffer) {
 	return bytes.NewReader(input), &bytes.Buffer{}, &bytes.Buffer{}
 }
 
-func TestTerminal_Read(t *testing.T) {
+func TestTerminal(t *testing.T) {
+	suite.Run(t, &TerminalTestSuite{})
+}
+
+type TerminalTestSuite struct {
+	suite.Suite
+}
+
+func (suite *TerminalTestSuite) TestRead() {
 	type testCase struct {
 		Prompt string
 		In     string
@@ -34,13 +42,13 @@ func TestTerminal_Read(t *testing.T) {
 		term := terminal.New(input, output, errorOut)
 		value, err := term.Read(tc.Prompt)
 
-		assert.Nil(t, err)
-		assert.Equal(t, tc.Out, output.String())
-		assert.Equal(t, tc.Value, value)
+		suite.Require().NoError(err)
+		suite.Equal(tc.Out, output.String())
+		suite.Equal(tc.Value, value)
 	}
 }
 
-func TestTerminal_Confirm(t *testing.T) {
+func (suite *TerminalTestSuite) TestConfirm() {
 	type testCase struct {
 		Prompt string
 		In     string
@@ -64,12 +72,12 @@ func TestTerminal_Confirm(t *testing.T) {
 		term := terminal.New(input, output, errorOut)
 		value := term.Confirm(tc.Prompt)
 
-		assert.Equal(t, tc.Out, output.String())
-		assert.Equal(t, tc.Value, value)
+		suite.Equal(tc.Out, output.String())
+		suite.Equal(tc.Value, value)
 	}
 }
 
-func TestTerminal_Hidden(t *testing.T) {
+func (suite *TerminalTestSuite) TestHidden() {
 	type testCase struct {
 		Prompt string
 		In     string
@@ -94,9 +102,9 @@ func TestTerminal_Hidden(t *testing.T) {
 		term := terminal.New(input, output, errorOut)
 		value, err := term.Hidden(tc.Prompt)
 
-		assert.Nil(t, err)
-		assert.Equal(t, tc.Err, errorOut.String())
-		assert.Equal(t, tc.Out, output.String())
-		assert.Equal(t, tc.Value, value)
+		suite.Require().NoError(err)
+		suite.Equal(tc.Err, errorOut.String())
+		suite.Equal(tc.Out, output.String())
+		suite.Equal(tc.Value, value)
 	}
 }

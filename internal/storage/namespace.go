@@ -2,8 +2,8 @@ package storage
 
 // Namespace represents a Namespace "category".
 type Namespace struct {
-	Name     string
-	Accounts []*Account
+	Name     string     `json:"name"     yaml:"name"`
+	Accounts []*Account `json:"accounts" yaml:"accounts"`
 }
 
 // FindAccount returns with an account under a specific Namespace
