@@ -1,9 +1,9 @@
 package security_test
 
 import (
-	"fmt"
-	"github.com/yitsushi/totp-cli/internal/security"
 	"testing"
+
+	"github.com/yitsushi/totp-cli/internal/security"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,11 +26,12 @@ func TestCheckPasswordConfirm(t *testing.T) {
 	}
 
 	for _, pair := range passwordPairs {
-		assert.Equal(
+		assert.Equalf(
 			t,
 			security.CheckPasswordConfirm(pair.Password, pair.Confirm),
 			pair.Correct,
-			fmt.Sprintf("%s == %s -> %t", pair.Password, pair.Confirm, pair.Correct),
+			"%s == %s -> %t",
+			pair.Password, pair.Confirm, pair.Correct,
 		)
 	}
 }
