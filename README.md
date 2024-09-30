@@ -41,7 +41,7 @@ signed with the [66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF](https://keys.openpgp.
 GPG key.
 
 ```
-gpg --keyserver keys.openpgp.org --search 66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF
+gpg --keyserver keys.openpgp.org --recv-keys 66EA13043E6CDBA67A5D85AB71BD3AD93E8B6ABF
 gpg --verify totp-cli_{{.Version}}_checksums.txt.sig
 ```
 
