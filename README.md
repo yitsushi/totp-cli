@@ -363,3 +363,7 @@ credentials files, that file is not really encrypted anymore as it can be
 decrypted with the password.
 
 **Please, never store your password as clear-text. Never. Pretty please.**
+
+# Alternatives
+
+https://github.com/keepassxreboot/keepassxc - TOTP is included, in CLI too, companion Android app https://github.com/Kunzisoft/KeePassDX
