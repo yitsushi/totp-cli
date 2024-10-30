@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-
 	"github.com/yitsushi/totp-cli/internal/storage"
 )
 

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
-
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )
@@ -66,7 +65,7 @@ func SetPrefixCommand() *cli.Command {
 	}
 }
 
-func askForSetPrefixDetails(namespace, account, prefix string, clear bool) (string, string, string) {
+func askForSetPrefixDetails(namespace, account, prefix string, isClear bool) (string, string, string) {
 	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
 	for len(namespace) < 1 {
@@ -77,7 +76,7 @@ func askForSetPrefixDetails(namespace, account, prefix string, clear bool) (stri
 		account, _ = term.Read("Account:")
 	}
 
-	if clear {
+	if isClear {
 		return namespace, account, ""
 	}
 

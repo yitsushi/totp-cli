@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
-
 	"github.com/yitsushi/totp-cli/internal/security"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 	"github.com/yitsushi/totp-cli/internal/terminal"

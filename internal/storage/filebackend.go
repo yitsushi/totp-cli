@@ -13,7 +13,6 @@ import (
 
 	"filippo.io/age"
 	"filippo.io/age/armor"
-
 	"github.com/yitsushi/totp-cli/internal/security"
 	"github.com/yitsushi/totp-cli/internal/terminal"
 )

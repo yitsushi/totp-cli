@@ -3,16 +3,13 @@ run:
   issues-exit-code: 1
   tests: false
   allow-parallel-runners: true
+  go: 1.22
 
 linters-settings:
   gci:
-    local-prefixes: github.com/yitsushi/totp-cli
+    local-prefix: github.com/yitsushi/totp-cli
   goimports:
-    local-prefixes: github.com/yitsushi/totp-cli
-  staticcheck:
-    go: "1.18"
-  stylecheck:
-    go: "1.18"
+    local-prefix: github.com/yitsushi/totp-cli
   govet:
     shadow: true
   misspell:
@@ -75,16 +72,9 @@ linters:
   enable-all: true
   disable:
     # Deprecated
-    - interfacer
-    - nosnakecase
-    - varcheck
-    - deadcode
-    - golint
-    - ifshort
-    - maligned
-    - exhaustivestruct
-    - scopelint
-    - structcheck
+    - gomnd
+    - exportloopref
+    - execinquery
 
     # Disabled because I need naked return to handle extra errors in defer.
     - nakedret

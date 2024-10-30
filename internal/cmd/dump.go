@@ -5,9 +5,8 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
-	"gopkg.in/yaml.v3"
-
 	s "github.com/yitsushi/totp-cli/internal/storage"
+	"gopkg.in/yaml.v3"
 )
 
 // DumpCommand is the dump subcommand.

@@ -59,6 +59,7 @@ func GenerateOTPCode(token string, when time.Time, length uint) (string, int64, 
 		((int(sum[offset+2] & mask3)) << shift8) |
 		(int(sum[offset+3]) & mask3))
 
+	//nolint:gosec // If the user sets a size that high to get an overflow, it's on them.
 	modulo := int32(value % int64(math.Pow10(int(length))))
 
 	format := fmt.Sprintf("%%0%dd", length)
