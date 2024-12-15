@@ -26,6 +26,9 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Create vendor directory
+        run: |
+          go mod vendor
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:

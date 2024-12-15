@@ -3,3 +3,4 @@ totp-cli
 coverage.out
 .idea
 dist/
+vendor/
