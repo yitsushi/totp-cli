@@ -29,6 +29,21 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+  - id: vendor-package
+    format: tar.xz
+    meta: true
+    name_template: "{{ .ProjectName }}_vendor"
+    files:
+      - vendor/*
+      - vendor/**/*
+
+    # That's sad:
+    # This feature is only available in GoReleaser Pro.
+    #   hooks:
+    #     before:
+    #       - go mod vendor
+    #     after:
+    #       - rm -rf vendor
 
 changelog:
   sort: asc
@@ -38,7 +53,7 @@ changelog:
       - "^test:"
 
 signs:
-  - artifacts: checksum
+  - artifacts: all
     cmd: gpg2
     args:
       - "--batch"
