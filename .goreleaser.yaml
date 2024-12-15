@@ -53,7 +53,7 @@ changelog:
       - "^test:"
 
 signs:
-  - artifacts: checksum
+  - artifacts: all
     cmd: gpg2
     args:
       - "--batch"
