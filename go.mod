@@ -3,7 +3,7 @@ module github.com/yitsushi/totp-cli
 go 1.22
 
 require (
-	filippo.io/age v1.2.0
+	filippo.io/age v1.2.1
 	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/term v0.27.0
