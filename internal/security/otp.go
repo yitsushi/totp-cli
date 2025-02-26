@@ -2,13 +2,14 @@ package security
 
 import (
 	"crypto/hmac"
-	"crypto/sha1" //nolint:gosec // This is an implementation of an RFC that used SHA-1
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
 	"math"
 	"strings"
 	"time"
+
+	"github.com/yitsushi/totp-cli/internal/security/algo"
 )
 
 const (
@@ -24,7 +25,7 @@ const (
 )
 
 // GenerateOTPCode generates a 6 digit TOTP from the secret Token.
-func GenerateOTPCode(token string, when time.Time, length uint) (string, int64, error) {
+func GenerateOTPCode(token string, when time.Time, length uint, algorithm algo.Algorithm) (string, int64, error) {
 	timer := uint64(math.Floor(float64(when.Unix()) / float64(timeSplitInSeconds)))
 	remainingTime := timeSplitInSeconds - when.Unix()%timeSplitInSeconds
 
@@ -46,7 +47,7 @@ func GenerateOTPCode(token string, when time.Time, length uint) (string, int64, 
 	}
 
 	buf := make([]byte, sumByteLength)
-	mac := hmac.New(sha1.New, secretBytes)
+	mac := hmac.New(algorithm.Hasher(), secretBytes)
 
 	binary.BigEndian.PutUint64(buf, timer)
 	_, _ = mac.Write(buf)

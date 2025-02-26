@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/yitsushi/totp-cli/internal/security"
+	"github.com/yitsushi/totp-cli/internal/security/algo"
 	"github.com/yitsushi/totp-cli/internal/storage"
 )
 
@@ -31,7 +32,7 @@ func (suite *GenerateOTPCodeTestSuite) TestDefault() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -51,7 +52,7 @@ func (suite *GenerateOTPCodeTestSuite) TestDifferentLength() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, 8)
+		code, _, err := security.GenerateOTPCode(input, when, 8, algo.SHA1{})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -71,7 +72,7 @@ func (suite *GenerateOTPCodeTestSuite) TestSpaceSeparatedToken() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -91,7 +92,7 @@ func (suite *GenerateOTPCodeTestSuite) TestNonPaddedHashes() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -106,9 +107,51 @@ func (suite *GenerateOTPCodeTestSuite) TestInvalidPadding() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength)
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
 
 		suite.Require().Error(err)
+		suite.Equal(expected, code, when.String())
+	}
+}
+
+func (suite *GenerateOTPCodeTestSuite) TestSHA256() {
+	input := "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"
+	table := map[time.Time]string{
+		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "598909",
+		time.Date(2005, 3, 18, 1, 58, 29, 0, time.UTC):   "343094",
+		time.Date(2005, 3, 18, 1, 58, 31, 0, time.UTC):   "342278",
+		time.Date(2009, 2, 13, 23, 31, 30, 0, time.UTC):  "657794",
+		time.Date(2016, 9, 16, 12, 40, 12, 0, time.UTC):  "139801",
+		time.Date(2033, 5, 18, 3, 33, 20, 0, time.UTC):   "102968",
+		time.Date(2603, 10, 11, 11, 33, 20, 0, time.UTC): "625152",
+		time.Date(2025, 02, 26, 18, 12, 11, 0, time.UTC): "356698",
+	}
+
+	for when, expected := range table {
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA256{})
+
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
+	}
+}
+
+func (suite *GenerateOTPCodeTestSuite) TestSHA512() {
+	input := "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"
+	table := map[time.Time]string{
+		time.Date(1970, 1, 1, 0, 0, 59, 0, time.UTC):     "735781",
+		time.Date(2005, 3, 18, 1, 58, 29, 0, time.UTC):   "630426",
+		time.Date(2005, 3, 18, 1, 58, 31, 0, time.UTC):   "719335",
+		time.Date(2009, 2, 13, 23, 31, 30, 0, time.UTC):  "390343",
+		time.Date(2016, 9, 16, 12, 40, 12, 0, time.UTC):  "760292",
+		time.Date(2033, 5, 18, 3, 33, 20, 0, time.UTC):   "255524",
+		time.Date(2603, 10, 11, 11, 33, 20, 0, time.UTC): "041274",
+		time.Date(2025, 02, 26, 18, 12, 11, 0, time.UTC): "546487",
+	}
+
+	for when, expected := range table {
+		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA512{})
+
+		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
 	}
 }

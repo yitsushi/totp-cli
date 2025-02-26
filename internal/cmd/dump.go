@@ -18,16 +18,8 @@ func DumpCommand() *cli.Command {
 		Usage:     "Dump all available accounts under all namespaces.",
 		ArgsUsage: " ",
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "yes-please",
-				Value: false,
-				Usage: warningMsg,
-			},
-			&cli.StringFlag{
-				Name:     "output",
-				Usage:    "Output file. (REQUIRED)",
-				Required: true,
-			},
+			flagYesPlease(warningMsg),
+			flagOutput(),
 		},
 		Action: func(ctx *cli.Context) error {
 			if !ctx.Bool("yes-please") {

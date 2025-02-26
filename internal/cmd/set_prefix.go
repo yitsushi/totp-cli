@@ -16,11 +16,7 @@ func SetPrefixCommand() *cli.Command {
 		Usage:     "Set prefix for a token.",
 		ArgsUsage: "[namespace] [account] [prefix]",
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "clear",
-				Value: false,
-				Usage: "Clear prefix from account.",
-			},
+			flagClearPrefix(),
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			var (
