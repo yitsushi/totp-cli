@@ -1,17 +1,24 @@
-ifeq (, $(shell which testifylint))
-$(error "No 'testifylint' on PATH, consider doing: go install github.com/Antonboom/testifylint@latest")
-endif
+GO ?= go
 
-ifeq (, $(shell which golint))
-$(error "No 'golint' on PATH, consider doing: go install golang.org/x/lint/golint@latest")
-endif
+.PHONY: test
+test:
+	$(GO) test \
+		./internal/... \
+		-v -count=1 \
+		-coverprofile coverage.out \
+		-covermode=atomic
 
-ifeq (, $(shell which golangci-lint))
-$(error "No 'golangci-lint' on PATH, consider following these instructions: https://golangci-lint.run/welcome/install/#local-installation")
-endif
+.PHONY: coverage
+coverage: test
+	$(GO) tool cover -html=coverage.out
 
 .PHONY: lint
 lint:
-	golint -set_exit_status ./...
-	testifylint ./...
-	golangci-lint run
+	$(GO) vet ./...
+	$(GO) tool golint -set_exit_status ./...
+	$(GO) tool testifylint -v -enable-all ./...
+	$(GO) tool golangci-lint run
+
+.PHONY: install-dependencies
+install-dependencies:
+	$(GO) install tool
