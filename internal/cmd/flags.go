@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli/v2"
 	"github.com/yitsushi/totp-cli/internal/storage"
 )
@@ -12,9 +10,9 @@ func flagAlgorithm() *cli.StringFlag {
 		Name:  "algorithm",
 		Value: "sha1",
 		Usage: "Algorithm to use for HMAC (sha1, sha256, sha512).",
-		Action: func(ctx *cli.Context, value string) error {
+		Action: func(_ *cli.Context, value string) error {
 			if value != "sha1" && value != "sha256" && value != "sha512" {
-				return fmt.Errorf("Invalid algorithm: %s", value)
+				return invalidAlgorithmError(value)
 			}
 
 			return nil
