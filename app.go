@@ -29,9 +29,10 @@ func newApplication() *cli.App {
 			cmd.SetPrefixCommand(),
 			cmd.SetLengthCommand(),
 			cmd.RenameCommand(),
+			cmd.UpdateCommand(),
 		},
 		Authors: []*cli.Author{
-			{Name: "Efertone", Email: "efertone@pm.me"},
+			{Name: "Efertone", Email: "victoria@efertone.me"},
 		},
 		EnableBashCompletion: true,
 		ExitErrHandler: func(ctx *cli.Context, err error) {

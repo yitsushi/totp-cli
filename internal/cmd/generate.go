@@ -30,8 +30,6 @@ func GenerateCommand() *cli.Command {
 				return CommandError{Message: "account is not defined"}
 			}
 
-			ctx.Args().First()
-
 			follow := ctx.Bool("follow")
 
 			storage := s.NewFileStorage()
