@@ -14,16 +14,8 @@ func GenerateCommand() *cli.Command {
 		Name:    "generate",
 		Aliases: []string{"g"},
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "follow",
-				Value: false,
-				Usage: "Generate codes continuously.",
-			},
-			&cli.BoolFlag{
-				Name:  "show-remaining",
-				Value: false,
-				Usage: "Show how much time left until the code will be invalid.",
-			},
+			flagFollow(),
+			flagShowRemaining(),
 		},
 		Usage:     "Generate a specific OTP",
 		ArgsUsage: "<namespace> <account>",

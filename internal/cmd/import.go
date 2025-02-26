@@ -16,11 +16,7 @@ func ImportCommand() *cli.Command {
 		Name:  "import",
 		Usage: "Import tokens from a yaml file.",
 		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "input",
-				Usage:    "Input YAML file. (REQUIRED)",
-				Required: true,
-			},
+			flagInput(),
 		},
 		Action: func(ctx *cli.Context) (err error) {
 			var file []byte

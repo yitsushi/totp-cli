@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/yitsushi/totp-cli/internal/security"
+	"github.com/yitsushi/totp-cli/internal/security/algo"
 	s "github.com/yitsushi/totp-cli/internal/storage"
 )
 
@@ -17,7 +18,20 @@ func formatCode(code string, remaining int64, showRemaining bool) string {
 }
 
 func generateCode(account *s.Account) (string, int64) {
-	code, remaining, err := security.GenerateOTPCode(account.Token, time.Now(), account.Length)
+	var algorithm algo.Algorithm
+
+	switch account.Algorithm {
+	case "sha1":
+		algorithm = algo.SHA1{}
+	case "sha256":
+		algorithm = algo.SHA256{}
+	case "sha512":
+		algorithm = algo.SHA512{}
+	default:
+		algorithm = algo.Default{}
+	}
+
+	code, remaining, err := security.GenerateOTPCode(account.Token, time.Now(), account.Length, algorithm)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 
