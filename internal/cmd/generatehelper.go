@@ -31,7 +31,13 @@ func generateCode(account *s.Account) (string, int64) {
 		algorithm = algo.Default{}
 	}
 
-	code, remaining, err := security.GenerateOTPCode(account.Token, time.Now(), account.Length, algorithm)
+	code, remaining, err := security.GenerateOTPCode(security.GenerateOptions{
+		Token:      account.Token,
+		When:       time.Now(),
+		Length:     account.Length,
+		Algorithm:  algorithm,
+		TimePeriod: account.TimePeriod,
+	})
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 

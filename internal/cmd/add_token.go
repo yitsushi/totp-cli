@@ -20,6 +20,7 @@ func AddTokenCommand() *cli.Command {
 			flagLength(),
 			flagPrefix(),
 			flagAlgorithm(),
+			flagTimePeriod(),
 		},
 		Action: func(ctx *cli.Context) error {
 			var (
@@ -48,11 +49,12 @@ func AddTokenCommand() *cli.Command {
 			}
 
 			account = &s.Account{
-				Name:      accName,
-				Token:     token,
-				Prefix:    ctx.String("prefix"),
-				Length:    ctx.Uint("length"),
-				Algorithm: ctx.String("algorithm"),
+				Name:       accName,
+				Token:      token,
+				Prefix:     ctx.String("prefix"),
+				Length:     ctx.Uint("length"),
+				Algorithm:  ctx.String("algorithm"),
+				TimePeriod: ctx.Int64("time-period"),
 			}
 			namespace.Accounts = append(namespace.Accounts, account)
 

@@ -30,6 +30,8 @@ func GenerateCommand() *cli.Command {
 				return CommandError{Message: "account is not defined"}
 			}
 
+			ctx.Args().First()
+
 			follow := ctx.Bool("follow")
 
 			storage := s.NewFileStorage()
@@ -43,6 +45,7 @@ func GenerateCommand() *cli.Command {
 			}
 
 			code, remaining := generateCode(account)
+
 			fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
 
 			if !follow {

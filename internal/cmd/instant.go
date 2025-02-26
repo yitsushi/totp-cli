@@ -19,13 +19,15 @@ func InstantCommand() *cli.Command {
 			flagLength(),
 			flagShowRemaining(),
 			flagAlgorithm(),
+			flagTimePeriod(),
 		},
 		Action: func(ctx *cli.Context) error {
 			account := storage.Account{
-				Name:      "instant",
-				Token:     os.Getenv("TOTP_TOKEN"),
-				Length:    ctx.Uint("length"),
-				Algorithm: ctx.String("algorithm"),
+				Name:       "instant",
+				Token:      os.Getenv("TOTP_TOKEN"),
+				Length:     ctx.Uint("length"),
+				Algorithm:  ctx.String("algorithm"),
+				TimePeriod: ctx.Int64("time-period"),
 			}
 
 			if account.Token == "" {

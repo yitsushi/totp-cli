@@ -32,7 +32,10 @@ func (suite *GenerateOTPCodeTestSuite) TestDefault() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token: input,
+			When:  when,
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -52,7 +55,12 @@ func (suite *GenerateOTPCodeTestSuite) TestDifferentLength() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, 8, algo.SHA1{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Length:    8,
+			Algorithm: algo.SHA1{},
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -72,7 +80,11 @@ func (suite *GenerateOTPCodeTestSuite) TestSpaceSeparatedToken() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Algorithm: algo.SHA1{},
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -92,7 +104,12 @@ func (suite *GenerateOTPCodeTestSuite) TestNonPaddedHashes() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Length:    storage.DefaultTokenLength,
+			Algorithm: algo.SHA1{},
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -107,7 +124,12 @@ func (suite *GenerateOTPCodeTestSuite) TestInvalidPadding() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA1{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Length:    storage.DefaultTokenLength,
+			Algorithm: algo.SHA1{},
+		})
 
 		suite.Require().Error(err)
 		suite.Equal(expected, code, when.String())
@@ -128,7 +150,12 @@ func (suite *GenerateOTPCodeTestSuite) TestSHA256() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA256{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Length:    storage.DefaultTokenLength,
+			Algorithm: algo.SHA256{},
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())
@@ -149,7 +176,39 @@ func (suite *GenerateOTPCodeTestSuite) TestSHA512() {
 	}
 
 	for when, expected := range table {
-		code, _, err := security.GenerateOTPCode(input, when, storage.DefaultTokenLength, algo.SHA512{})
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:     input,
+			When:      when,
+			Length:    storage.DefaultTokenLength,
+			Algorithm: algo.SHA512{},
+		})
+
+		suite.Require().NoError(err)
+		suite.Equal(expected, code, when.String())
+	}
+}
+
+func (suite *GenerateOTPCodeTestSuite) TestSHA256WithLongerPeriod() {
+	input := "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"
+	table := map[time.Time]string{
+		time.Date(2025, 02, 26, 18, 12, 1, 0, time.UTC):  "195134",
+		time.Date(2025, 02, 26, 18, 12, 11, 0, time.UTC): "195134",
+		time.Date(2025, 02, 26, 18, 12, 23, 0, time.UTC): "195134",
+		time.Date(2025, 02, 26, 18, 12, 33, 0, time.UTC): "195134",
+		time.Date(2025, 02, 26, 18, 12, 43, 0, time.UTC): "195134",
+		time.Date(2025, 02, 26, 18, 12, 53, 0, time.UTC): "195134",
+		time.Date(2025, 02, 26, 18, 13, 3, 0, time.UTC):  "042795",
+		time.Date(2025, 02, 26, 18, 13, 13, 0, time.UTC): "042795",
+	}
+
+	for when, expected := range table {
+		code, _, err := security.GenerateOTPCode(security.GenerateOptions{
+			Token:      input,
+			When:       when,
+			Length:     storage.DefaultTokenLength,
+			TimePeriod: 60,
+			Algorithm:  algo.SHA256{},
+		})
 
 		suite.Require().NoError(err)
 		suite.Equal(expected, code, when.String())

@@ -6,7 +6,7 @@ type DownloadError struct {
 }
 
 func (e DownloadError) Error() string {
-	return "download error: %s" + e.Message
+	return "download error: " + e.Message
 }
 
 // CommandError is an error during downloading an update.
@@ -15,7 +15,7 @@ type CommandError struct {
 }
 
 func (e CommandError) Error() string {
-	return "error: %s" + e.Message
+	return "error: " + e.Message
 }
 
 func resourceNotFoundError(name string) CommandError {
@@ -28,7 +28,7 @@ type FlagError struct {
 }
 
 func (e FlagError) Error() string {
-	return "flag error: %s" + e.Message
+	return "flag error: " + e.Message
 }
 
 func invalidAlgorithmError(value string) FlagError {
