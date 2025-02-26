@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/urfave/cli/v2"
-	"github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/security"
 )
 
 func flagAlgorithm() *cli.StringFlag {
@@ -31,7 +31,7 @@ func flagShowRemaining() *cli.BoolFlag {
 func flagLength() *cli.UintFlag {
 	return &cli.UintFlag{
 		Name:  "length",
-		Value: storage.DefaultTokenLength,
+		Value: security.DefaultLength,
 		Usage: "Length of the generated token.",
 	}
 }
@@ -81,5 +81,13 @@ func flagClearPrefix() *cli.BoolFlag {
 		Name:  "clear",
 		Value: false,
 		Usage: "Clear prefix from account.",
+	}
+}
+
+func flagTimePeriod() *cli.Int64Flag {
+	return &cli.Int64Flag{
+		Name:  "time-period",
+		Value: security.DefaultTimePeriod,
+		Usage: "Time period in seconds.",
 	}
 }
