@@ -3,7 +3,7 @@ run:
   issues-exit-code: 1
   tests: false
   allow-parallel-runners: true
-  go: 1.22
+  go: 1.24
 
 linters-settings:
   gci:
@@ -72,9 +72,7 @@ linters:
   enable-all: true
   disable:
     # Deprecated
-    - gomnd
-    - exportloopref
-    - execinquery
+    - tenv          # Replaced by usetesting.
 
     # Disabled because I need naked return to handle extra errors in defer.
     - nakedret
