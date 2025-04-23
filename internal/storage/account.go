@@ -9,7 +9,7 @@ type Account struct {
 	Name       string `json:"name"       yaml:"name"`
 	Token      string `json:"token"      yaml:"token"`
 	Prefix     string `json:"prefix"     yaml:"prefix"`
-	Length     uint   `json:"length"     yaml:"length"`
 	Algorithm  string `json:"algorithm"  yaml:"algorithm"`
+	Length     uint   `json:"length"     yaml:"length"`
 	TimePeriod int64  `json:"timePeriod" yaml:"timePeriod"`
 }

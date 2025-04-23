@@ -30,11 +30,11 @@ const (
 
 // GenerateOptions is the option list for the GenerateOTPCode function.
 type GenerateOptions struct {
-	Token      string
 	When       time.Time
-	Length     uint
 	Algorithm  algo.Algorithm
+	Token      string
 	TimePeriod int64
+	Length     uint
 }
 
 func (opts *GenerateOptions) normalise() {

@@ -1,82 +1,96 @@
+version: "2"
+
 run:
-  timeout: 5m
+  go: "1.24"
   issues-exit-code: 1
   tests: false
   allow-parallel-runners: true
-  go: 1.24
-
-linters-settings:
-  gci:
-    local-prefix: github.com/yitsushi/totp-cli
-  goimports:
-    local-prefix: github.com/yitsushi/totp-cli
-  govet:
-    shadow: true
-  misspell:
-    locale: US
-  cyclop:
-    max-complexity: 15
-    skip-tests: true
-  nolintlint:
-    allow-leading-space: false
-    allow-unused: false
-    require-explanation: true
-    require-specific: false
-  varnamelen:
-    ignore-names:
-      - ns
-      - err
-      - iv
-  depguard:
-    rules:
-      main:
-        allow:
-          - $gostd
-          - filippo.io/age
-          - github.com/urfave/cli/v2
-          - github.com/yitsushi/totp-cli
-          - github.com/kardianos/osext
-          - github.com/yitsushi/github-release-check
-
-issues:
-  exclude-rules:
-  - path: _test\.go
-    linters:
-    - goerr113
-    - gocyclo
-    - errcheck
-    - gosec
-    - dupl
-    - funlen
-    - scopelint
-    - testpackage
-    - varnamelen
-  - path: internal/cmd/
-    linters:
-    - forbidigo
-  - text: "sig: func github.com/yitsushi/totp-cli/"
-    linters:
-    - wrapcheck
-  - text: "sig: func \\(\\*?github.com/yitsushi/totp-cli/"
-    linters:
-    - wrapcheck
-  - path: internal/info
-    linters:
-    - gochecknoglobals
-  - source: "// .* #\\d+"
-    # Ignore TODO lines if they have a GitHub Issue reference.
-    linters:
-    - godox
 
 linters:
-  enable-all: true
+  default: all
   disable:
-    # Deprecated
-    - tenv          # Replaced by usetesting.
-
-    # Disabled because I need naked return to handle extra errors in defer.
+    - exhaustruct
     - nakedret
 
-    # Just disabled them...
-    - exhaustruct
+  settings:
+    cyclop:
+      max-complexity: 15
+    depguard:
+      rules:
+        main:
+          allow:
+            - $gostd
+            - filippo.io/age
+            - github.com/kardianos/osext
+            - github.com/urfave/cli/v2
+            - github.com/yitsushi/github-release-check
+            - github.com/yitsushi/totp-cli
+            - golang.org/x/term
+            - gopkg.in/yaml.v3
+    govet:
+      enable-all: true
+    misspell:
+      locale: US
+    nolintlint:
+      require-explanation: true
+      require-specific: false
+      allow-unused: false
+    varnamelen:
+      ignore-names:
+        - ns
+        - err
+        - iv
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - err113
+          - errcheck
+          - funlen
+          - gocyclo
+          - gosec
+          - scopelint
+          - testpackage
+          - varnamelen
+        path: _test\.go
+      - linters:
+          - forbidigo
+        path: internal/cmd/
+      - linters:
+          - wrapcheck
+        text: 'sig: func github.com/yitsushi/totp-cli/'
+      - linters:
+          - wrapcheck
+        text: 'sig: func \(\*?github.com/yitsushi/totp-cli/'
+      - linters:
+          - gochecknoglobals
+        path: internal/info
+      - linters:
+          - godox
+        source: '// .* #\d+'
+      - linters:
+          - cyclop
+        path: (.+)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: strict
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
