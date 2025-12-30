@@ -5,6 +5,22 @@ import (
 	"github.com/yitsushi/totp-cli/internal/security"
 )
 
+const passwordCommandFlagName = "password-command"
+
+// GlobalFlags returns flags that apply to every command.
+func GlobalFlags() []cli.Flag {
+	return []cli.Flag{
+		flagPasswordCommand(),
+	}
+}
+
+func flagPasswordCommand() *cli.StringFlag {
+	return &cli.StringFlag{
+		Name:  passwordCommandFlagName,
+		Usage: "Command that prints the storage password to stdout.",
+	}
+}
+
 func flagAlgorithm() *cli.StringFlag {
 	return &cli.StringFlag{
 		Name:  "algorithm",
