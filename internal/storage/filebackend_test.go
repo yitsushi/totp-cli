@@ -172,7 +172,7 @@ func (suite *FileBackendTestSuite) TestInvalidPassword() {
 	)
 
 	err = newStorage.Prepare()
-	suite.Require().ErrorIs(err, storage.BackendError{Message: "no identity matched any of the recipients"})
+	suite.Require().ErrorIs(err, storage.BackendError{Message: "identity did not match any of the recipients: incorrect identity for recipient block: incorrect passphrase"})
 }
 
 func (suite *FileBackendTestSuite) TestSetPassword() {
