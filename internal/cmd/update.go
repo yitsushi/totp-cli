@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"slices"
 
 	"github.com/urfave/cli/v2"
 	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 // UpdateCommand is the subcommand to update a TOTP token options.
@@ -23,7 +25,7 @@ func UpdateCommand() *cli.Command {
 		Action: func(ctx *cli.Context) error {
 			namespaceName := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(namespaceName) < 1 {
-				return CommandError{Message: "namespace is not defined"}
+				return CommandError{Message: errMsgNamespaceNotDefined}
 			}
 
 			accountName := ctx.Args().Get(argSetPrefixPositionAccount)
@@ -31,37 +33,63 @@ func UpdateCommand() *cli.Command {
 				return CommandError{Message: "account is not defined"}
 			}
 
-			storage := s.NewFileStorage()
-			if err := storage.Prepare(); err != nil {
-				return err
-			}
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
 
-			account, err := getAccount(storage, namespaceName, accountName)
+			err := storage.Prepare()
 			if err != nil {
 				return err
 			}
 
+			opts := AccountOptions{}
+
 			if slices.Contains(ctx.LocalFlagNames(), "algorithm") {
-				account.Algorithm = ctx.String("algorithm")
+				opts.Algorithm = ctx.String("algorithm")
 			}
 
 			if slices.Contains(ctx.LocalFlagNames(), "length") {
-				account.Length = ctx.Uint("length")
+				opts.Length = ctx.Uint("length")
 			}
 
 			if slices.Contains(ctx.LocalFlagNames(), "time-period") {
-				account.TimePeriod = ctx.Int64("time-period")
+				opts.TimePeriod = ctx.Int64("time-period")
 			}
 
 			if slices.Contains(ctx.LocalFlagNames(), "prefix") {
-				account.Prefix = ctx.String("prefix")
+				opts.Prefix = ctx.String("prefix")
 			}
 
-			if err := storage.Save(); err != nil {
-				return fmt.Errorf("failed to save the storage: %w", err)
-			}
-
-			return nil
+			return executeUpdate(storage, namespaceName, accountName, opts, ctx.LocalFlagNames())
 		},
 	}
+}
+
+func executeUpdate(storage s.Storage, nsName, accName string, opts AccountOptions, setFlags []string) error {
+	account, err := getAccount(storage, nsName, accName)
+	if err != nil {
+		return err
+	}
+
+	if slices.Contains(setFlags, "algorithm") {
+		account.Algorithm = opts.Algorithm
+	}
+
+	if slices.Contains(setFlags, "length") {
+		account.Length = opts.Length
+	}
+
+	if slices.Contains(setFlags, "time-period") {
+		account.TimePeriod = opts.TimePeriod
+	}
+
+	if slices.Contains(setFlags, "prefix") {
+		account.Prefix = opts.Prefix
+	}
+
+	err = storage.Save()
+	if err != nil {
+		return fmt.Errorf("failed to save the storage: %w", err)
+	}
+
+	return nil
 }

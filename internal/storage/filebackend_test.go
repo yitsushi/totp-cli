@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"errors"
 	"os"
 	"path"
 	"testing"
@@ -8,6 +9,12 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/yitsushi/totp-cli/internal/storage"
 )
+
+type errorPasswordProvider struct{}
+
+func (e errorPasswordProvider) GetPassword(_ string) (string, error) {
+	return "", errors.New("no tty")
+}
 
 func TestFileBackend(t *testing.T) {
 	suite.Run(t, &FileBackendTestSuite{})
@@ -110,18 +117,27 @@ func (suite *FileBackendTestSuite) TestReadWrite() {
 		os.RemoveAll(tmpDir)
 	}()
 
-	os.Setenv("TOTP_PASS", "password")
 	os.Setenv("TOTP_CLI_CREDENTIAL_FILE", credsFilepath)
+	defer os.Unsetenv("TOTP_CLI_CREDENTIAL_FILE")
 
-	suite.storage.Prepare()
-	suite.Empty(suite.storage.ListNamespaces())
-	suite.storage.AddNamespace(&storage.Namespace{Name: "ns1"})
-	suite.storage.AddNamespace(&storage.Namespace{Name: "ns2"})
-	suite.Len(suite.storage.ListNamespaces(), 2)
-	suite.storage.Save()
+	stor := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "password"}),
+	)
 
-	newStorage := storage.NewFileStorage()
-	newStorage.Prepare()
+	err = stor.Prepare()
+	suite.Require().NoError(err)
+	suite.Empty(stor.ListNamespaces())
+	stor.AddNamespace(&storage.Namespace{Name: "ns1"})
+	stor.AddNamespace(&storage.Namespace{Name: "ns2"})
+	suite.Len(stor.ListNamespaces(), 2)
+	stor.Save()
+
+	newStorage := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "password"}),
+	)
+
+	err = newStorage.Prepare()
+	suite.Require().NoError(err)
 	suite.Len(newStorage.ListNamespaces(), 2)
 }
 
@@ -136,19 +152,105 @@ func (suite *FileBackendTestSuite) TestInvalidPassword() {
 		os.RemoveAll(tmpDir)
 	}()
 
-	os.Setenv("TOTP_PASS", "password")
 	os.Setenv("TOTP_CLI_CREDENTIAL_FILE", credsFilepath)
+	defer os.Unsetenv("TOTP_CLI_CREDENTIAL_FILE")
 
-	err = suite.storage.Prepare()
+	stor := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "password"}),
+	)
+
+	err = stor.Prepare()
 	suite.Require().NoError(err)
-	suite.Empty(suite.storage.ListNamespaces())
-	suite.storage.AddNamespace(&storage.Namespace{Name: "ns1"})
-	suite.storage.AddNamespace(&storage.Namespace{Name: "ns2"})
-	suite.Len(suite.storage.ListNamespaces(), 2)
-	suite.storage.Save()
+	suite.Empty(stor.ListNamespaces())
+	stor.AddNamespace(&storage.Namespace{Name: "ns1"})
+	stor.AddNamespace(&storage.Namespace{Name: "ns2"})
+	suite.Len(stor.ListNamespaces(), 2)
+	stor.Save()
 
-	newStorage := storage.NewFileStorage()
-	newStorage.SetPassword("new password")
+	newStorage := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "wrong password"}),
+	)
+
 	err = newStorage.Prepare()
 	suite.Require().ErrorIs(err, storage.BackendError{Message: "no identity matched any of the recipients"})
+}
+
+func (suite *FileBackendTestSuite) TestSetPassword() {
+	tmpDir, err := os.MkdirTemp("", "totp-cli-test-*")
+	if err != nil {
+		return
+	}
+	credsFilepath := path.Join(tmpDir, "credentials")
+
+	defer func() {
+		os.RemoveAll(tmpDir)
+	}()
+
+	os.Setenv("TOTP_CLI_CREDENTIAL_FILE", credsFilepath)
+	defer os.Unsetenv("TOTP_CLI_CREDENTIAL_FILE")
+
+	writer := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "mypassword"}),
+	)
+	suite.Require().NoError(writer.Prepare())
+
+	reader := storage.NewFileStorage()
+	reader.SetPassword("mypassword")
+
+	err = reader.Prepare()
+	suite.Require().NoError(err)
+}
+
+func (suite *FileBackendTestSuite) TestPrepareAcquirePasswordNilProvider() {
+	tmpDir, err := os.MkdirTemp("", "totp-cli-test-*")
+	if err != nil {
+		return
+	}
+	credsFilepath := path.Join(tmpDir, "credentials")
+
+	defer func() {
+		os.RemoveAll(tmpDir)
+	}()
+
+	os.Setenv("TOTP_CLI_CREDENTIAL_FILE", credsFilepath)
+	defer os.Unsetenv("TOTP_CLI_CREDENTIAL_FILE")
+	os.Unsetenv("TOTP_PASS")
+
+	writer := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "pass"}),
+	)
+	suite.Require().NoError(writer.Prepare())
+
+	reader := storage.NewFileStorage()
+
+	err = reader.Prepare()
+	suite.Require().ErrorIs(err, storage.BackendError{Message: "no password provider configured"})
+}
+
+func (suite *FileBackendTestSuite) TestPrepareAcquirePasswordErrorProvider() {
+	tmpDir, err := os.MkdirTemp("", "totp-cli-test-*")
+	if err != nil {
+		return
+	}
+	credsFilepath := path.Join(tmpDir, "credentials")
+
+	defer func() {
+		os.RemoveAll(tmpDir)
+	}()
+
+	os.Setenv("TOTP_CLI_CREDENTIAL_FILE", credsFilepath)
+	defer os.Unsetenv("TOTP_CLI_CREDENTIAL_FILE")
+	os.Unsetenv("TOTP_PASS")
+
+	writer := storage.NewFileStorage(
+		storage.WithPasswordProvider(storage.StaticPasswordProvider{Password: "pass"}),
+	)
+	suite.Require().NoError(writer.Prepare())
+
+	reader := storage.NewFileStorage(
+		storage.WithPasswordProvider(errorPasswordProvider{}),
+	)
+
+	err = reader.Prepare()
+	suite.Require().ErrorIs(err, storage.BackendError{Message: "no tty"})
 }

@@ -14,7 +14,6 @@ import (
 	"filippo.io/age"
 	"filippo.io/age/armor"
 	"github.com/yitsushi/totp-cli/internal/security"
-	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 const (
@@ -32,15 +31,30 @@ const scryptWorkFactor = 15
 
 // FileBackend structure represents the credential storage.
 type FileBackend struct {
-	file     string `json:"-"`
-	password string `json:"-"`
+	file             string `json:"-"`
+	password         string `json:"-"`
+	passwordProvider PasswordProvider
 
 	namespaces []*Namespace
 }
 
 // NewFileStorage creates a new File Backend Storage.
-func NewFileStorage() *FileBackend {
-	return &FileBackend{}
+func NewFileStorage(opts ...func(*FileBackend)) *FileBackend {
+	backend := &FileBackend{}
+
+	for _, o := range opts {
+		o(backend)
+	}
+
+	return backend
+}
+
+// WithPasswordProvider sets the PasswordProvider used when a password is
+// needed and TOTP_PASS is not set.
+func WithPasswordProvider(pp PasswordProvider) func(*FileBackend) {
+	return func(fb *FileBackend) {
+		fb.passwordProvider = pp
+	}
 }
 
 // SetPassword sets the password for the file storage.
@@ -50,27 +64,22 @@ func (s *FileBackend) SetPassword(password string) {
 
 // Prepare tries to load the credentials file and tries to decrypt it.
 func (s *FileBackend) Prepare() error {
-	var err error
-
-	if err = s.initfileStorage(); err != nil {
+	err := s.initfileStorage()
+	if err != nil {
 		return err
 	}
 
+	if s.password != "" {
+		return s.Decrypt()
+	}
+
+	s.password = os.Getenv("TOTP_PASS")
+
 	if s.password == "" {
-		// TODO: Remove IO from here. #112
-		// Return error when we can't find the backend file, and handle the creation
-		// on cmd layer.
-		term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
-
-		password := os.Getenv("TOTP_PASS")
-
-		if password == "" {
-			if password, err = term.Hidden("Password:"); err != nil {
-				return BackendError{Message: err.Error()}
-			}
+		s.password, err = s.acquirePassword("Password:")
+		if err != nil {
+			return err
 		}
-
-		s.password = password
 	}
 
 	return s.Decrypt()
@@ -78,7 +87,8 @@ func (s *FileBackend) Prepare() error {
 
 // Decrypt tries to decrypt the storage.
 func (s *FileBackend) Decrypt() error {
-	if err := s.decryptV1(); err == nil {
+	err := s.decryptV1()
+	if err == nil {
 		return nil
 	}
 
@@ -121,7 +131,8 @@ func (s *FileBackend) DeleteNamespace(namespace *Namespace) {
 // AddNamespace adds a namespace to the namespace list if it's not already
 // there.
 func (s *FileBackend) AddNamespace(ns *Namespace) (*Namespace, error) {
-	if lookupNS, err := s.FindNamespace(ns.Name); err == nil {
+	lookupNS, err := s.FindNamespace(ns.Name)
+	if err == nil {
 		return lookupNS, BackendError{
 			Message: "namespace already exists: " + ns.Name,
 		}
@@ -201,6 +212,20 @@ func (s *FileBackend) Save() error {
 	return nil
 }
 
+// acquirePassword asks the passwordProvider for a password using the given prompt.
+func (s *FileBackend) acquirePassword(prompt string) (string, error) {
+	if s.passwordProvider == nil {
+		return "", BackendError{Message: "no password provider configured"}
+	}
+
+	password, err := s.passwordProvider.GetPassword(prompt)
+	if err != nil {
+		return "", BackendError{Message: err.Error()}
+	}
+
+	return password, nil
+}
+
 // decryptV1 tries to decrypt the storage with AES encryption using the SHA1
 // hash of the password as encryption key.
 func (s *FileBackend) decryptV1() error {
@@ -268,14 +293,13 @@ func (s *FileBackend) decryptV2() error {
 }
 
 func (s *FileBackend) initfileStorage() error {
-	var credentialFile string
-
 	credentialFile, err := s.credentialsFilePath()
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(credentialFile); err == nil {
+	_, err = os.Stat(credentialFile)
+	if err == nil {
 		s.file = credentialFile
 
 		return nil
@@ -284,13 +308,9 @@ func (s *FileBackend) initfileStorage() error {
 	password := os.Getenv("TOTP_PASS")
 
 	if password == "" {
-		term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
-
-		var err error
-
-		password, err = term.Hidden("Your Password (do not forget it):")
+		password, err = s.acquirePassword("Your Password (do not forget it):")
 		if err != nil {
-			return BackendError{Message: err.Error()}
+			return err
 		}
 	}
 
@@ -301,7 +321,8 @@ func (s *FileBackend) initfileStorage() error {
 }
 
 func (s *FileBackend) parse(decodedData []byte) error {
-	if err := s.parseV1(decodedData); err == nil {
+	err := s.parseV1(decodedData)
+	if err == nil {
 		return nil
 	}
 

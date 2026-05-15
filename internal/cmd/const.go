@@ -12,4 +12,7 @@ const (
 	argSetLengthPositionPrefix    = 2
 
 	strictDumpFilePerms = 0o600
+
+	errMsgNamespaceNotDefined = "namespace is not defined"
+	defaultAlgorithm          = "sha1"
 )

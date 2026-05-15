@@ -16,34 +16,44 @@ func ChangePasswordCommand() *cli.Command {
 		Usage:     "Change password.",
 		ArgsUsage: "",
 		Action: func(_ *cli.Context) error {
-			var (
-				err                  error
-				newPasswordIn        string
-				newPasswordConfirmIn string
-			)
-
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
-				return err
-			}
-
 			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
 
-			if newPasswordIn, err = term.Hidden("New Password:"); err != nil {
+			err := storage.Prepare()
+			if err != nil {
 				return err
 			}
 
-			if newPasswordConfirmIn, err = term.Hidden("Again:"); err != nil {
+			newPassword, err := askForNewPassword(term)
+			if err != nil {
 				return err
 			}
 
-			if !security.CheckPasswordConfirm([]byte(newPasswordIn), []byte(newPasswordConfirmIn)) {
-				return CommandError{Message: "new password and the confirm mismatch"}
-			}
-
-			storage.SetPassword(newPasswordIn)
-
-			return storage.Save()
+			return executeChangePassword(storage, newPassword)
 		},
 	}
+}
+
+func executeChangePassword(storage s.Storage, newPassword string) error {
+	storage.SetPassword(newPassword)
+
+	return storage.Save()
+}
+
+func askForNewPassword(term terminal.Terminal) (string, error) {
+	newPassword, err := term.Hidden("New Password:")
+	if err != nil {
+		return "", err
+	}
+
+	confirm, err := term.Hidden("Again:")
+	if err != nil {
+		return "", err
+	}
+
+	if !security.CheckPasswordConfirm([]byte(newPassword), []byte(confirm)) {
+		return "", CommandError{Message: "new password and the confirm mismatch"}
+	}
+
+	return newPassword, nil
 }

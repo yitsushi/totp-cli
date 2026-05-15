@@ -1,6 +1,6 @@
 module github.com/yitsushi/totp-cli
 
-go 1.24
+go 1.26.3
 
 require (
 	filippo.io/age v1.2.1

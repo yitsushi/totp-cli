@@ -10,16 +10,24 @@ import (
 	"golang.org/x/term"
 )
 
-// Terminal represents the terminal with input, output and error output.
-type Terminal struct {
+// Terminal is the interface for interacting with the user.
+type Terminal interface {
+	Read(prompt string) (string, error)
+	Confirm(prompt string) bool
+	Hidden(prompt string) (string, error)
+}
+
+// ConcreteTerminal implements Terminal using an input reader and output writers.
+type ConcreteTerminal struct {
 	Input       io.Reader
 	Output      io.Writer
 	ErrorOutput io.Writer
+	reader      *bufio.Reader
 }
 
 // New terminal instance.
-func New(in io.Reader, out io.Writer, errorOut io.Writer) Terminal {
-	return Terminal{
+func New(in io.Reader, out io.Writer, errorOut io.Writer) *ConcreteTerminal {
+	return &ConcreteTerminal{
 		Input:       in,
 		Output:      out,
 		ErrorOutput: errorOut,
@@ -27,14 +35,16 @@ func New(in io.Reader, out io.Writer, errorOut io.Writer) Terminal {
 }
 
 // Read text from input with optional prompt.
-func (t Terminal) Read(prompt string) (string, error) {
+func (t *ConcreteTerminal) Read(prompt string) (string, error) {
 	if prompt != "" {
 		_, _ = fmt.Fprintf(t.Output, "%s ", prompt)
 	}
 
-	reader := bufio.NewReader(t.Input)
+	if t.reader == nil {
+		t.reader = bufio.NewReader(t.Input)
+	}
 
-	text, readErr := reader.ReadString('\n')
+	text, readErr := t.reader.ReadString('\n')
 	if readErr != nil {
 		return text, fmt.Errorf("error reading from input: %w", readErr)
 	}
@@ -47,7 +57,7 @@ func (t Terminal) Read(prompt string) (string, error) {
 // Confirm asks the user for confirmation.
 // If the answer is y, yes, or sure, the used confirmed,
 // otherwise not.
-func (t Terminal) Confirm(prompt string) bool {
+func (t *ConcreteTerminal) Confirm(prompt string) bool {
 	answer, err := t.Read(prompt)
 	if err != nil {
 		return false
@@ -60,7 +70,7 @@ func (t Terminal) Confirm(prompt string) bool {
 
 // Hidden reads from Input, but typed characters are hidden.
 // Good for passwords, tokens, or other sensitive information.
-func (t Terminal) Hidden(prompt string) (string, error) {
+func (t *ConcreteTerminal) Hidden(prompt string) (string, error) {
 	var (
 		text string
 		err  error
