@@ -16,6 +16,12 @@ from the [releases page](https://github.com/yitsushi/totp-cli/releases/latest) o
 go install github.com/yitsushi/totp-cli@latest
 ```
 
+Users on Windows can install via [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/):
+
+```shell
+winget install --exact --id yitsushi.totp-cli
+```
+
 #### Alternative
 
 I'm not the maintainer of the MacPorts or the Homebrew package, if it's outdated
