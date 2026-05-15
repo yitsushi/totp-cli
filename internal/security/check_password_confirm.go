@@ -1,5 +1,7 @@
 package security
 
+import "crypto/subtle"
+
 // CheckPasswordConfirm checks two byte array if the content is the same.
 func CheckPasswordConfirm(password, confirm []byte) bool {
 	if password == nil && confirm == nil {
@@ -10,15 +12,5 @@ func CheckPasswordConfirm(password, confirm []byte) bool {
 		return false
 	}
 
-	if len(password) != len(confirm) {
-		return false
-	}
-
-	for i := range password {
-		if password[i] != confirm[i] {
-			return false
-		}
-	}
-
-	return true
+	return subtle.ConstantTimeCompare(password, confirm) == 1
 }

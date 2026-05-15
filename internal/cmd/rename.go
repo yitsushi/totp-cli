@@ -33,33 +33,26 @@ func renameNamespaceCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "namespace",
 		ArgsUsage: "[namespace] [new name]",
-		Action: func(ctx *cli.Context) (err error) {
-			nsName, newName := askForNamespaceRenameDetails(
+		Action: func(ctx *cli.Context) error {
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+
+			nsName, newName, err := askForNamespaceRenameDetails(
+				term,
 				ctx.Args().Get(argRenameNamespacePositionNamespace),
 				ctx.Args().Get(argRenameNamespacePositionNewName),
 			)
-
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
+			if err != nil {
 				return err
 			}
 
-			defer func() {
-				if err != nil {
-					return
-				}
+			storage := prepareStorage(term)
 
-				err = storage.Save()
-			}()
-
-			namespace, err := storage.FindNamespace(nsName)
+			err = storage.Prepare()
 			if err != nil {
-				return resourceNotFoundError(nsName)
+				return err
 			}
 
-			namespace.Name = newName
-
-			return
+			return executeRenameNamespace(storage, nsName, newName)
 		},
 	}
 }
@@ -68,71 +61,103 @@ func renameAccountCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "account",
 		ArgsUsage: "[namespace] [account] [new name]",
-		Action: func(ctx *cli.Context) (err error) {
-			nsName, accName, newName := askForAccountRenameDetails(
+		Action: func(ctx *cli.Context) error {
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+
+			nsName, accName, newName, err := askForAccountRenameDetails(
+				term,
 				ctx.Args().Get(argRenameAccountPositionNamespace),
 				ctx.Args().Get(argRenameAccountPositionAccount),
 				ctx.Args().Get(argRenameAccountPositionNewName),
 			)
-
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
+			if err != nil {
 				return err
 			}
 
-			defer func() {
-				if err != nil {
-					return
-				}
+			storage := prepareStorage(term)
 
-				err = storage.Save()
-			}()
-
-			namespace, err := storage.FindNamespace(nsName)
+			err = storage.Prepare()
 			if err != nil {
-				return resourceNotFoundError(nsName)
+				return err
 			}
 
-			account, err := namespace.FindAccount(accName)
-			if err != nil {
-				return resourceNotFoundError(fmt.Sprintf("%s/%s", namespace.Name, accName))
-			}
-
-			account.Name = newName
-
-			return
+			return executeRenameAccount(storage, nsName, accName, newName)
 		},
 	}
 }
 
-func askForNamespaceRenameDetails(namespace, newName string) (string, string) {
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+func executeRenameNamespace(storage s.Storage, nsName, newName string) error {
+	namespace, err := storage.FindNamespace(nsName)
+	if err != nil {
+		return resourceNotFoundError(nsName)
+	}
+
+	namespace.Name = newName
+
+	return storage.Save()
+}
+
+func executeRenameAccount(storage s.Storage, nsName, accName, newName string) error {
+	namespace, err := storage.FindNamespace(nsName)
+	if err != nil {
+		return resourceNotFoundError(nsName)
+	}
+
+	account, err := namespace.FindAccount(accName)
+	if err != nil {
+		return resourceNotFoundError(fmt.Sprintf("%s/%s", namespace.Name, accName))
+	}
+
+	account.Name = newName
+
+	return storage.Save()
+}
+
+func askForNamespaceRenameDetails(term terminal.Terminal, namespace, newName string) (string, string, error) {
+	var err error
 
 	for len(namespace) < 1 {
-		namespace, _ = term.Read("Namespace:")
+		namespace, err = term.Read("Namespace:")
+		if err != nil {
+			return "", "", err
+		}
 	}
 
 	for len(newName) < 1 {
-		newName, _ = term.Read("New Name:")
+		newName, err = term.Read("New Name:")
+		if err != nil {
+			return "", "", err
+		}
 	}
 
-	return namespace, newName
+	return namespace, newName, nil
 }
 
-func askForAccountRenameDetails(namespace, account, newName string) (string, string, string) {
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+func askForAccountRenameDetails(
+	term terminal.Terminal, namespace, account, newName string,
+) (string, string, string, error) {
+	var err error
 
 	for len(namespace) < 1 {
-		namespace, _ = term.Read("Namespace:")
+		namespace, err = term.Read("Namespace:")
+		if err != nil {
+			return "", "", "", err
+		}
 	}
 
 	for len(account) < 1 {
-		account, _ = term.Read("Account:")
+		account, err = term.Read("Account:")
+		if err != nil {
+			return "", "", "", err
+		}
 	}
 
 	for len(newName) < 1 {
-		newName, _ = term.Read("New Name:")
+		newName, err = term.Read("New Name:")
+		if err != nil {
+			return "", "", "", err
+		}
 	}
 
-	return namespace, account, newName
+	return namespace, account, newName, nil
 }

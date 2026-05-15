@@ -15,7 +15,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.26
 
       - name: Get dependencies
         run: |
@@ -43,7 +43,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.26
 
       - name: go vet
         run: go vet ./...
@@ -58,7 +58,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.26
 
       - name: Get dependencies
         run: |
@@ -80,9 +80,9 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.26
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.2
+          version: v2.12.2

@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/terminal"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,26 +24,32 @@ func DumpCommand() *cli.Command {
 		},
 		Action: func(ctx *cli.Context) error {
 			if !ctx.Bool("yes-please") {
-				return CommandError{
-					Message: warningMsg,
-				}
+				return CommandError{Message: warningMsg}
 			}
 
-			storage := s.NewFileStorage()
-			if err := storage.Prepare(); err != nil {
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
+
+			err := storage.Prepare()
+			if err != nil {
 				return err
 			}
 
-			out, err := yaml.Marshal(storage.ListNamespaces())
-			if err != nil {
-				return fmt.Errorf("failed to marshal storage: %w", err)
-			}
-
-			if err := os.WriteFile(ctx.String("output"), out, strictDumpFilePerms); err != nil {
-				return fmt.Errorf("failed to write output file: %w", err)
-			}
-
-			return nil
+			return executeDump(storage, ctx.String("output"))
 		},
 	}
+}
+
+func executeDump(storage s.Storage, outputPath string) error {
+	out, err := yaml.Marshal(storage.ListNamespaces())
+	if err != nil {
+		return fmt.Errorf("failed to marshal storage: %w", err)
+	}
+
+	err = os.WriteFile(outputPath, out, strictDumpFilePerms)
+	if err != nil {
+		return fmt.Errorf("failed to write output file: %w", err)
+	}
+
+	return nil
 }

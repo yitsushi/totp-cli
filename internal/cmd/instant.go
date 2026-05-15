@@ -32,10 +32,19 @@ func InstantCommand() *cli.Command {
 
 			if account.Token == "" {
 				term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
-				account.Token, _ = term.Read("")
+
+				var err error
+
+				account.Token, err = term.Read("")
+				if err != nil {
+					return err
+				}
 			}
 
-			code, remaining := generateCode(&account)
+			code, remaining, err := generateCode(&account)
+			if err != nil {
+				return err
+			}
 
 			fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
 

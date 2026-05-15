@@ -23,63 +23,74 @@ func AddTokenCommand() *cli.Command {
 			flagTimePeriod(),
 		},
 		Action: func(ctx *cli.Context) error {
-			var (
-				namespace *s.Namespace
-				account   *s.Account
-				err       error
-			)
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
 
-			nsName, accName, token := askForAddTokenDetails(
+			nsName, accName, token, err := askForAddTokenDetails(
+				term,
 				ctx.Args().Get(argSetPrefixPositionNamespace),
 				ctx.Args().Get(argSetPrefixPositionAccount),
 			)
-
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
-				return err
-			}
-
-			namespace, _ = storage.AddNamespace(&s.Namespace{Name: nsName})
-
-			account, err = namespace.FindAccount(accName)
-			if err == nil {
-				return CommandError{
-					Message: fmt.Sprintf("%s.%s exists", namespace.Name, account.Name),
-				}
-			}
-
-			account = &s.Account{
-				Name:       accName,
-				Token:      token,
-				Prefix:     ctx.String("prefix"),
-				Length:     ctx.Uint("length"),
-				Algorithm:  ctx.String("algorithm"),
-				TimePeriod: ctx.Int64("time-period"),
-			}
-			namespace.Accounts = append(namespace.Accounts, account)
-
-			err = storage.Save()
 			if err != nil {
 				return err
 			}
 
-			return nil
+			storage := prepareStorage(term)
+
+			err = storage.Prepare()
+			if err != nil {
+				return err
+			}
+
+			return executeAddToken(storage, nsName, accName, token, AccountOptions{
+				Prefix:     ctx.String("prefix"),
+				Length:     ctx.Uint("length"),
+				Algorithm:  ctx.String("algorithm"),
+				TimePeriod: ctx.Int64("time-period"),
+			})
 		},
 	}
 }
 
-func askForAddTokenDetails(namespace, account string) (string, string, string) {
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+func executeAddToken(storage s.Storage, nsName, accName, token string, opts AccountOptions) error {
+	namespace, _ := storage.AddNamespace(&s.Namespace{Name: nsName})
+
+	_, err := namespace.FindAccount(accName)
+	if err == nil {
+		return CommandError{
+			Message: fmt.Sprintf("%s.%s exists", namespace.Name, accName),
+		}
+	}
+
+	namespace.Accounts = append(namespace.Accounts, &s.Account{
+		Name:       accName,
+		Token:      token,
+		Prefix:     opts.Prefix,
+		Length:     opts.Length,
+		Algorithm:  opts.Algorithm,
+		TimePeriod: opts.TimePeriod,
+	})
+
+	return storage.Save()
+}
+
+func askForAddTokenDetails(term terminal.Terminal, namespace, account string) (string, string, string, error) {
+	var err error
 
 	for len(namespace) < 1 {
-		namespace, _ = term.Read("Namespace:")
+		namespace, err = term.Read("Namespace:")
+		if err != nil {
+			return "", "", "", err
+		}
 	}
 
 	for len(account) < 1 {
-		account, _ = term.Read("Account:")
+		account, err = term.Read("Account:")
+		if err != nil {
+			return "", "", "", err
+		}
 	}
 
-	token, _ := term.Read("Token:")
+	token, err := term.Read("Token:")
 
-	return namespace, account, token
+	return namespace, account, token, err
 }

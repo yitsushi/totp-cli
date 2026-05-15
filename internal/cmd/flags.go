@@ -8,10 +8,10 @@ import (
 func flagAlgorithm() *cli.StringFlag {
 	return &cli.StringFlag{
 		Name:  "algorithm",
-		Value: "sha1",
+		Value: defaultAlgorithm,
 		Usage: "Algorithm to use for HMAC (sha1, sha256, sha512).",
 		Action: func(_ *cli.Context, value string) error {
-			if value != "sha1" && value != "sha256" && value != "sha512" {
+			if value != defaultAlgorithm && value != "sha256" && value != "sha512" {
 				return invalidAlgorithmError(value)
 			}
 

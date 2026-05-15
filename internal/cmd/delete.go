@@ -15,60 +15,55 @@ func DeleteCommand() *cli.Command {
 		Name:      "delete",
 		Usage:     "Delete an account or a whole namespace.",
 		ArgsUsage: "<namespace> [account]",
-		Action: func(ctx *cli.Context) (err error) {
+		Action: func(ctx *cli.Context) error {
 			namespaceName := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(namespaceName) < 1 {
-				return CommandError{Message: "namespace is not defined"}
-			}
-
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
-				return err
-			}
-
-			defer func() {
-				if err != nil {
-					return
-				}
-
-				err = storage.Save()
-			}()
-
-			var (
-				namespace *s.Namespace
-				account   *s.Account
-			)
-
-			if namespace, err = storage.FindNamespace(namespaceName); err != nil {
-				return
+				return CommandError{Message: errMsgNamespaceNotDefined}
 			}
 
 			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
 
-			if accountName := ctx.Args().Get(argSetPrefixPositionAccount); accountName != "" {
-				if account, err = namespace.FindAccount(accountName); err != nil {
-					return
-				}
-
-				fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
-
-				if term.Confirm("Are you sure?") {
-					namespace.DeleteAccount(account)
-				}
-
-				return
+			err := storage.Prepare()
+			if err != nil {
+				return err
 			}
 
-			fmt.Printf("You want to delete '%s' namespace with %d accounts.\n", namespace.Name, len(namespace.Accounts))
-			for _, account := range namespace.Accounts {
-				fmt.Printf(" - %s.%s\n", namespace.Name, account.Name)
-			}
-
-			if term.Confirm("Are you sure?") {
-				storage.DeleteNamespace(namespace)
-			}
-
-			return
+			return executeDelete(storage, term, namespaceName, ctx.Args().Get(argSetPrefixPositionAccount))
 		},
 	}
+}
+
+func executeDelete(storage s.Storage, term terminal.Terminal, nsName, accName string) error {
+	namespace, err := storage.FindNamespace(nsName)
+	if err != nil {
+		return err
+	}
+
+	if accName != "" {
+		account, err := namespace.FindAccount(accName)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("You want to delete '%s.%s' account.\n", namespace.Name, account.Name)
+
+		if term.Confirm("Are you sure?") {
+			namespace.DeleteAccount(account)
+		}
+
+		return storage.Save()
+	}
+
+	fmt.Printf("You want to delete '%s' namespace with %d accounts.\n", namespace.Name, len(namespace.Accounts))
+
+	for _, account := range namespace.Accounts {
+		fmt.Printf(" - %s.%s\n", namespace.Name, account.Name)
+	}
+
+	if term.Confirm("Are you sure?") {
+		storage.DeleteNamespace(namespace)
+	}
+
+	return storage.Save()
 }

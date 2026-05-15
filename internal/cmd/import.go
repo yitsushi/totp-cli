@@ -18,46 +18,37 @@ func ImportCommand() *cli.Command {
 		Flags: []cli.Flag{
 			flagInput(),
 		},
-		Action: func(ctx *cli.Context) (err error) {
-			var file []byte
-
-			if file, err = os.ReadFile(ctx.String("input")); err != nil {
-				return
+		Action: func(ctx *cli.Context) error {
+			file, err := os.ReadFile(ctx.String("input"))
+			if err != nil {
+				return fmt.Errorf("failed to read input file: %w", err)
 			}
 
 			var nsList []*s.Namespace
 
-			if err = yaml.Unmarshal(file, &nsList); err != nil {
-				err = CommandError{Message: "invalid file format"}
-
-				return
+			err = yaml.Unmarshal(file, &nsList)
+			if err != nil {
+				return CommandError{Message: "invalid file format"}
 			}
 
-			storage := s.NewFileStorage()
-			if err = storage.Prepare(); err != nil {
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
+
+			err = storage.Prepare()
+			if err != nil {
 				return err
 			}
 
-			defer func() {
-				if err != nil {
-					return
-				}
+			executeImport(storage, term, nsList)
 
-				err = storage.Save()
-			}()
-
-			importNamespaces(storage, nsList)
-
-			return nil
+			return storage.Save()
 		},
 	}
 }
 
-func importNamespaces(storage s.Storage, nsList []*s.Namespace) {
-	term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
-
+func executeImport(storage s.Storage, term terminal.Terminal, nsList []*s.Namespace) {
 	for _, ns := range nsList {
-		internalNS, _ := storage.AddNamespace(ns)
+		internalNS, _ := storage.AddNamespace(&s.Namespace{Name: ns.Name})
 
 		for _, acc := range ns.Accounts {
 			internalAcc, err := internalNS.FindAccount(acc.Name)

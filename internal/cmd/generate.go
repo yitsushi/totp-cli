@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/urfave/cli/v2"
 	s "github.com/yitsushi/totp-cli/internal/storage"
+	"github.com/yitsushi/totp-cli/internal/terminal"
 )
 
 // GenerateCommand is the subcommand to generate a TOTP token.
@@ -22,7 +24,7 @@ func GenerateCommand() *cli.Command {
 		Action: func(ctx *cli.Context) error {
 			namespaceName := ctx.Args().Get(argSetPrefixPositionNamespace)
 			if len(namespaceName) < 1 {
-				return CommandError{Message: "namespace is not defined"}
+				return CommandError{Message: errMsgNamespaceNotDefined}
 			}
 
 			accountName := ctx.Args().Get(argSetPrefixPositionAccount)
@@ -30,38 +32,50 @@ func GenerateCommand() *cli.Command {
 				return CommandError{Message: "account is not defined"}
 			}
 
-			follow := ctx.Bool("follow")
+			term := terminal.New(os.Stdin, os.Stdout, os.Stderr)
+			storage := prepareStorage(term)
 
-			storage := s.NewFileStorage()
-			if err := storage.Prepare(); err != nil {
-				return err
-			}
-
-			account, err := getAccount(storage, namespaceName, accountName)
+			err := storage.Prepare()
 			if err != nil {
 				return err
 			}
 
-			code, remaining := generateCode(account)
-
-			fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
-
-			if !follow {
-				return nil
-			}
-
-			previousCode := code
-
-			for {
-				code, remaining := generateCode(account)
-				if code != previousCode {
-					fmt.Println(formatCode(code, remaining, ctx.Bool("show-remaining")))
-					previousCode = code
-				}
-
-				time.Sleep(time.Second)
-			}
+			return executeGenerate(storage, namespaceName, accountName, ctx.Bool("follow"), ctx.Bool("show-remaining"))
 		},
+	}
+}
+
+func executeGenerate(storage s.Storage, nsName, accName string, follow, showRemaining bool) error {
+	account, err := getAccount(storage, nsName, accName)
+	if err != nil {
+		return err
+	}
+
+	code, remaining, err := generateCode(account)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(formatCode(code, remaining, showRemaining))
+
+	if !follow {
+		return nil
+	}
+
+	previousCode := code
+
+	for {
+		code, remaining, err := generateCode(account)
+		if err != nil {
+			return err
+		}
+
+		if code != previousCode {
+			fmt.Println(formatCode(code, remaining, showRemaining))
+			previousCode = code
+		}
+
+		time.Sleep(time.Second)
 	}
 }
 
