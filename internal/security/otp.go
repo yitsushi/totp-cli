@@ -81,8 +81,8 @@ func GenerateOTPCode(opts GenerateOptions) (string, int64, error) {
 	// http://tools.ietf.org/html/rfc4226#section-5.4
 	offset := sum[len(sum)-1] & mask1
 	value := int64(((int(sum[offset]) & mask2) << shift24) |
-		((int(sum[offset+1] & mask3)) << shift16) |
-		((int(sum[offset+2] & mask3)) << shift8) |
+		(int(sum[offset+1]&mask3) << shift16) |
+		(int(sum[offset+2]&mask3) << shift8) |
 		(int(sum[offset+3]) & mask3))
 
 	//nolint:gosec // If the user sets a size that high to get an overflow, it's on them.
