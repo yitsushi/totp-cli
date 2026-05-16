@@ -314,6 +314,26 @@ If you save it in a variable it can be exposed if your `ENV` is exposed somehow,
 if you directly type in the password in the command line, it can end up in your
 bash/zsh/whatevershell history.
 
+### Password command
+
+If the password comes from another tool, use `--password-command`. The command
+is executed by your shell, and totp-cli uses its stdout as the storage password.
+The trailing line break is ignored.
+
+This can be used with a YubiKey configured for HMAC-SHA1 challenge-response,
+where the same challenge returns the same response every time:
+
+```shell
+ykman otp chalresp --touch --generate 2
+totp-cli \
+  --password-command 'ykman otp calculate 2 746f74702d636c69' \
+  list
+```
+
+Do not use Yubico OTP or HOTP keyboard output as the password source for this
+option. Those values change on every touch, so they cannot decrypt the same
+credentials file later.
+
 Mostly to support CI/CD automation, there is an option to set the
 password/passphrase as an environment variable. **Please use it only if you know
 the system is safe to store passwords in environment variables.**

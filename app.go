@@ -17,6 +17,8 @@ func newApplication() *cli.App {
 		HelpName: "totp-cli",
 		Usage:    "Authy/Google Authenticator like TOTP CLI tool written in Go.",
 		Version:  info.Version,
+		Flags:    cmd.GlobalFlags(),
+		Before:   cmd.PreparePassword,
 		Commands: []*cli.Command{
 			cmd.AddTokenCommand(),
 			cmd.ChangePasswordCommand(),
